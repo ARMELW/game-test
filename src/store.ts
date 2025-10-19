@@ -1748,6 +1748,9 @@ export const useStore = create<MachineState>((set, get) => ({
                 sequenceFeedback("INCROYABLE ! 🎆 C'est de la MAGIE ! 10 petites billes sont devenues 1 PAQUET de 10 !", "C'est la RÈGLE D'OR : 10 billes = 1 paquet dans la colonne de gauche !");
                 setTimeout(() => {
                     const resetCols = initialColumns.map((col, i) => i === 1 ? { ...col, unlocked: true } : col);
+                    // Keep the value at 10 (1 ten, 0 units) instead of resetting to 0
+                    resetCols[1].value = 1;
+                    resetCols[0].value = 0;
                     set({
                         columns: resetCols,
                         phase: 'practice-ten',
