@@ -1740,18 +1740,33 @@ export const useStore = create<MachineState>((set, get) => ({
                 get().setFeedback(`Oups ! Tu as dépassé ${targetNumber}. Utilise ∇ pour revenir à ${targetNumber} !`);
                 return;
             }
-        } else if (phase === 'learn-carry' && hasCarry) {
-            sequenceFeedback("INCROYABLE ! 🎆 C'est de la MAGIE ! 10 petites billes sont devenues 1 PAQUET de 10 !", "C'est la RÈGLE D'OR : 10 billes = 1 paquet dans la colonne de gauche !");
-            setTimeout(() => {
-                const resetCols = initialColumns.map((col, i) => i === 1 ? { ...col, unlocked: true } : col);
-                set({
-                    columns: resetCols,
-                    phase: 'practice-ten',
-                    practiceTenRepetitions: 0
-                });
-                get().updateButtonVisibility();
-                sequenceFeedback("WOW ! 10 petites billes = 1 PAQUET de 10 !", "Clique sur ∇ pour revenir à 9 !");
-            }, FEEDBACK_DELAY * 2);
+        } else if (phase === 'learn-carry') {
+            // Provide feedback during counting to 9
+            const currentValue = newCols[0].value;
+            if (hasCarry) {
+                // The magic moment when 9+1 becomes 10!
+                sequenceFeedback("INCROYABLE ! 🎆 C'est de la MAGIE ! 10 petites billes sont devenues 1 PAQUET de 10 !", "C'est la RÈGLE D'OR : 10 billes = 1 paquet dans la colonne de gauche !");
+                setTimeout(() => {
+                    const resetCols = initialColumns.map((col, i) => i === 1 ? { ...col, unlocked: true } : col);
+                    set({
+                        columns: resetCols,
+                        phase: 'practice-ten',
+                        practiceTenRepetitions: 0
+                    });
+                    get().updateButtonVisibility();
+                    sequenceFeedback("WOW ! 10 petites billes = 1 PAQUET de 10 !", "Clique sur ∇ pour revenir à 9 !");
+                }, FEEDBACK_DELAY * 2);
+            } else if (currentValue === 9) {
+                // Child is at 9, one more click will trigger the magic!
+                get().setFeedback("Parfait ! Tu es à 9 ! 🎯 Encore UN clic sur △ et... la MAGIE va opérer ! ✨");
+            } else if (currentValue >= 1 && currentValue <= 8) {
+                // Counting to 9
+                const remaining = 9 - currentValue;
+                get().setFeedback(`**${currentValue}** ! Continue ! Encore ${remaining} clic${remaining > 1 ? 's' : ''} pour arriver à 9 ! 💪`);
+            } else if (currentValue === 0) {
+                // Just started
+                get().setFeedback("Vas-y ! Clique sur △ pour commencer à compter jusqu'à 9 ! 🚀");
+            }
         } else if (phase === 'practice-ten') {
             const tensValue = newCols[1].value;
             const { practiceTenRepetitions } = get();
@@ -2475,9 +2490,16 @@ export const useStore = create<MachineState>((set, get) => ({
             if (unitTargetIndex + 1 >= challenge.targets.length) {
                 if (challengeIndex === UNIT_CHALLENGES.length - 1) {
                     setTimeout(() => {
-                        set({ phase: 'learn-carry' });
+                        // Reset units column to 0 so child can start from the beginning
+                        const resetCols = get().columns.map((col, i) => 
+                            i === 0 ? { ...col, value: 0 } : col
+                        );
+                        set({ 
+                            columns: resetCols,
+                            phase: 'learn-carry' 
+                        });
                         get().updateButtonVisibility();
-                        sequenceFeedback("Prêt pour la magie ? 🎩 Clique sur △ pour l'échange 10 pour 1 !", "Vas-y ! Clique sur △ pour voir la transformation !");
+                        sequenceFeedback("Prêt pour la magie ? 🎩 Tu vas voir l'échange 10 pour 1 !", "D'abord, compte jusqu'à 9 en cliquant sur △. Ensuite, la magie va opérer ! ✨");
                     }, FEEDBACK_DELAY);
                 } else {
                     setTimeout(() => {
@@ -3403,7 +3425,7 @@ export const useStore = create<MachineState>((set, get) => ({
                 break;
             }
             case 'learn-carry':
-                newInstruction = "C'est le grand moment ! 🎆 Clique sur △ pour voir la transformation !";
+                newInstruction = "Compte jusqu'à 9 en cliquant sur △ ! Quand tu arrives à 9, un clic de plus et... MAGIE ! 🎆";
                 break;
             case 'practice-ten':
                 newInstruction = "Pratique le concept de paquet ! Clique sur ∇ pour revenir à 9, puis △ pour refaire l'échange magique !";
