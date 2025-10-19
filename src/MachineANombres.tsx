@@ -232,10 +232,19 @@ function MachineANombres() {
               else if ((phase === 'tutorial' || phase === 'explore-units' || phase === 'click-add' || phase === 'click-remove' || phase.startsWith('challenge-unit-') || phase === 'challenge-ten-to-twenty') && isUnit) {
                 isInteractive = true;
               }
-              else if ((phase === 'learn-carry' || phase === 'practice-ten' || phase === 'learn-ten-to-twenty' || phase === 'learn-twenty-to-thirty') && isUnit) {
+              else if (phase === 'learn-carry' && isUnit) {
                 isInteractive = true;
               }
-              else if ((phase === 'practice-hundred' || phase === 'learn-hundred-to-hundred-ten' || phase === 'learn-hundred-ten-to-two-hundred' || phase === 'challenge-hundred-to-two-hundred' || phase === 'learn-two-hundred-to-three-hundred' || phase === 'challenge-two-hundred-to-three-hundred') && isUnit) {
+              else if (phase === 'practice-ten' && (isUnit || originalIdx === 1)) {
+                isInteractive = true;
+              }
+              else if ((phase === 'learn-ten-to-twenty' || phase === 'learn-twenty-to-thirty') && isUnit) {
+                isInteractive = true;
+              }
+              else if (phase === 'practice-hundred' && (isUnit || originalIdx === 1 || originalIdx === 2)) {
+                isInteractive = true;
+              }
+              else if ((phase === 'learn-hundred-to-hundred-ten' || phase === 'learn-hundred-ten-to-two-hundred' || phase === 'challenge-hundred-to-two-hundred' || phase === 'learn-two-hundred-to-three-hundred' || phase === 'challenge-two-hundred-to-three-hundred') && isUnit) {
                 isInteractive = true;
               }
               else if ((phase.startsWith('challenge-tens-') || phase === 'learn-tens-combination') && (isUnit || originalIdx === 1)) {
@@ -244,7 +253,13 @@ function MachineANombres() {
               else if ((phase.startsWith('challenge-hundreds-') || phase === 'learn-hundreds-combination' || phase === 'learn-hundreds-simple-combination') && (isUnit || originalIdx === 1 || originalIdx === 2)) {
                 isInteractive = true;
               }
-              else if ((phase.startsWith('challenge-thousands-') || phase === 'learn-thousands-combination') && (isUnit || originalIdx === 1 || originalIdx === 2 || originalIdx === 3)) {
+              else if (phase === 'practice-thousand' && (isUnit || originalIdx === 1 || originalIdx === 2 || originalIdx === 3)) {
+                isInteractive = true;
+              }
+              else if ((phase === 'learn-thousand-to-thousand-ten' || phase === 'learn-thousand-to-thousand-hundred' || phase === 'learn-thousand-hundred-to-two-thousand' || phase === 'challenge-thousand-to-two-thousand' || phase === 'learn-two-thousand-to-three-thousand' || phase === 'challenge-two-thousand-to-three-thousand') && isUnit) {
+                isInteractive = true;
+              }
+              else if ((phase.startsWith('challenge-thousands-') || phase === 'learn-thousands-combination' || phase === 'challenge-thousands-simple-combination' || phase === 'learn-thousands-very-simple-combination' || phase === 'learn-thousands-full-combination') && (isUnit || originalIdx === 1 || originalIdx === 2 || originalIdx === 3)) {
                 isInteractive = true;
               }
             }
