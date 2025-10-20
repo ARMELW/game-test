@@ -82,7 +82,75 @@ L'application suit un parcours d'apprentissage progressif :
 - React 19
 - TypeScript
 - Vite
+- Unity WebGL (Counting Machine)
+- react-unity-webgl
 - GitHub Actions pour le déploiement
+
+## 🎮 Integration Unity
+
+L'application intègre un jeu Unity WebGL qui permet d'interagir avec une machine à compter virtuelle.
+
+### Fonctions Globales JavaScript
+
+Les fonctions suivantes sont disponibles globalement via l'objet `window` et peuvent être appelées depuis n'importe quel code JavaScript :
+
+```javascript
+// Changer le nombre affiché sur la machine
+// SetValue322 -> la machine affichera 0322
+window.ChangeCurrentValue()
+
+// Envoyer la liste des objectifs vers Unity
+// ChangeList544/1352/9871 -> les objectifs seront 544 puis 1352 puis 9871
+window.ChangeCurrentGoalList()
+
+// Bloquer/débloquer le rouleau des milliers
+window.LockThousandRoll(true)  // bloquer
+window.LockThousandRoll(false) // débloquer
+
+// Bloquer/débloquer le rouleau des centaines
+window.LockHundredRoll(true)   // bloquer
+window.LockHundredRoll(false)  // débloquer
+
+// Bloquer/débloquer le rouleau des dizaines
+window.LockTenRoll(true)       // bloquer
+window.LockTenRoll(false)      // débloquer
+
+// Bloquer/débloquer le rouleau des unités
+window.LockUnitRoll(true)      // bloquer
+window.LockUnitRoll(false)     // débloquer
+
+// Gestionnaire de messages provenant d'Unity
+window.onUnityMessage = function(message) {
+  console.log("Message from Unity:", message);
+}
+```
+
+### Règles de Blocage des Rouleaux
+
+Lorsqu'un rouleau est bloqué :
+
+- **Rouleau des 1 bloqué** : on ne peut pas augmenter/réduire de 1
+- **Rouleau des 10 bloqué** : 
+  - on ne peut pas augmenter/réduire de 1 si la prochaine valeur n'est pas dans la plage disponible
+  - on ne peut pas augmenter/réduire de 10
+  - Exemple : valeur = 5895, bloqué sur 9 → plage autorisée : 5890-5899
+- **Rouleau des 100 bloqué** :
+  - on ne peut pas augmenter/réduire de 1 ou 10 si la prochaine valeur n'est pas dans la plage disponible
+  - on ne peut pas augmenter/réduire de 100
+  - Exemple : valeur = 3259, bloqué sur 2 → plage autorisée : 3200-3299
+- **Rouleau des 1000 bloqué** :
+  - on ne peut pas augmenter/réduire de 1, 10 ou 100 si la prochaine valeur n'est pas dans la plage disponible
+  - on ne peut pas augmenter/réduire de 1000
+  - Exemple : valeur = 7381, bloqué sur 7 → plage autorisée : 7000-7999
+
+**Note :** Plusieurs rouleaux peuvent être bloqués simultanément, et les rouleaux bloqués affichent une animation dans Unity.
+
+### Page de Test
+
+Une page de test est disponible pour tester les fonctions globales Unity :
+```
+/test-global-bridge.html
+```
 
 ---
 

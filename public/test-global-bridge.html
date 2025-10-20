@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Test Global Unity Bridge</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 800px;
+      margin: 50px auto;
+      padding: 20px;
+      background: #f5f5f5;
+    }
+    .container {
+      background: white;
+      padding: 30px;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    h1 {
+      color: #333;
+      border-bottom: 2px solid #4CAF50;
+      padding-bottom: 10px;
+    }
+    .section {
+      margin: 20px 0;
+      padding: 15px;
+      background: #f9f9f9;
+      border-left: 4px solid #4CAF50;
+      border-radius: 4px;
+    }
+    input {
+      width: 100%;
+      padding: 8px;
+      margin: 5px 0;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      box-sizing: border-box;
+    }
+    button {
+      background: #4CAF50;
+      color: white;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      margin: 5px 5px 5px 0;
+      font-size: 14px;
+    }
+    button:hover {
+      background: #45a049;
+    }
+    button.lock {
+      background: #f44336;
+    }
+    button.lock:hover {
+      background: #da190b;
+    }
+    button.unlock {
+      background: #2196F3;
+    }
+    button.unlock:hover {
+      background: #0b7dda;
+    }
+    .console {
+      background: #1e1e1e;
+      color: #d4d4d4;
+      padding: 15px;
+      border-radius: 4px;
+      font-family: 'Courier New', monospace;
+      font-size: 12px;
+      max-height: 200px;
+      overflow-y: auto;
+      margin-top: 10px;
+    }
+    .console div {
+      margin: 5px 0;
+    }
+    .info {
+      background: #e3f2fd;
+      border-left-color: #2196F3;
+      padding: 15px;
+      margin: 20px 0;
+      border-radius: 4px;
+      border-left: 4px solid #2196F3;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🎮 Test Global Unity Bridge Functions</h1>
+    
+    <div class="info">
+      <strong>ℹ️ Note:</strong> This page tests the global Unity bridge functions. 
+      To use this with the actual React app, open the React app in another tab and then you can call these functions from the browser console.
+    </div>
+
+    <div class="section">
+      <h3>Set Value</h3>
+      <p>Enter a number (0-9999) to display on the machine:</p>
+      <input type="text" id="currentValue" placeholder="0322" value="0322">
+      <button onclick="testChangeValue()">Change Current Value</button>
+    </div>
+
+    <div class="section">
+      <h3>Set Goal List</h3>
+      <p>Enter goals separated by slashes (e.g., 544/1352/9871):</p>
+      <input type="text" id="currentGoalList" placeholder="544/1352/9871" value="544/1352/9871">
+      <button onclick="testChangeGoalList()">Change Goal List</button>
+    </div>
+
+    <div class="section">
+      <h3>Lock/Unlock Rolls</h3>
+      <p>Control which rolls are locked:</p>
+      <div>
+        <button class="lock" onclick="testLockRoll('thousand', true)">🔒 Lock 1000</button>
+        <button class="unlock" onclick="testLockRoll('thousand', false)">🔓 Unlock 1000</button>
+      </div>
+      <div>
+        <button class="lock" onclick="testLockRoll('hundred', true)">🔒 Lock 100</button>
+        <button class="unlock" onclick="testLockRoll('hundred', false)">🔓 Unlock 100</button>
+      </div>
+      <div>
+        <button class="lock" onclick="testLockRoll('ten', true)">🔒 Lock 10</button>
+        <button class="unlock" onclick="testLockRoll('ten', false)">🔓 Unlock 10</button>
+      </div>
+      <div>
+        <button class="lock" onclick="testLockRoll('unit', true)">🔒 Lock 1</button>
+        <button class="unlock" onclick="testLockRoll('unit', false)">🔓 Unlock 1</button>
+      </div>
+    </div>
+
+    <div class="section">
+      <h3>Console Output</h3>
+      <div class="console" id="console"></div>
+    </div>
+
+    <div class="info">
+      <h4>Global Functions Available:</h4>
+      <ul style="font-family: monospace; font-size: 14px;">
+        <li>window.ChangeCurrentValue()</li>
+        <li>window.ChangeCurrentGoalList()</li>
+        <li>window.LockThousandRoll(locked)</li>
+        <li>window.LockHundredRoll(locked)</li>
+        <li>window.LockTenRoll(locked)</li>
+        <li>window.LockUnitRoll(locked)</li>
+        <li>window.onUnityMessage(message)</li>
+      </ul>
+    </div>
+  </div>
+
+  <script>
+    // Simple console logging
+    function log(message, type = 'info') {
+      const consoleDiv = document.getElementById('console');
+      const timestamp = new Date().toLocaleTimeString();
+      const color = type === 'error' ? '#ff6b6b' : type === 'success' ? '#51cf66' : '#d4d4d4';
+      consoleDiv.innerHTML += `<div style="color: ${color}">[${timestamp}] ${message}</div>`;
+      consoleDiv.scrollTop = consoleDiv.scrollHeight;
+    }
+
+    // Check if Unity bridge is loaded
+    function checkUnityBridge() {
+      if (typeof window.unityInstance === 'undefined') {
+        log('⚠️ Unity instance not loaded. Make sure to run this from the React app.', 'error');
+        return false;
+      }
+      return true;
+    }
+
+    // Test change value
+    function testChangeValue() {
+      log('Testing ChangeCurrentValue()...');
+      if (typeof window.ChangeCurrentValue === 'function') {
+        try {
+          window.ChangeCurrentValue();
+          const value = document.getElementById('currentValue').value;
+          log(`✓ Called ChangeCurrentValue() with value: ${value}`, 'success');
+        } catch (error) {
+          log(`✗ Error: ${error.message}`, 'error');
+        }
+      } else {
+        log('✗ window.ChangeCurrentValue is not available. Load the React app first.', 'error');
+      }
+    }
+
+    // Test change goal list
+    function testChangeGoalList() {
+      log('Testing ChangeCurrentGoalList()...');
+      if (typeof window.ChangeCurrentGoalList === 'function') {
+        try {
+          window.ChangeCurrentGoalList();
+          const value = document.getElementById('currentGoalList').value;
+          log(`✓ Called ChangeCurrentGoalList() with value: ${value}`, 'success');
+        } catch (error) {
+          log(`✗ Error: ${error.message}`, 'error');
+        }
+      } else {
+        log('✗ window.ChangeCurrentGoalList is not available. Load the React app first.', 'error');
+      }
+    }
+
+    // Test lock/unlock rolls
+    function testLockRoll(roll, locked) {
+      const functionName = `Lock${roll.charAt(0).toUpperCase() + roll.slice(1)}Roll`;
+      log(`Testing window.${functionName}(${locked})...`);
+      
+      const func = window[functionName];
+      if (typeof func === 'function') {
+        try {
+          func(locked);
+          log(`✓ Called ${functionName}(${locked})`, 'success');
+        } catch (error) {
+          log(`✗ Error: ${error.message}`, 'error');
+        }
+      } else {
+        log(`✗ window.${functionName} is not available. Load the React app first.`, 'error');
+      }
+    }
+
+    // Override console.log to capture Unity messages
+    const originalLog = console.log;
+    console.log = function(...args) {
+      originalLog.apply(console, args);
+      if (args[0] && typeof args[0] === 'string' && args[0].includes('UnityBridge')) {
+        log(args.join(' '));
+      }
+    };
+
+    // Initialize
+    log('Unity Bridge Test Page Loaded');
+    log('Open the React app to enable Unity bridge functions');
+  </script>
+</body>
+</html>
