@@ -104,10 +104,16 @@ function MachineANombres() {
       handleManualValidation();
     }
     else if (parsedData.type == 'wrongValue') {
-      // wrong   value when clique
+      // Handle wrong value event from Unity
+      // This event is received when Unity detects an incorrect value
+      // The game logic in validation handlers already manages feedback
+      console.log('Wrong value event received from Unity');
     }
     else if (parsedData.type == 'nextGoal') {
-      // passage au challenge suivant
+      // Handle next goal event from Unity
+      // This event is received when Unity signals to move to the next challenge
+      // The game logic in validation handlers already manages progression
+      console.log('Next goal event received from Unity');
     }
   }, [handleAdd, handleSubtract, phase]); // eslint-disable-line react-hooks/exhaustive-deps
 
