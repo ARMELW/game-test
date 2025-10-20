@@ -1,6 +1,81 @@
 import { useUnityContext } from 'react-unity-webgl';
 import { useEffect } from 'react';
 
+/**
+ * Génère un parseur de message générique pour un jeu Unity.
+ * @param patterns Liste des patterns à matcher
+ * @param unknownType Valeur à utiliser pour le type UNKNOWN
+ * @returns Fonction de parsing typée
+ */
+export function parse(message: string) {
+    if (!message || typeof message !== 'string') return null;
+    const normalizedMessage = message.toLowerCase().trim();
+    if (!normalizedMessage) return null;
+    for (const patternConfig of COUNTING_MACHINE_PATTERNS) {
+      const match = normalizedMessage.match(patternConfig.pattern);
+      if (match) {
+        const result = {
+          type: patternConfig.type,
+          timestamp: Date.now()
+        } as Record<string, unknown>;
+        if (match[1]) {
+          result.value = match[1];
+          if (patternConfig.hasNumericValue && /^\d+$/.test(match[1])) {
+            const numericValue = parseInt(match[1], 10);
+            if (!isNaN(numericValue)) {
+              result.numericValue = numericValue;
+            }
+          }
+        }
+        return result as unknown;
+      }
+    }
+    return {
+      value: message,
+      timestamp: Date.now()
+  };
+}
+
+
+ export enum CountingMachineMessageType {
+  SET_VALUE = 'setValue',
+  ADD_GOAL = 'addGoal',
+  INCREASE_VALUE = 'increaseValue',
+  DECREASE_VALUE = 'decreaseValue',
+  NEXT_GOAL = 'nextGoal',
+  VALID_BUTTON = 'validButton',
+  CORRECT_VALUE = 'correctValue',
+  WRONG_VALUE = 'wrongValue',
+  DONE = 'done',
+  UNKNOWN = 'unknown',
+  LOCK_THOUSAND_ROLL = 'lockThousandRoll',
+  LOCK_HUNDRED_ROLL = 'lockHundredRoll',
+  LOCK_TEN_ROLL = 'lockTenRoll',
+  LOCK_UNIT_ROLL = 'lockUnitRoll',
+}
+
+export interface CountingMachineParsedMessage {
+  type: CountingMachineMessageType;
+  value?: string;
+  numericValue?: number;
+  timestamp: number;
+}
+
+ export const COUNTING_MACHINE_PATTERNS = [
+  { pattern: /^set value (\d+)$/, type: CountingMachineMessageType.SET_VALUE, hasNumericValue: true },
+  { pattern: /^add to goal list (\d+)$/, type: CountingMachineMessageType.ADD_GOAL, hasNumericValue: true },
+  { pattern: /^increase value by (\d+)$/, type: CountingMachineMessageType.INCREASE_VALUE, hasNumericValue: true },
+  { pattern: /^decrease value by (\d+)$/, type: CountingMachineMessageType.DECREASE_VALUE, hasNumericValue: true },
+  { pattern: /^next goal (\d+)$/, type: CountingMachineMessageType.NEXT_GOAL, hasNumericValue: true },
+  { pattern: /^on valid button clicked$/, type: CountingMachineMessageType.VALID_BUTTON },
+  { pattern: /^correct value$/, type: CountingMachineMessageType.CORRECT_VALUE },
+  { pattern: /^wrong value$/, type: CountingMachineMessageType.WRONG_VALUE },
+  { pattern: /^done$/, type: CountingMachineMessageType.DONE },
+  { pattern: /^lock thousand roll$/, type: CountingMachineMessageType.LOCK_THOUSAND_ROLL },
+  { pattern: /^lock hundred roll$/, type: CountingMachineMessageType.LOCK_HUNDRED_ROLL },
+  { pattern: /^lock ten roll$/, type: CountingMachineMessageType.LOCK_TEN_ROLL },
+  { pattern: /^lock unit roll$/, type: CountingMachineMessageType.LOCK_UNIT_ROLL },
+];
 // Extend window to include unityInstance
 declare global {
   interface Window {
@@ -9,6 +84,7 @@ declare global {
     };
   }
 }
+
 
 export function useUnity() {
   const unityContext = useUnityContext({
@@ -60,6 +136,7 @@ export function useUnity() {
 
   // Function to lock/unlock the hundreds roll
   const lockHundredRoll = (locked: boolean) => {
+        console.log('locked',isLoaded);
     if (isLoaded) {
       sendMessage('WebBridge', 'ReceiveStringMessageFromJs', `LockHundred:${locked ? 1 : 0}`);
     }

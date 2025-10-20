@@ -2,7 +2,8 @@ import { useEffect, useCallback, useMemo, useState, useRef } from "react";
 import { useStore } from './store.ts';
 import { UNIT_CHALLENGES, TEN_TO_TWENTY_CHALLENGES, TENS_CHALLENGES, HUNDRED_TO_TWO_HUNDRED_CHALLENGES, TWO_HUNDRED_TO_THREE_HUNDRED_CHALLENGES, HUNDREDS_CHALLENGES, THOUSAND_TO_TWO_THOUSAND_CHALLENGES, TWO_THOUSAND_TO_THREE_THOUSAND_CHALLENGES, THOUSANDS_SIMPLE_COMBINATION_CHALLENGES, THOUSANDS_CHALLENGES } from './types.ts';
 import { UnityGame } from './components/UnityGame';
-import { useUnity } from './hooks/useUnity';
+import { parse, useUnity } from './hooks/useUnity';
+
 
 
 function MachineANombres() {
@@ -77,7 +78,8 @@ function MachineANombres() {
 
   // Handle messages from Unity (button clicks)
   const handleUnityMessage = useCallback((message: string) => {
-    // Unity sends messages like "ButtonClick:Add:0" or "ButtonClick:Subtract:2"
+    let data = parse(message);
+    console.log('data',data);
     if (message.startsWith('ButtonClick:')) {
       const parts = message.split(':');
       const action = parts[1]; // "Add" or "Subtract"
