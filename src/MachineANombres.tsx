@@ -1,6 +1,8 @@
 import { useEffect, useCallback, useMemo, useState, useRef } from "react";
 import { useStore } from './store.ts';
 import { UNIT_CHALLENGES, TEN_TO_TWENTY_CHALLENGES, TENS_CHALLENGES, HUNDRED_TO_TWO_HUNDRED_CHALLENGES, TWO_HUNDRED_TO_THREE_HUNDRED_CHALLENGES, HUNDREDS_CHALLENGES, THOUSAND_TO_TWO_THOUSAND_CHALLENGES, TWO_THOUSAND_TO_THREE_THOUSAND_CHALLENGES, THOUSANDS_SIMPLE_COMBINATION_CHALLENGES, THOUSANDS_CHALLENGES } from './types.ts';
+import { UnityGame } from './components/UnityGame';
+import { useUnity } from './hooks/useUnity';
 
 
 function MachineANombres() {
@@ -63,6 +65,40 @@ function MachineANombres() {
     introMaxAttempt,
   } = useStore();
 
+  // Unity integration
+  const {
+    isLoaded: unityLoaded,
+    changeCurrentValue,
+    lockThousandRoll,
+    lockHundredRoll,
+    lockTenRoll,
+    lockUnitRoll,
+  } = useUnity();
+
+  // Handle messages from Unity (button clicks)
+  const handleUnityMessage = useCallback((message: string) => {
+    // Unity sends messages like "ButtonClick:Add:0" or "ButtonClick:Subtract:2"
+    if (message.startsWith('ButtonClick:')) {
+      const parts = message.split(':');
+      const action = parts[1]; // "Add" or "Subtract"
+      const columnIndex = parseInt(parts[2], 10); // 0 = units, 1 = tens, 2 = hundreds, 3 = thousands
+      
+      if (action === 'Add') {
+        handleAdd(columnIndex);
+      } else if (action === 'Subtract') {
+        handleSubtract(columnIndex);
+      }
+    }
+  }, [handleAdd, handleSubtract]);
+
+  // Set up Unity message handler
+  useEffect(() => {
+    window.onUnityMessage = handleUnityMessage;
+    return () => {
+      window.onUnityMessage = undefined;
+    };
+  }, [handleUnityMessage]);
+
   // Local typing animation state
   const [typedInstruction, setTypedInstruction] = useState("");
   const [typedFeedback, setTypedFeedback] = useState("");
@@ -78,8 +114,6 @@ function MachineANombres() {
     columns.reduce((acc, col, idx) => acc + col.value * Math.pow(10, idx), 0),
     [columns]
   );
-
-  const isUnitsColumn = useCallback((idx: number) => idx === 0, []);
 
   // Typing animation effect for instruction
   useEffect(() => {
@@ -141,25 +175,119 @@ function MachineANombres() {
 
   const isTyping = isTypingInstruction || isTypingFeedback;
 
-  // --- Rendu des jetons visuels ---
-  const renderTokens = useCallback((value: number) => (
-    <div style={{ display: "flex", gap: 4, justifyContent: "center", minHeight: 22 }}>
-      {[...Array(9)].map((_, i) => (
-        <span
-          key={i}
-          style={{
-            width: 16,
-            height: 16,
-            borderRadius: "100%",
-            background: i < value ? "#38bdf8" : "#e5e7eb",
-            display: "inline-block",
-            transition: "background 0.2s ease",
-          }}
-          aria-hidden="true"
-        />
-      ))}
-    </div>
-  ), []);
+  // Sync Unity machine value with current state
+  useEffect(() => {
+    if (unityLoaded) {
+      changeCurrentValue(totalNumber.toString());
+    }
+  }, [totalNumber, unityLoaded, changeCurrentValue]);
+
+  // Sync Unity roll locks based on phase and unlocked columns
+  useEffect(() => {
+    if (!unityLoaded) return;
+
+    // Lock all rolls initially
+    let lockUnits = true;
+    let lockTens = true;
+    let lockHundreds = true;
+    let lockThousands = true;
+
+    // Unlock based on unlocked columns and phase
+    const isUnit = columns[0]?.unlocked || false;
+    const isTen = columns[1]?.unlocked || false;
+    const isHundred = columns[2]?.unlocked || false;
+    const isThousand = columns[3]?.unlocked || false;
+
+    // Determine which rolls should be unlocked based on phase
+    if (phase === 'intro-welcome' && isUnit) {
+      lockUnits = false;
+    }
+    else if (phase === 'intro-first-interaction' && isUnit) {
+      lockUnits = false;
+    }
+    else if (phase === 'intro-discover-carry' && (isUnit || isTen)) {
+      lockUnits = !isUnit;
+      lockTens = !isTen;
+    }
+    else if (phase === 'intro-count-digits' && isUnit) {
+      lockUnits = false;
+    }
+    else if (phase === 'intro-max-value-question' && introMaxAttempt === -1 && (isUnit || isTen)) {
+      lockUnits = !isUnit;
+      lockTens = !isTen;
+    }
+    else if (phase === 'intro-discover' && isUnit) {
+      lockUnits = false;
+    }
+    else if (phase === 'intro-add-roll' && isUnit) {
+      lockUnits = false;
+    }
+    else if (phase === 'normal') {
+      lockUnits = !isUnit;
+      lockTens = !isTen;
+      lockHundreds = !isHundred;
+      lockThousands = !isThousand;
+    }
+    else if ((phase === 'tutorial' || phase === 'explore-units' || phase === 'click-add' || phase === 'click-remove' || phase.startsWith('challenge-unit-') || phase === 'challenge-ten-to-twenty') && isUnit) {
+      lockUnits = false;
+    }
+    else if (phase === 'learn-carry' && isUnit) {
+      lockUnits = false;
+    }
+    else if (phase === 'practice-ten' && (isUnit || isTen)) {
+      lockUnits = !isUnit;
+      lockTens = !isTen;
+    }
+    else if ((phase === 'learn-ten-to-twenty' || phase === 'learn-twenty-to-thirty') && isUnit) {
+      lockUnits = false;
+    }
+    else if (phase === 'practice-hundred' && (isUnit || isTen || isHundred)) {
+      lockUnits = !isUnit;
+      lockTens = !isTen;
+      lockHundreds = !isHundred;
+    }
+    else if ((phase === 'learn-hundred-to-hundred-ten' || phase === 'learn-hundred-ten-to-two-hundred' || phase === 'challenge-hundred-to-two-hundred' || phase === 'learn-two-hundred-to-three-hundred' || phase === 'challenge-two-hundred-to-three-hundred') && isUnit) {
+      lockUnits = false;
+    }
+    else if ((phase.startsWith('challenge-tens-') || phase === 'learn-tens-combination') && (isUnit || isTen)) {
+      lockUnits = !isUnit;
+      lockTens = !isTen;
+    }
+    else if ((phase.startsWith('challenge-hundreds-') || phase === 'learn-hundreds-combination' || phase === 'learn-hundreds-simple-combination') && (isUnit || isTen || isHundred)) {
+      lockUnits = !isUnit;
+      lockTens = !isTen;
+      lockHundreds = !isHundred;
+    }
+    else if (phase === 'practice-thousand' && (isUnit || isTen || isHundred || isThousand)) {
+      lockUnits = !isUnit;
+      lockTens = !isTen;
+      lockHundreds = !isHundred;
+      lockThousands = !isThousand;
+    }
+    else if ((phase === 'learn-thousand-to-thousand-ten' || phase === 'learn-thousand-to-thousand-hundred' || phase === 'learn-thousand-hundred-to-two-thousand' || phase === 'challenge-thousand-to-two-thousand' || phase === 'learn-two-thousand-to-three-thousand' || phase === 'challenge-two-thousand-to-three-thousand') && isUnit) {
+      lockUnits = false;
+    }
+    else if ((phase.startsWith('challenge-thousands-') || phase === 'learn-thousands-combination' || phase === 'challenge-thousands-simple-combination' || phase === 'learn-thousands-very-simple-combination' || phase === 'learn-thousands-full-combination') && (isUnit || isTen || isHundred || isThousand)) {
+      lockUnits = !isUnit;
+      lockTens = !isTen;
+      lockHundreds = !isHundred;
+      lockThousands = !isThousand;
+    }
+
+    // During auto-counting, lock everything
+    if (isCountingAutomatically) {
+      lockUnits = true;
+      lockTens = true;
+      lockHundreds = true;
+      lockThousands = true;
+    }
+
+    // Apply locks to Unity
+    lockUnitRoll(lockUnits);
+    lockTenRoll(lockTens);
+    lockHundredRoll(lockHundreds);
+    lockThousandRoll(lockThousands);
+  }, [phase, columns, isCountingAutomatically, unityLoaded, lockUnitRoll, lockTenRoll, lockHundredRoll, lockThousandRoll, introMaxAttempt]);
 
   return (
     <div style={{
@@ -191,158 +319,17 @@ function MachineANombres() {
           Machine à Nombres
         </h2>
 
+        {/* Unity Game Container */}
         <div style={{
-          display: 'flex',
-          gap: 8,
-          justifyContent: 'center',
+          width: '100%',
+          height: '450px',
+          border: '2px solid #cbd5e1',
+          borderRadius: 8,
+          overflow: 'hidden',
+          background: '#000',
           marginBottom: 16
         }}>
-          {/* Rendu des colonnes (Milliers à gauche, Unités à droite) */}
-          {columns.slice().reverse().map((col, idx) => {
-            const originalIdx = columns.length - 1 - idx;
-            const isUnit = isUnitsColumn(originalIdx);
-
-            // Logique d'activation des boutons
-            let isInteractive = false;
-            if (col.unlocked) {
-              if (phase === 'intro-welcome' && isUnit) {
-                isInteractive = true;
-              }
-              else if (phase === 'intro-first-interaction' && isUnit) {
-                isInteractive = true;
-              }
-              else if (phase === 'intro-discover-carry' && (isUnit || originalIdx === 1)) {
-                isInteractive = true;
-              }
-              else if (phase === 'intro-count-digits' && isUnit) {
-                isInteractive = true;
-              }
-              else if (phase === 'intro-max-value-question' && introMaxAttempt === -1 && (isUnit || originalIdx === 1)) {
-                isInteractive = true;
-              }
-              else if (phase === 'intro-discover' && isUnit) {
-                isInteractive = true;
-              }
-              else if (phase === 'intro-add-roll' && isUnit) {
-                isInteractive = true;
-              }
-              else if (phase === 'normal') {
-                isInteractive = true;
-              }
-              else if ((phase === 'tutorial' || phase === 'explore-units' || phase === 'click-add' || phase === 'click-remove' || phase.startsWith('challenge-unit-') || phase === 'challenge-ten-to-twenty') && isUnit) {
-                isInteractive = true;
-              }
-              else if (phase === 'learn-carry' && isUnit) {
-                isInteractive = true;
-              }
-              else if (phase === 'practice-ten' && (isUnit || originalIdx === 1)) {
-                isInteractive = true;
-              }
-              else if ((phase === 'learn-ten-to-twenty' || phase === 'learn-twenty-to-thirty') && isUnit) {
-                isInteractive = true;
-              }
-              else if (phase === 'practice-hundred' && (isUnit || originalIdx === 1 || originalIdx === 2)) {
-                isInteractive = true;
-              }
-              else if ((phase === 'learn-hundred-to-hundred-ten' || phase === 'learn-hundred-ten-to-two-hundred' || phase === 'challenge-hundred-to-two-hundred' || phase === 'learn-two-hundred-to-three-hundred' || phase === 'challenge-two-hundred-to-three-hundred') && isUnit) {
-                isInteractive = true;
-              }
-              else if ((phase.startsWith('challenge-tens-') || phase === 'learn-tens-combination') && (isUnit || originalIdx === 1)) {
-                isInteractive = true;
-              }
-              else if ((phase.startsWith('challenge-hundreds-') || phase === 'learn-hundreds-combination' || phase === 'learn-hundreds-simple-combination') && (isUnit || originalIdx === 1 || originalIdx === 2)) {
-                isInteractive = true;
-              }
-              else if (phase === 'practice-thousand' && (isUnit || originalIdx === 1 || originalIdx === 2 || originalIdx === 3)) {
-                isInteractive = true;
-              }
-              else if ((phase === 'learn-thousand-to-thousand-ten' || phase === 'learn-thousand-to-thousand-hundred' || phase === 'learn-thousand-hundred-to-two-thousand' || phase === 'challenge-thousand-to-two-thousand' || phase === 'learn-two-thousand-to-three-thousand' || phase === 'challenge-two-thousand-to-three-thousand') && isUnit) {
-                isInteractive = true;
-              }
-              else if ((phase.startsWith('challenge-thousands-') || phase === 'learn-thousands-combination' || phase === 'challenge-thousands-simple-combination' || phase === 'learn-thousands-very-simple-combination' || phase === 'learn-thousands-full-combination') && (isUnit || originalIdx === 1 || originalIdx === 2 || originalIdx === 3)) {
-                isInteractive = true;
-              }
-            }
-
-            // Désactiver pendant l'auto-comptage
-            if (isCountingAutomatically) {
-              isInteractive = false;
-            }
-
-
-            return (
-              <div
-                key={col.name}
-                style={{
-                  opacity: col.unlocked ? 1 : 0.4,
-                  textAlign: 'center',
-                  minWidth: 70,
-                  transition: 'opacity 0.3s ease'
-                }}
-              >
-                <div style={{
-                  fontWeight: 'bold',
-                  fontSize: 13,
-                  marginBottom: 8,
-                  color: '#475569'
-                }}>
-                  {col.name}
-                </div>
-
-                {renderTokens(col.value)}
-
-                <div style={{ marginTop: 8, display: 'flex', gap: 4, justifyContent: 'center' }}>
-                  {/* Bouton Ajouter */}
-                  <button
-                    onClick={() => handleAdd(originalIdx)}
-                    disabled={!isInteractive}
-                    aria-label={`Ajouter une unité dans ${col.name}`}
-                    style={{
-                      fontSize: 18,
-                      padding: '4px 10px',
-                      background: isInteractive && isUnit ? '#22c55e' : isInteractive ? '#10b981' : '#e5e7eb',
-                      color: isInteractive ? '#fff' : '#9ca3af',
-                      border: 'none',
-                      borderRadius: 6,
-                      cursor: isInteractive ? 'pointer' : 'not-allowed',
-                      transition: 'all 0.2s ease',
-                      fontWeight: 'bold'
-                    }}
-                  >
-                    △
-                  </button>
-                  {/* Bouton Soustraire */}
-                  <button
-                    onClick={() => handleSubtract(originalIdx)}
-                    disabled={!isInteractive}
-                    aria-label={`Retirer une unité de ${col.name}`}
-                    style={{
-                      fontSize: 18,
-                      padding: '4px 10px',
-                      background: isInteractive && isUnit ? '#ef4444' : isInteractive ? '#f87171' : '#e5e7eb',
-                      color: isInteractive ? '#fff' : '#9ca3af',
-                      border: 'none',
-                      borderRadius: 6,
-                      cursor: isInteractive ? 'pointer' : 'not-allowed',
-                      transition: 'all 0.2s ease',
-                      fontWeight: 'bold'
-                    }}
-                  >
-                    ∇
-                  </button>
-                </div>
-
-                <div style={{
-                  fontSize: 20,
-                  marginTop: 6,
-                  fontWeight: 'bold',
-                  color: '#0ea5e9'
-                }}>
-                  {col.value}
-                </div>
-              </div>
-            );
-          })}
+          <UnityGame />
         </div>
 
         {/* BOUTON VALIDER (Défi d'apprentissage 5) */}
