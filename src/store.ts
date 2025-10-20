@@ -27,7 +27,7 @@ import {
     getSolutionAnimationStep,
     getGuidedClickFeedback
 } from './feedbackSystem.ts';
-import { LockHundredRoll, LockTenRoll, LockThousandRoll, LockUnitRoll, sendChallengeListToUnity, setValue } from './unityBridge.ts';
+import { sendChallengeListToUnity, setValue } from './unityBridge.ts';
 
 export const initialColumns: Column[] = [
     { name: 'Unités', value: 0, unlocked: false, color: 'bg-green-500' },
