@@ -21,8 +21,28 @@ export function UnityDemo() {
     setUnityMessages((prev) => [...prev.slice(-4), message]);
   }, []);
 
+  // Test global function
+  const testGlobalFunction = () => {
+    // Set values in hidden inputs
+    const currentValueInput = document.getElementById('currentValue') as HTMLInputElement;
+    const goalListInput = document.getElementById('currentGoalList') as HTMLInputElement;
+    
+    if (currentValueInput) currentValueInput.value = currentValue;
+    if (goalListInput) goalListInput.value = goalList;
+    
+    // Call global function
+    if (window.ChangeCurrentValue) {
+      window.ChangeCurrentValue();
+      console.log('Called global ChangeCurrentValue()');
+    }
+  };
+
   return (
     <div style={{ fontFamily: 'sans-serif', padding: '20px', maxWidth: '1200px', margin: '0 auto' }}>
+      {/* Hidden inputs for global functions */}
+      <input type="hidden" id="currentValue" value={currentValue} />
+      <input type="hidden" id="currentGoalList" value={goalList} />
+      
       <h1 style={{ textAlign: 'center', marginBottom: '30px' }}>Unity Integration Demo</h1>
       
       <div style={{ display: 'flex', gap: '20px', flexWrap: 'wrap' }}>
@@ -65,10 +85,27 @@ export function UnityDemo() {
                   border: 'none',
                   borderRadius: '4px',
                   cursor: isLoaded ? 'pointer' : 'not-allowed',
-                  fontWeight: 'bold'
+                  fontWeight: 'bold',
+                  marginBottom: '5px'
                 }}
               >
                 Change Current Value
+              </button>
+              <button
+                onClick={testGlobalFunction}
+                disabled={!isLoaded}
+                style={{
+                  width: '100%',
+                  padding: '8px',
+                  background: isLoaded ? '#FF9800' : '#ccc',
+                  color: 'white',
+                  border: 'none',
+                  borderRadius: '4px',
+                  cursor: isLoaded ? 'pointer' : 'not-allowed',
+                  fontWeight: 'bold'
+                }}
+              >
+                Test Global Function
               </button>
             </div>
 
@@ -316,6 +353,32 @@ export function UnityDemo() {
         </ul>
         <p style={{ margin: 0, marginTop: '10px' }}>
           <strong>Note:</strong> Multiple rolls can be locked simultaneously, and locked rolls show an animation in Unity.
+        </p>
+      </div>
+
+      {/* Global Functions Section */}
+      <div style={{ 
+        marginTop: '20px',
+        padding: '20px',
+        background: '#fff3e0',
+        borderRadius: '8px',
+        border: '1px solid #ffb74d'
+      }}>
+        <h3 style={{ marginTop: 0 }}>🌐 Global JavaScript Functions</h3>
+        <p style={{ marginBottom: '15px' }}>
+          The following functions are now available globally on the <code>window</code> object and can be called from any JavaScript code:
+        </p>
+        <ul style={{ lineHeight: '1.8', fontFamily: 'monospace', fontSize: '14px' }}>
+          <li><strong>window.ChangeCurrentValue()</strong> - Reads value from element with id "currentValue"</li>
+          <li><strong>window.ChangeCurrentGoalList()</strong> - Reads value from element with id "currentGoalList"</li>
+          <li><strong>window.LockThousandRoll(locked)</strong> - Lock/unlock thousands roll</li>
+          <li><strong>window.LockHundredRoll(locked)</strong> - Lock/unlock hundreds roll</li>
+          <li><strong>window.LockTenRoll(locked)</strong> - Lock/unlock tens roll</li>
+          <li><strong>window.LockUnitRoll(locked)</strong> - Lock/unlock units roll</li>
+          <li><strong>window.onUnityMessage</strong> - Handler for messages from Unity</li>
+        </ul>
+        <p style={{ marginTop: '15px', marginBottom: 0 }}>
+          <strong>Usage:</strong> You can open the browser console and call these functions directly, e.g., <code>window.LockUnitRoll(true)</code>
         </p>
       </div>
     </div>

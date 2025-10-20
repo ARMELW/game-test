@@ -1,4 +1,14 @@
 import { useUnityContext } from 'react-unity-webgl';
+import { useEffect } from 'react';
+
+// Extend window to include unityInstance
+declare global {
+  interface Window {
+    unityInstance?: {
+      SendMessage: (objectName: string, methodName: string, value?: string | number) => void;
+    };
+  }
+}
 
 export function useUnity() {
   const unityContext = useUnityContext({
@@ -13,6 +23,17 @@ export function useUnity() {
   });
 
   const { unityProvider, sendMessage, addEventListener, removeEventListener, isLoaded, loadingProgression } = unityContext;
+
+  // Expose Unity instance globally when loaded
+  useEffect(() => {
+    if (isLoaded) {
+      window.unityInstance = {
+        SendMessage: (objectName: string, methodName: string, value?: string | number) => {
+          sendMessage(objectName, methodName, value);
+        }
+      };
+    }
+  }, [isLoaded, sendMessage]);
 
   // Function to change the current value displayed on the machine
   // SetValue322 -> the machine will display 0322
