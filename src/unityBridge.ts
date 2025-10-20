@@ -80,8 +80,8 @@ export function setValue(value: number) {
   }
 
   // Default handler for Unity messages
-  export function onUnityMessage(message: string) {
-    console.log("[UnityBridge override] Message:", message);
+  export function onUnityMessage(_message: string) {
+    // Message handler - can be overridden by setting window.onUnityMessage
   }
 
   // Initialize global functions

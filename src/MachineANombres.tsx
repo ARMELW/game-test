@@ -1,6 +1,5 @@
 import { useEffect, useCallback, useMemo, useState, useRef } from "react";
 import { useStore } from './store.ts';
-import { UNIT_CHALLENGES, TEN_TO_TWENTY_CHALLENGES, TENS_CHALLENGES, HUNDRED_TO_TWO_HUNDRED_CHALLENGES, TWO_HUNDRED_TO_THREE_HUNDRED_CHALLENGES, HUNDREDS_CHALLENGES, THOUSAND_TO_TWO_THOUSAND_CHALLENGES, TWO_THOUSAND_TO_THREE_THOUSAND_CHALLENGES, THOUSANDS_SIMPLE_COMBINATION_CHALLENGES, THOUSANDS_CHALLENGES } from './types.ts';
 import { UnityGame } from './components/UnityGame';
 import { parse, useUnity } from './hooks/useUnity';
 
@@ -14,11 +13,6 @@ function MachineANombres() {
     instruction,
     feedback,
     isCountingAutomatically,
-    unitTargetIndex,
-    tenToTwentyTargetIndex,
-    tensTargetIndex,
-    hundredsTargetIndex,
-    thousandsTargetIndex,
     userInput,
     showInputField,
     handleAdd,
@@ -33,11 +27,6 @@ function MachineANombres() {
     handleValidateThousandToTwoThousand,
     handleValidateTwoThousandToThreeThousand,
     handleValidateThousandsSimpleCombination,
-    hundredToTwoHundredTargetIndex,
-    twoHundredToThreeHundredTargetIndex,
-    thousandToTwoThousandTargetIndex,
-    twoThousandToThreeThousandTargetIndex,
-    thousandsSimpleCombinationTargetIndex,
     startLearningPhase,
     unlockNextColumn,
     showUnlockButton,
@@ -106,8 +95,35 @@ function MachineANombres() {
       handleAdd(columnIndex);
     } else if (parsedData.type === 'decreaseValue') {
       handleSubtract(columnIndex);
+    } else if (parsedData.type === 'addGoal') {
+      // Handle validation triggered by Unity's "add to goal list" message
+      // Trigger appropriate validation based on current phase
+      if (phase === 'challenge-ten-to-twenty') {
+        handleValidateTenToTwenty();
+      } else if (phase === 'challenge-unit-1' || phase === 'challenge-unit-2' || phase === 'challenge-unit-3') {
+        handleValidateLearning();
+      } else if (phase === 'challenge-tens-1' || phase === 'challenge-tens-2' || phase === 'challenge-tens-3') {
+        handleValidateTens();
+      } else if (phase === 'challenge-hundred-to-two-hundred') {
+        handleValidateHundredToTwoHundred();
+      } else if (phase === 'challenge-two-hundred-to-three-hundred') {
+        handleValidateTwoHundredToThreeHundred();
+      } else if (phase === 'challenge-hundreds-1' || phase === 'challenge-hundreds-2' || phase === 'challenge-hundreds-3') {
+        handleValidateHundreds();
+      } else if (phase === 'challenge-thousand-to-two-thousand') {
+        handleValidateThousandToTwoThousand();
+      } else if (phase === 'challenge-two-thousand-to-three-thousand') {
+        handleValidateTwoThousandToThreeThousand();
+      } else if (phase === 'challenge-thousands-simple-combination') {
+        handleValidateThousandsSimpleCombination();
+      } else if (phase === 'challenge-thousands-1' || phase === 'challenge-thousands-2' || phase === 'challenge-thousands-3') {
+        handleValidateThousands();
+      }
     }
-  }, [handleAdd, handleSubtract]);
+  }, [handleAdd, handleSubtract, phase, handleValidateLearning, handleValidateTenToTwenty, handleValidateTens, 
+      handleValidateHundredToTwoHundred, handleValidateTwoHundredToThreeHundred, handleValidateHundreds,
+      handleValidateThousandToTwoThousand, handleValidateTwoThousandToThreeThousand, 
+      handleValidateThousandsSimpleCombination, handleValidateThousands]);
 
   // Set up Unity message handler
   useEffect(() => {
@@ -348,308 +364,9 @@ function MachineANombres() {
           <UnityGame />
         </div>
 
-        {/* BOUTON VALIDER (Défi d'apprentissage 5) */}
-        {showValidateLearningButton && (() => {
-          // Handle challenge-ten-to-twenty separately
-          if (phase === 'challenge-ten-to-twenty') {
-            const challenge = TEN_TO_TWENTY_CHALLENGES[0];
-            const targetNumber = challenge.targets[tenToTwentyTargetIndex];
-            const isCorrect = totalNumber === targetNumber;
-            
-            return (
-              <div style={{ marginTop: 20, textAlign: 'center' }}>
-                <button
-                  onClick={handleValidateTenToTwenty}
-                  style={{
-                    fontSize: 16,
-                    padding: '10px 30px',
-                    background: isCorrect
-                      ? 'linear-gradient(135deg, #22c55e 0%, #16a34a 100%)'
-                      : 'linear-gradient(135deg, #f97316 0%, #ea580c 100%)',
-                    color: '#fff',
-                    border: 'none',
-                    borderRadius: 8,
-                    cursor: 'pointer',
-                    fontWeight: 'bold',
-                    boxShadow: isCorrect
-                      ? '0 4px 8px rgba(34, 197, 94, 0.3)'
-                      : '0 4px 8px rgba(249, 115, 22, 0.3)',
-                    transition: 'all 0.2s ease',
-                    animation: isCorrect ? 'celebration 0.6s ease-in-out infinite' : 'none'
-                  }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.transform = 'translateY(-2px)';
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.transform = 'translateY(0)';
-                  }}
-                >
-                  {isCorrect ? '✅ VALIDER LE DÉFI' : '🎯 VALIDER LE DÉFI'}
-                </button>
-              </div>
-            );
-          }
-          
-          // Handle regular unit challenges
-          const challengeIndex = ['challenge-unit-1', 'challenge-unit-2', 'challenge-unit-3'].indexOf(phase as string);
-          const challenge = UNIT_CHALLENGES[challengeIndex];
-          const targetNumber = challenge.targets[unitTargetIndex];
-          const isCorrect = columns[0].value === targetNumber;
-          
-          return (
-            <div style={{ marginTop: 20, textAlign: 'center' }}>
-              <button
-                onClick={handleValidateLearning}
-                style={{
-                  fontSize: 16,
-                  padding: '10px 30px',
-                  background: isCorrect
-                    ? 'linear-gradient(135deg, #22c55e 0%, #16a34a 100%)'
-                    : 'linear-gradient(135deg, #f97316 0%, #ea580c 100%)',
-                  color: '#fff',
-                  border: 'none',
-                  borderRadius: 8,
-                  cursor: 'pointer',
-                  fontWeight: 'bold',
-                  boxShadow: isCorrect
-                    ? '0 4px 8px rgba(34, 197, 94, 0.3)'
-                    : '0 4px 8px rgba(249, 115, 22, 0.3)',
-                  transition: 'all 0.2s ease',
-                  animation: isCorrect ? 'celebration 0.6s ease-in-out infinite' : 'none'
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.transform = 'translateY(-2px)';
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.transform = 'translateY(0)';
-                }}
-              >
-                {isCorrect ? '✅ VALIDER LE DÉFI' : '🎯 VALIDER LE DÉFI'}
-              </button>
-            </div>
-          );
-        })()}
 
-        {/* BOUTON VALIDER (Défis des dizaines) */}
-        {showValidateTensButton && (() => {
-          const challengeIndex = ['challenge-tens-1', 'challenge-tens-2', 'challenge-tens-3'].indexOf(phase as string);
-          const challenge = TENS_CHALLENGES[challengeIndex];
-          const targetNumber = challenge.targets[tensTargetIndex];
-          const isCorrect = totalNumber === targetNumber;
-          
-          return (
-            <div style={{ marginTop: 20, textAlign: 'center' }}>
-              <button
-                onClick={handleValidateTens}
-                style={{
-                  fontSize: 16,
-                  padding: '10px 30px',
-                  background: isCorrect
-                    ? 'linear-gradient(135deg, #22c55e 0%, #16a34a 100%)'
-                    : 'linear-gradient(135deg, #f97316 0%, #ea580c 100%)',
-                  color: '#fff',
-                  border: 'none',
-                  borderRadius: 8,
-                  cursor: 'pointer',
-                  fontWeight: 'bold',
-                  boxShadow: isCorrect
-                    ? '0 4px 8px rgba(34, 197, 94, 0.3)'
-                    : '0 4px 8px rgba(249, 115, 22, 0.3)',
-                  transition: 'all 0.2s ease',
-                  animation: isCorrect ? 'celebration 0.6s ease-in-out infinite' : 'none'
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.transform = 'translateY(-2px)';
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.transform = 'translateY(0)';
-                }}
-              >
-                {isCorrect ? '✅ VALIDER LE DÉFI ' : '🎯 VALIDER LE DÉFI'}
-              </button>
-            </div>
-          );
-        })()}
 
-        {/* BOUTON VALIDER (Défis des centaines) */}
-        {showValidateHundredsButton && (() => {
-          // Handle new hundreds challenge phases
-          if (phase === 'challenge-hundred-to-two-hundred') {
-            const challenge = HUNDRED_TO_TWO_HUNDRED_CHALLENGES[0];
-            const targetNumber = challenge.targets[hundredToTwoHundredTargetIndex];
-            const isCorrect = totalNumber === targetNumber;
-            
-            return (
-              <div style={{ marginTop: 20, textAlign: 'center' }}>
-                <button
-                  onClick={handleValidateHundredToTwoHundred}
-                  style={{
-                    fontSize: 16,
-                    padding: '10px 30px',
-                    background: isCorrect
-                      ? 'linear-gradient(135deg, #22c55e 0%, #16a34a 100%)'
-                      : 'linear-gradient(135deg, #f97316 0%, #ea580c 100%)',
-                    color: '#fff',
-                    border: 'none',
-                    borderRadius: 8,
-                    cursor: 'pointer',
-                    fontWeight: 'bold',
-                    boxShadow: isCorrect
-                      ? '0 4px 8px rgba(34, 197, 94, 0.3)'
-                      : '0 4px 8px rgba(249, 115, 22, 0.3)',
-                    transition: 'all 0.2s ease',
-                    animation: isCorrect ? 'celebration 0.6s ease-in-out infinite' : 'none'
-                  }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.transform = 'translateY(-2px)';
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.transform = 'translateY(0)';
-                  }}
-                >
-                  {isCorrect ? '✅ VALIDER LE DÉFI' : '🎯 VALIDER LE DÉFI'}
-                </button>
-              </div>
-            );
-          }
-          
-          if (phase === 'challenge-two-hundred-to-three-hundred') {
-            const challenge = TWO_HUNDRED_TO_THREE_HUNDRED_CHALLENGES[0];
-            const targetNumber = challenge.targets[twoHundredToThreeHundredTargetIndex];
-            const isCorrect = totalNumber === targetNumber;
-            
-            return (
-              <div style={{ marginTop: 20, textAlign: 'center' }}>
-                <button
-                  onClick={handleValidateTwoHundredToThreeHundred}
-                  style={{
-                    fontSize: 16,
-                    padding: '10px 30px',
-                    background: isCorrect
-                      ? 'linear-gradient(135deg, #22c55e 0%, #16a34a 100%)'
-                      : 'linear-gradient(135deg, #f97316 0%, #ea580c 100%)',
-                    color: '#fff',
-                    border: 'none',
-                    borderRadius: 8,
-                    cursor: 'pointer',
-                    fontWeight: 'bold',
-                    boxShadow: isCorrect
-                      ? '0 4px 8px rgba(34, 197, 94, 0.3)'
-                      : '0 4px 8px rgba(249, 115, 22, 0.3)',
-                    transition: 'all 0.2s ease',
-                    animation: isCorrect ? 'celebration 0.6s ease-in-out infinite' : 'none'
-                  }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.transform = 'translateY(-2px)';
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.transform = 'translateY(0)';
-                  }}
-                >
-                  {isCorrect ? '✅ VALIDER LE DÉFI' : '🎯 VALIDER LE DÉFI'}
-                </button>
-              </div>
-            );
-          }
-          
-          const challengeIndex = ['challenge-hundreds-1', 'challenge-hundreds-2', 'challenge-hundreds-3'].indexOf(phase as string);
-          const challenge = HUNDREDS_CHALLENGES[challengeIndex];
-          const targetNumber = challenge.targets[hundredsTargetIndex];
-          const isCorrect = totalNumber === targetNumber;
-          
-          return (
-            <div style={{ marginTop: 20, textAlign: 'center' }}>
-              <button
-                onClick={handleValidateHundreds}
-                style={{
-                  fontSize: 16,
-                  padding: '10px 30px',
-                  background: isCorrect
-                    ? 'linear-gradient(135deg, #22c55e 0%, #16a34a 100%)'
-                    : 'linear-gradient(135deg, #f97316 0%, #ea580c 100%)',
-                  color: '#fff',
-                  border: 'none',
-                  borderRadius: 8,
-                  cursor: 'pointer',
-                  fontWeight: 'bold',
-                  boxShadow: isCorrect
-                    ? '0 4px 8px rgba(34, 197, 94, 0.3)'
-                    : '0 4px 8px rgba(249, 115, 22, 0.3)',
-                  transition: 'all 0.2s ease',
-                  animation: isCorrect ? 'celebration 0.6s ease-in-out infinite' : 'none'
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.transform = 'translateY(-2px)';
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.transform = 'translateY(0)';
-                }}
-              >
-                {isCorrect ? '✅ VALIDER LE DÉFI' : '🎯 VALIDER LE DÉFI'}
-              </button>
-            </div>
-          );
-        })()}
 
-        {/* BOUTON VALIDER (Défis des milliers) */}
-        {showValidateThousandsButton && (() => {
-          let targetNumber = 0;
-          let handleValidate = handleValidateThousands;
-          
-          if (phase === 'challenge-thousand-to-two-thousand') {
-            const challenge = THOUSAND_TO_TWO_THOUSAND_CHALLENGES[0];
-            targetNumber = challenge.targets[thousandToTwoThousandTargetIndex];
-            handleValidate = handleValidateThousandToTwoThousand;
-          } else if (phase === 'challenge-two-thousand-to-three-thousand') {
-            const challenge = TWO_THOUSAND_TO_THREE_THOUSAND_CHALLENGES[0];
-            targetNumber = challenge.targets[twoThousandToThreeThousandTargetIndex];
-            handleValidate = handleValidateTwoThousandToThreeThousand;
-          } else if (phase === 'challenge-thousands-simple-combination') {
-            const challenge = THOUSANDS_SIMPLE_COMBINATION_CHALLENGES[0];
-            targetNumber = challenge.targets[thousandsSimpleCombinationTargetIndex];
-            handleValidate = handleValidateThousandsSimpleCombination;
-          } else {
-            const challengeIndex = ['challenge-thousands-1', 'challenge-thousands-2', 'challenge-thousands-3'].indexOf(phase as string);
-            const challenge = THOUSANDS_CHALLENGES[challengeIndex];
-            targetNumber = challenge.targets[thousandsTargetIndex];
-            handleValidate = handleValidateThousands;
-          }
-          
-          const isCorrect = totalNumber === targetNumber;
-          
-          return (
-            <div style={{ marginTop: 20, textAlign: 'center' }}>
-              <button
-                onClick={handleValidate}
-                style={{
-                  fontSize: 16,
-                  padding: '10px 30px',
-                  background: isCorrect
-                    ? 'linear-gradient(135deg, #22c55e 0%, #16a34a 100%)'
-                    : 'linear-gradient(135deg, #f97316 0%, #ea580c 100%)',
-                  color: '#fff',
-                  border: 'none',
-                  borderRadius: 8,
-                  cursor: 'pointer',
-                  fontWeight: 'bold',
-                  boxShadow: isCorrect
-                    ? '0 4px 8px rgba(34, 197, 94, 0.3)'
-                    : '0 4px 8px rgba(249, 115, 22, 0.3)',
-                  transition: 'all 0.2s ease',
-                  animation: isCorrect ? 'celebration 0.6s ease-in-out infinite' : 'none'
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.transform = 'translateY(-2px)';
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.transform = 'translateY(0)';
-                }}
-              >
-                {isCorrect ? '✅ VALIDER LE DÉFI' : '🎯 VALIDER LE DÉFI'}
-              </button>
-            </div>
-          );
-        })()}
 
         {/* Boutons de phase (Débloquer / Commencer) */}
         {(showUnlockButton || showStartLearningButton) && (
