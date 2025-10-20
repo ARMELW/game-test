@@ -35,6 +35,15 @@ export function ChangeCurrentGoalList() {
   }
 }
 
+// cette fonction sert à envoyer la liste des objectifs vers Unity de manière programmatique
+// sendChallengeListToUnity([544, 1352, 9871]) -> enverra "ChangeList544/1352/9871"
+export function sendChallengeListToUnity(targets: number[]) {
+  if (typeof window.unityInstance !== 'undefined' && targets && targets.length > 0) {
+    const value = targets.join('/');
+    window.unityInstance.SendMessage('WebBridge', 'ReceiveStringMessageFromJs', 'ChangeList' + value);
+  }
+}
+
 // cette fonction sert à bloquer/débloquer le rouleau des 1000
 export function LockThousandRoll(locked: boolean) {
   if (typeof window.unityInstance !== 'undefined') {

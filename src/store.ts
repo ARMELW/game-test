@@ -27,6 +27,7 @@ import {
     getSolutionAnimationStep,
     getGuidedClickFeedback
 } from './feedbackSystem.ts';
+import { sendChallengeListToUnity } from './unityBridge.ts';
 
 export const initialColumns: Column[] = [
     { name: 'Unités', value: 0, unlocked: true, color: 'bg-green-500' },
@@ -34,6 +35,96 @@ export const initialColumns: Column[] = [
     { name: 'Centaines', value: 0, unlocked: false, color: 'bg-yellow-500' },
     { name: 'Milliers', value: 0, unlocked: false, color: 'bg-red-500' },
 ];
+
+// Helper function to send challenge targets to Unity based on phase
+function sendChallengeToUnity(phase: string) {
+    let targets: number[] = [];
+    
+    // Determine targets based on phase
+    if (phase.startsWith('challenge-unit-')) {
+        const index = parseInt(phase.split('-')[2]) - 1;
+        if (index >= 0 && index < UNIT_CHALLENGES.length) {
+            targets = UNIT_CHALLENGES[index].targets;
+        }
+    } else if (phase === 'challenge-ten-to-twenty') {
+        targets = TEN_TO_TWENTY_CHALLENGES[0].targets;
+    } else if (phase.startsWith('challenge-tens-')) {
+        const index = parseInt(phase.split('-')[2]) - 1;
+        if (index >= 0 && index < TENS_CHALLENGES.length) {
+            targets = TENS_CHALLENGES[index].targets;
+        }
+    } else if (phase === 'challenge-hundred-to-two-hundred') {
+        targets = HUNDRED_TO_TWO_HUNDRED_CHALLENGES[0].targets;
+    } else if (phase === 'challenge-two-hundred-to-three-hundred') {
+        targets = TWO_HUNDRED_TO_THREE_HUNDRED_CHALLENGES[0].targets;
+    } else if (phase.startsWith('challenge-hundreds-')) {
+        const index = parseInt(phase.split('-')[2]) - 1;
+        if (index >= 0 && index < HUNDREDS_CHALLENGES.length) {
+            targets = HUNDREDS_CHALLENGES[index].targets;
+        }
+    } else if (phase === 'challenge-thousand-to-two-thousand') {
+        targets = THOUSAND_TO_TWO_THOUSAND_CHALLENGES[0].targets;
+    } else if (phase === 'challenge-two-thousand-to-three-thousand') {
+        targets = TWO_THOUSAND_TO_THREE_THOUSAND_CHALLENGES[0].targets;
+    } else if (phase === 'challenge-thousands-simple-combination') {
+        targets = THOUSANDS_SIMPLE_COMBINATION_CHALLENGES[0].targets;
+    } else if (phase.startsWith('challenge-thousands-')) {
+        const index = parseInt(phase.split('-')[2]) - 1;
+        if (index >= 0 && index < THOUSANDS_CHALLENGES.length) {
+            targets = THOUSANDS_CHALLENGES[index].targets;
+        }
+    }
+    
+    // Send to Unity if targets found
+    if (targets.length > 0) {
+        sendChallengeListToUnity(targets);
+    }
+}
+
+// Helper function to send remaining targets to Unity based on phase and current index
+function sendRemainingTargetsToUnity(phase: string, currentIndex: number) {
+    let targets: number[] = [];
+    
+    // Determine targets based on phase
+    if (phase.startsWith('challenge-unit-')) {
+        const index = parseInt(phase.split('-')[2]) - 1;
+        if (index >= 0 && index < UNIT_CHALLENGES.length) {
+            targets = UNIT_CHALLENGES[index].targets.slice(currentIndex);
+        }
+    } else if (phase === 'challenge-ten-to-twenty') {
+        targets = TEN_TO_TWENTY_CHALLENGES[0].targets.slice(currentIndex);
+    } else if (phase.startsWith('challenge-tens-')) {
+        const index = parseInt(phase.split('-')[2]) - 1;
+        if (index >= 0 && index < TENS_CHALLENGES.length) {
+            targets = TENS_CHALLENGES[index].targets.slice(currentIndex);
+        }
+    } else if (phase === 'challenge-hundred-to-two-hundred') {
+        targets = HUNDRED_TO_TWO_HUNDRED_CHALLENGES[0].targets.slice(currentIndex);
+    } else if (phase === 'challenge-two-hundred-to-three-hundred') {
+        targets = TWO_HUNDRED_TO_THREE_HUNDRED_CHALLENGES[0].targets.slice(currentIndex);
+    } else if (phase.startsWith('challenge-hundreds-')) {
+        const index = parseInt(phase.split('-')[2]) - 1;
+        if (index >= 0 && index < HUNDREDS_CHALLENGES.length) {
+            targets = HUNDREDS_CHALLENGES[index].targets.slice(currentIndex);
+        }
+    } else if (phase === 'challenge-thousand-to-two-thousand') {
+        targets = THOUSAND_TO_TWO_THOUSAND_CHALLENGES[0].targets.slice(currentIndex);
+    } else if (phase === 'challenge-two-thousand-to-three-thousand') {
+        targets = TWO_THOUSAND_TO_THREE_THOUSAND_CHALLENGES[0].targets.slice(currentIndex);
+    } else if (phase === 'challenge-thousands-simple-combination') {
+        targets = THOUSANDS_SIMPLE_COMBINATION_CHALLENGES[0].targets.slice(currentIndex);
+    } else if (phase.startsWith('challenge-thousands-')) {
+        const index = parseInt(phase.split('-')[2]) - 1;
+        if (index >= 0 && index < THOUSANDS_CHALLENGES.length) {
+            targets = THOUSANDS_CHALLENGES[index].targets.slice(currentIndex);
+        }
+    }
+    
+    // Send to Unity if targets found
+    if (targets.length > 0) {
+        sendChallengeListToUnity(targets);
+    }
+}
 
 export const useStore = create<MachineState>((set, get) => ({
     columns: initialColumns,
@@ -127,6 +218,11 @@ export const useStore = create<MachineState>((set, get) => ({
         set({ phase });
         console.log('set phase', phase);
         
+        // Send challenge list to Unity when entering a challenge phase
+        if (phase.startsWith('challenge-')) {
+            sendChallengeToUnity(phase);
+        }
+        
         // Handle auto-transitions for intro phases
         if (phase === 'intro-welcome-personalized') {
             set({ showInputField: true, feedback: "", instruction: "" });
@@ -163,6 +259,10 @@ export const useStore = create<MachineState>((set, get) => ({
     setCompletedChallenges: (updater) => set((state) => ({ completedChallenges: typeof updater === 'function' ? updater(state.completedChallenges) : updater })),
     setUnitTargetIndex: (index) => {
         set({ unitTargetIndex: index });
+        const { phase } = get();
+        if (phase.startsWith('challenge-unit-')) {
+            sendRemainingTargetsToUnity(phase, index);
+        }
         get().updateInstruction();
     },
     setUnitSuccessCount: (count) => {
@@ -171,6 +271,10 @@ export const useStore = create<MachineState>((set, get) => ({
     },
     setTensTargetIndex: (index) => {
         set({ tensTargetIndex: index });
+        const { phase } = get();
+        if (phase.startsWith('challenge-tens-')) {
+            sendRemainingTargetsToUnity(phase, index);
+        }
         get().updateInstruction();
     },
     setTensSuccessCount: (count) => {
@@ -179,6 +283,10 @@ export const useStore = create<MachineState>((set, get) => ({
     },
     setHundredsTargetIndex: (index) => {
         set({ hundredsTargetIndex: index });
+        const { phase } = get();
+        if (phase.startsWith('challenge-hundreds-')) {
+            sendRemainingTargetsToUnity(phase, index);
+        }
         get().updateInstruction();
     },
     setHundredsSuccessCount: (count) => {
@@ -187,6 +295,10 @@ export const useStore = create<MachineState>((set, get) => ({
     },
     setThousandsTargetIndex: (index) => {
         set({ thousandsTargetIndex: index });
+        const { phase } = get();
+        if (phase.startsWith('challenge-thousands-')) {
+            sendRemainingTargetsToUnity(phase, index);
+        }
         get().updateInstruction();
     },
     setThousandsSuccessCount: (count) => {
@@ -195,6 +307,10 @@ export const useStore = create<MachineState>((set, get) => ({
     },
     setTenToTwentyTargetIndex: (index) => {
         set({ tenToTwentyTargetIndex: index });
+        const { phase } = get();
+        if (phase === 'challenge-ten-to-twenty') {
+            sendRemainingTargetsToUnity(phase, index);
+        }
         get().updateInstruction();
     },
     setTenToTwentySuccessCount: (count) => {
@@ -209,6 +325,10 @@ export const useStore = create<MachineState>((set, get) => ({
     },
     setHundredToTwoHundredTargetIndex: (index) => {
         set({ hundredToTwoHundredTargetIndex: index });
+        const { phase } = get();
+        if (phase === 'challenge-hundred-to-two-hundred') {
+            sendRemainingTargetsToUnity(phase, index);
+        }
         get().updateInstruction();
     },
     setHundredToTwoHundredSuccessCount: (count) => {
@@ -217,6 +337,10 @@ export const useStore = create<MachineState>((set, get) => ({
     },
     setTwoHundredToThreeHundredTargetIndex: (index) => {
         set({ twoHundredToThreeHundredTargetIndex: index });
+        const { phase } = get();
+        if (phase === 'challenge-two-hundred-to-three-hundred') {
+            sendRemainingTargetsToUnity(phase, index);
+        }
         get().updateInstruction();
     },
     setTwoHundredToThreeHundredSuccessCount: (count) => {
@@ -228,6 +352,10 @@ export const useStore = create<MachineState>((set, get) => ({
     },
     setThousandToTwoThousandTargetIndex: (index) => {
         set({ thousandToTwoThousandTargetIndex: index });
+        const { phase } = get();
+        if (phase === 'challenge-thousand-to-two-thousand') {
+            sendRemainingTargetsToUnity(phase, index);
+        }
         get().updateInstruction();
     },
     setThousandToTwoThousandSuccessCount: (count) => {
@@ -236,6 +364,10 @@ export const useStore = create<MachineState>((set, get) => ({
     },
     setTwoThousandToThreeThousandTargetIndex: (index) => {
         set({ twoThousandToThreeThousandTargetIndex: index });
+        const { phase } = get();
+        if (phase === 'challenge-two-thousand-to-three-thousand') {
+            sendRemainingTargetsToUnity(phase, index);
+        }
         get().updateInstruction();
     },
     setTwoThousandToThreeThousandSuccessCount: (count) => {
@@ -244,6 +376,10 @@ export const useStore = create<MachineState>((set, get) => ({
     },
     setThousandsSimpleCombinationTargetIndex: (index) => {
         set({ thousandsSimpleCombinationTargetIndex: index });
+        const { phase } = get();
+        if (phase === 'challenge-thousands-simple-combination') {
+            sendRemainingTargetsToUnity(phase, index);
+        }
         get().updateInstruction();
     },
     setThousandsSimpleCombinationSuccessCount: (count) => {
@@ -253,51 +389,91 @@ export const useStore = create<MachineState>((set, get) => ({
     resetUnitChallenge: () => {
         set({ unitTargetIndex: 0, unitSuccessCount: 0 });
         get().resetAttempts();
+        const { phase } = get();
+        if (phase.startsWith('challenge-unit-')) {
+            sendChallengeToUnity(phase);
+        }
         get().updateInstruction();
     },
     resetTenToTwentyChallenge: () => {
         set({ tenToTwentyTargetIndex: 0, tenToTwentySuccessCount: 0 });
         get().resetAttempts();
+        const { phase } = get();
+        if (phase === 'challenge-ten-to-twenty') {
+            sendChallengeToUnity(phase);
+        }
         get().updateInstruction();
     },
     resetHundredToTwoHundredChallenge: () => {
         set({ hundredToTwoHundredTargetIndex: 0, hundredToTwoHundredSuccessCount: 0 });
         get().resetAttempts();
+        const { phase } = get();
+        if (phase === 'challenge-hundred-to-two-hundred') {
+            sendChallengeToUnity(phase);
+        }
         get().updateInstruction();
     },
     resetTwoHundredToThreeHundredChallenge: () => {
         set({ twoHundredToThreeHundredTargetIndex: 0, twoHundredToThreeHundredSuccessCount: 0 });
         get().resetAttempts();
+        const { phase } = get();
+        if (phase === 'challenge-two-hundred-to-three-hundred') {
+            sendChallengeToUnity(phase);
+        }
         get().updateInstruction();
     },
     resetTensChallenge: () => {
         set({ tensTargetIndex: 0, tensSuccessCount: 0 });
         get().resetAttempts();
+        const { phase } = get();
+        if (phase.startsWith('challenge-tens-')) {
+            sendChallengeToUnity(phase);
+        }
         get().updateInstruction();
     },
     resetHundredsChallenge: () => {
         set({ hundredsTargetIndex: 0, hundredsSuccessCount: 0 });
         get().resetAttempts();
+        const { phase } = get();
+        if (phase.startsWith('challenge-hundreds-')) {
+            sendChallengeToUnity(phase);
+        }
         get().updateInstruction();
     },
     resetThousandsChallenge: () => {
         set({ thousandsTargetIndex: 0, thousandsSuccessCount: 0 });
         get().resetAttempts();
+        const { phase } = get();
+        if (phase.startsWith('challenge-thousands-')) {
+            sendChallengeToUnity(phase);
+        }
         get().updateInstruction();
     },
     resetThousandToTwoThousandChallenge: () => {
         set({ thousandToTwoThousandTargetIndex: 0, thousandToTwoThousandSuccessCount: 0 });
         get().resetAttempts();
+        const { phase } = get();
+        if (phase === 'challenge-thousand-to-two-thousand') {
+            sendChallengeToUnity(phase);
+        }
         get().updateInstruction();
     },
     resetTwoThousandToThreeThousandChallenge: () => {
         set({ twoThousandToThreeThousandTargetIndex: 0, twoThousandToThreeThousandSuccessCount: 0 });
         get().resetAttempts();
+        const { phase } = get();
+        if (phase === 'challenge-two-thousand-to-three-thousand') {
+            sendChallengeToUnity(phase);
+        }
         get().updateInstruction();
     },
     resetThousandsSimpleCombinationChallenge: () => {
         set({ thousandsSimpleCombinationTargetIndex: 0, thousandsSimpleCombinationSuccessCount: 0 });
         get().resetAttempts();
+        const { phase } = get();
+        if (phase === 'challenge-thousands-simple-combination') {
+            sendChallengeToUnity(phase);
+        }
         get().updateInstruction();
     },
     setUserInput: (input) => set({ userInput: input }),
