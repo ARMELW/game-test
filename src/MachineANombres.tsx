@@ -65,6 +65,10 @@ function MachineANombres() {
     lockUnitRoll,
   } = useUnity();
 
+  // Ref to track last addGoal validation time to prevent rapid successive calls
+  const lastAddGoalTimeRef = useRef<number>(0);
+  const addGoalDebounceMs = 150; // Debounce period for addGoal messages
+
   // Handle messages from Unity (button clicks)
   const handleUnityMessage = useCallback((message: string) => {
     const data = parse(message);
@@ -96,6 +100,14 @@ function MachineANombres() {
     } else if (parsedData.type === 'decreaseValue') {
       handleSubtract(columnIndex);
     } else if (parsedData.type === 'addGoal') {
+      // Anti-loop protection: Prevent addGoal from being processed too frequently
+      const now = Date.now();
+      if (now - lastAddGoalTimeRef.current < addGoalDebounceMs) {
+        console.warn('addGoal message ignored - debounce protection active');
+        return;
+      }
+      lastAddGoalTimeRef.current = now;
+
       // Handle validation triggered by Unity's "add to goal list" message
       // Trigger appropriate validation based on current phase
       if (phase === 'challenge-ten-to-twenty') {
