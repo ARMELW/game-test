@@ -1,5 +1,5 @@
 import { useUnityContext } from 'react-unity-webgl';
-import { useEffect } from 'react';
+import { useEffect, useCallback } from 'react';
 
 /**
  * Génère un parseur de message générique pour un jeu Unity.
@@ -113,48 +113,47 @@ export function useUnity() {
 
   // Function to change the current value displayed on the machine
   // SetValue322 -> the machine will display 0322
-  const changeCurrentValue = (value: string | number) => {
+  const changeCurrentValue = useCallback((value: string | number) => {
     if (isLoaded) {
       sendMessage('WebBridge', 'ReceiveStringMessageFromJs', `SetValue${value}`);
     }
-  };
+  }, [isLoaded, sendMessage]);
 
   // Function to send the list of goals to Unity
   // ChangeList544/1352/9871 -> goals will be 544 then 1352 then 9871
-  const changeCurrentGoalList = (value: string) => {
+  const changeCurrentGoalList = useCallback((value: string) => {
     if (isLoaded) {
       sendMessage('WebBridge', 'ReceiveStringMessageFromJs', `ChangeList${value}`);
     }
-  };
+  }, [isLoaded, sendMessage]);
 
   // Function to lock/unlock the thousands roll
-  const lockThousandRoll = (locked: boolean) => {
+  const lockThousandRoll = useCallback((locked: boolean) => {
     if (isLoaded) {
       sendMessage('WebBridge', 'ReceiveStringMessageFromJs', `LockThousand:${locked ? 1 : 0}`);
     }
-  };
+  }, [isLoaded, sendMessage]);
 
   // Function to lock/unlock the hundreds roll
-  const lockHundredRoll = (locked: boolean) => {
-        console.log('locked',isLoaded);
+  const lockHundredRoll = useCallback((locked: boolean) => {
     if (isLoaded) {
       sendMessage('WebBridge', 'ReceiveStringMessageFromJs', `LockHundred:${locked ? 1 : 0}`);
     }
-  };
+  }, [isLoaded, sendMessage]);
 
   // Function to lock/unlock the tens roll
-  const lockTenRoll = (locked: boolean) => {
+  const lockTenRoll = useCallback((locked: boolean) => {
     if (isLoaded) {
       sendMessage('WebBridge', 'ReceiveStringMessageFromJs', `LockTen:${locked ? 1 : 0}`);
     }
-  };
+  }, [isLoaded, sendMessage]);
 
   // Function to lock/unlock the units roll
-  const lockUnitRoll = (locked: boolean) => {
+  const lockUnitRoll = useCallback((locked: boolean) => {
     if (isLoaded) {
       sendMessage('WebBridge', 'ReceiveStringMessageFromJs', `LockUnit:${locked ? 1 : 0}`);
     }
-  };
+  }, [isLoaded, sendMessage]);
 
   return {
     unityProvider,
