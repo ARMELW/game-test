@@ -78,18 +78,34 @@ function MachineANombres() {
 
   // Handle messages from Unity (button clicks)
   const handleUnityMessage = useCallback((message: string) => {
-    let data = parse(message);
+    const data = parse(message);
     console.log('data',data);
-    if (message.startsWith('ButtonClick:')) {
-      const parts = message.split(':');
-      const action = parts[1]; // "Add" or "Subtract"
-      const columnIndex = parseInt(parts[2], 10); // 0 = units, 1 = tens, 2 = hundreds, 3 = thousands
-      
-      if (action === 'Add') {
-        handleAdd(columnIndex);
-      } else if (action === 'Subtract') {
-        handleSubtract(columnIndex);
-      }
+    
+    // Check if data is valid and has the expected structure
+    if (!data || typeof data !== 'object' || !('type' in data)) {
+      return;
+    }
+    
+    const parsedData = data as { type: string; numericValue?: number };
+    
+    // Map numeric value to column index
+    // 1 = units (index 0), 10 = tens (index 1), 100 = hundreds (index 2), 1000 = thousands (index 3)
+    const getColumnIndex = (value?: number): number => {
+      if (!value) return 0;
+      if (value === 1) return 0;      // units
+      if (value === 10) return 1;     // tens
+      if (value === 100) return 2;    // hundreds
+      if (value === 1000) return 3;   // thousands
+      return 0; // default to units
+    };
+    
+    const columnIndex = getColumnIndex(parsedData.numericValue);
+    
+    // Handle increase and decrease actions
+    if (parsedData.type === 'increaseValue') {
+      handleAdd(columnIndex);
+    } else if (parsedData.type === 'decreaseValue') {
+      handleSubtract(columnIndex);
     }
   }, [handleAdd, handleSubtract]);
 
