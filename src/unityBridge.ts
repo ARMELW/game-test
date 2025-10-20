@@ -79,6 +79,34 @@ export function setValue(value: number) {
     }
   }
 
+  // Send message to Unity when validation button is clicked
+  export function sendValidationButtonClicked() {
+    if (typeof window.unityInstance !== 'undefined') {
+      window.unityInstance.SendMessage('WebBridge', 'ReceiveStringMessageFromJs', 'on valid button clicked');
+    }
+  }
+
+  // Send message to Unity when answer is correct
+  export function sendCorrectValue() {
+    if (typeof window.unityInstance !== 'undefined') {
+      window.unityInstance.SendMessage('WebBridge', 'ReceiveStringMessageFromJs', 'correct value');
+    }
+  }
+
+  // Send message to Unity when answer is wrong
+  export function sendWrongValue() {
+    if (typeof window.unityInstance !== 'undefined') {
+      window.unityInstance.SendMessage('WebBridge', 'ReceiveStringMessageFromJs', 'wrong value');
+    }
+  }
+
+  // Send message to Unity to move to next goal
+  export function sendNextGoal() {
+    if (typeof window.unityInstance !== 'undefined') {
+      window.unityInstance.SendMessage('WebBridge', 'ReceiveStringMessageFromJs', 'next goal');
+    }
+  }
+
   // Default handler for Unity messages
   export function onUnityMessage(_message: string) {
     // Message handler - can be overridden by setting window.onUnityMessage

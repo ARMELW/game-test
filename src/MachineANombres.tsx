@@ -65,10 +65,6 @@ function MachineANombres() {
     lockUnitRoll,
   } = useUnity();
 
-  // Ref to track last addGoal validation time to prevent rapid successive calls
-  const lastAddGoalTimeRef = useRef<number>(0);
-  const addGoalDebounceMs = 150; // Debounce period for addGoal messages
-
   // Handle messages from Unity (button clicks)
   const handleUnityMessage = useCallback((message: string) => {
     const data = parse(message);
@@ -100,42 +96,49 @@ function MachineANombres() {
     } else if (parsedData.type === 'decreaseValue') {
       handleSubtract(columnIndex);
     } else if (parsedData.type === 'addGoal') {
-      // Anti-loop protection: Prevent addGoal from being processed too frequently
-      const now = Date.now();
-      if (now - lastAddGoalTimeRef.current < addGoalDebounceMs) {
-        console.warn('addGoal message ignored - debounce protection active');
-        return;
-      }
-      lastAddGoalTimeRef.current = now;
-
-      // Handle validation triggered by Unity's "add to goal list" message
-      // Trigger appropriate validation based on current phase
-      if (phase === 'challenge-ten-to-twenty') {
-        handleValidateTenToTwenty();
-      } else if (phase === 'challenge-unit-1' || phase === 'challenge-unit-2' || phase === 'challenge-unit-3') {
-        handleValidateLearning();
-      } else if (phase === 'challenge-tens-1' || phase === 'challenge-tens-2' || phase === 'challenge-tens-3') {
-        handleValidateTens();
-      } else if (phase === 'challenge-hundred-to-two-hundred') {
-        handleValidateHundredToTwoHundred();
-      } else if (phase === 'challenge-two-hundred-to-three-hundred') {
-        handleValidateTwoHundredToThreeHundred();
-      } else if (phase === 'challenge-hundreds-1' || phase === 'challenge-hundreds-2' || phase === 'challenge-hundreds-3') {
-        handleValidateHundreds();
-      } else if (phase === 'challenge-thousand-to-two-thousand') {
-        handleValidateThousandToTwoThousand();
-      } else if (phase === 'challenge-two-thousand-to-three-thousand') {
-        handleValidateTwoThousandToThreeThousand();
-      } else if (phase === 'challenge-thousands-simple-combination') {
-        handleValidateThousandsSimpleCombination();
-      } else if (phase === 'challenge-thousands-1' || phase === 'challenge-thousands-2' || phase === 'challenge-thousands-3') {
-        handleValidateThousands();
-      }
+      // Note: This message type is no longer used for automatic validation.
+      // Validation is now triggered manually by the user clicking the "Valider" button.
+      console.log('addGoal message received but ignored - manual validation required');
     }
   }, [handleAdd, handleSubtract, phase, handleValidateLearning, handleValidateTenToTwenty, handleValidateTens, 
       handleValidateHundredToTwoHundred, handleValidateTwoHundredToThreeHundred, handleValidateHundreds,
       handleValidateThousandToTwoThousand, handleValidateTwoThousandToThreeThousand, 
       handleValidateThousandsSimpleCombination, handleValidateThousands]);
+
+  // Handle manual validation button click
+  const handleManualValidation = useCallback(() => {
+    // Send message to Unity that validation button was clicked
+    if (window.unityInstance) {
+      window.unityInstance.SendMessage('WebBridge', 'ReceiveStringMessageFromJs', 'on valid button clicked');
+    }
+
+    // Trigger appropriate validation based on current phase
+    if (phase === 'challenge-ten-to-twenty') {
+      handleValidateTenToTwenty();
+    } else if (phase === 'challenge-unit-1' || phase === 'challenge-unit-2' || phase === 'challenge-unit-3') {
+      handleValidateLearning();
+    } else if (phase === 'challenge-tens-1' || phase === 'challenge-tens-2' || phase === 'challenge-tens-3') {
+      handleValidateTens();
+    } else if (phase === 'challenge-hundred-to-two-hundred') {
+      handleValidateHundredToTwoHundred();
+    } else if (phase === 'challenge-two-hundred-to-three-hundred') {
+      handleValidateTwoHundredToThreeHundred();
+    } else if (phase === 'challenge-hundreds-1' || phase === 'challenge-hundreds-2' || phase === 'challenge-hundreds-3') {
+      handleValidateHundreds();
+    } else if (phase === 'challenge-thousand-to-two-thousand') {
+      handleValidateThousandToTwoThousand();
+    } else if (phase === 'challenge-two-thousand-to-three-thousand') {
+      handleValidateTwoThousandToThreeThousand();
+    } else if (phase === 'challenge-thousands-simple-combination') {
+      handleValidateThousandsSimpleCombination();
+    } else if (phase === 'challenge-thousands-1' || phase === 'challenge-thousands-2' || phase === 'challenge-thousands-3') {
+      handleValidateThousands();
+    }
+  }, [phase, handleValidateLearning, handleValidateTenToTwenty, handleValidateTens,
+      handleValidateHundredToTwoHundred, handleValidateTwoHundredToThreeHundred, handleValidateHundreds,
+      handleValidateThousandToTwoThousand, handleValidateTwoThousandToThreeThousand,
+      handleValidateThousandsSimpleCombination, handleValidateThousands]);
+
 
   // Set up Unity message handler
   useEffect(() => {
@@ -771,6 +774,38 @@ function MachineANombres() {
             {totalNumber.toString().padStart(4, '0')}
           </div>
         </div>
+
+        {/* Manual Validation Button for Challenges */}
+        {(showValidateLearningButton || showValidateTensButton || showValidateHundredsButton || showValidateThousandsButton) && (
+          <div style={{ marginTop: 16, textAlign: 'center' }}>
+            <button
+              onClick={handleManualValidation}
+              style={{
+                fontSize: 18,
+                padding: '12px 32px',
+                background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
+                color: '#fff',
+                border: 'none',
+                borderRadius: 8,
+                cursor: 'pointer',
+                fontWeight: 'bold',
+                boxShadow: '0 4px 8px rgba(16, 185, 129, 0.3)',
+                transition: 'all 0.2s ease',
+                animation: 'pulse 2s ease-in-out infinite'
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.transform = 'translateY(-2px)';
+                e.currentTarget.style.boxShadow = '0 6px 12px rgba(16, 185, 129, 0.4)';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.transform = 'translateY(0)';
+                e.currentTarget.style.boxShadow = '0 4px 8px rgba(16, 185, 129, 0.3)';
+              }}
+            >
+              ✓ Valider ma réponse
+            </button>
+          </div>
+        )}
 
         {/* Attempt indicator for challenges */}
         {(showValidateLearningButton || showValidateTensButton || showValidateHundredsButton || showValidateThousandsButton) && attemptCount > 0 && (

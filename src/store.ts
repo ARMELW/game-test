@@ -27,7 +27,7 @@ import {
     getSolutionAnimationStep,
     getGuidedClickFeedback
 } from './feedbackSystem.ts';
-import { sendChallengeListToUnity, setValue } from './unityBridge.ts';
+import { sendChallengeListToUnity, setValue, sendCorrectValue, sendWrongValue, sendNextGoal } from './unityBridge.ts';
 
 export const initialColumns: Column[] = [
     { name: 'Unités', value: 0, unlocked: false, color: 'bg-green-500' },
@@ -2654,6 +2654,9 @@ export const useStore = create<MachineState>((set, get) => ({
 
         if (currentNumber === targetNumber) {
             // SUCCESS!
+            // Send correct value message to Unity
+            sendCorrectValue();
+            
             const successMsg = getSuccessMessage(attemptCount + 1, false);
             get().setFeedback(successMsg);
 
@@ -2681,6 +2684,9 @@ export const useStore = create<MachineState>((set, get) => ({
                     }, FEEDBACK_DELAY);
                 } else {
                     setTimeout(() => {
+                        // Send next goal message to Unity
+                        sendNextGoal();
+                        
                         // Keep units unlocked for challenges
                         const resetCols = initialColumns.map(col => ({ ...col }));
                         resetCols[0].unlocked = true;
@@ -2695,6 +2701,9 @@ export const useStore = create<MachineState>((set, get) => ({
                 }
             } else {
                 setTimeout(() => {
+                    // Send next goal message to Unity
+                    sendNextGoal();
+                    
                     // Keep units unlocked for challenges
                     const resetCols = initialColumns.map(col => ({ ...col }));
                     resetCols[0].unlocked = true;
@@ -2707,6 +2716,9 @@ export const useStore = create<MachineState>((set, get) => ({
             }
         } else {
             // FAILURE - Generate progressive feedback
+            // Send wrong value message to Unity
+            sendWrongValue();
+            
             const newAttemptCount = attemptCount + 1;
             setAttemptCount(newAttemptCount);
 
@@ -2754,6 +2766,9 @@ export const useStore = create<MachineState>((set, get) => ({
 
         if (totalNumber === targetNumber) {
             // SUCCESS!
+            // Send correct value message to Unity
+            sendCorrectValue();
+            
             const successMsg = getSuccessMessage(attemptCount + 1, false);
             get().setFeedback(successMsg);
 
@@ -2780,6 +2795,9 @@ export const useStore = create<MachineState>((set, get) => ({
                     sequenceFeedback("Maintenant, remplis la colonne des unités jusqu'à 9 !", "Clique sur △ pour ajouter des billes !");
                 }, FEEDBACK_DELAY * 2);
             } else {
+                // Send next goal message to Unity
+                sendNextGoal();
+                
                 const nextTarget = challenge.targets[tenToTwentyTargetIndex + 1];
                 const resetCols = initialColumns.map((col, i) => i === 1 ? { ...col, unlocked: true } : col);
                 set({ tenToTwentyTargetIndex: tenToTwentyTargetIndex + 1, columns: resetCols });
@@ -2787,6 +2805,9 @@ export const useStore = create<MachineState>((set, get) => ({
             }
         } else {
             // FAILURE - Generate progressive feedback
+            // Send wrong value message to Unity
+            sendWrongValue();
+            
             const newAttemptCount = attemptCount + 1;
             setAttemptCount(newAttemptCount);
 
@@ -2835,6 +2856,9 @@ export const useStore = create<MachineState>((set, get) => ({
 
         if (totalNumber === targetNumber) {
             // SUCCESS!
+            // Send correct value message to Unity
+            sendCorrectValue();
+            
             const successMsg = getSuccessMessage(attemptCount + 1, false);
             get().setFeedback(successMsg);
 
@@ -2870,6 +2894,9 @@ export const useStore = create<MachineState>((set, get) => ({
                 } else {
                     const nextChallenge = TENS_CHALLENGES[challengeIndex + 1];
                     setTimeout(() => {
+                        // Send next goal message to Unity
+                        sendNextGoal();
+                        
                         resetTensChallenge();
                         const resetCols = initialColumns.map((col, i) => i === 1 ? { ...col, unlocked: true } : col);
                         set({
@@ -2881,6 +2908,9 @@ export const useStore = create<MachineState>((set, get) => ({
                     }, FEEDBACK_DELAY * 2);
                 }
             } else {
+                // Send next goal message to Unity
+                sendNextGoal();
+                
                 const nextTarget = challenge.targets[tensTargetIndex + 1];
                 const resetCols = initialColumns.map((col, i) => i === 1 ? { ...col, unlocked: true } : col);
                 set({ tensTargetIndex: tensTargetIndex + 1, columns: resetCols });
@@ -2888,6 +2918,9 @@ export const useStore = create<MachineState>((set, get) => ({
             }
         } else {
             // FAILURE - Generate progressive feedback
+            // Send wrong value message to Unity
+            sendWrongValue();
+            
             const newAttemptCount = attemptCount + 1;
             setAttemptCount(newAttemptCount);
 
