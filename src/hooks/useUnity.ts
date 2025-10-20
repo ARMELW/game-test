@@ -1,5 +1,5 @@
 import { useUnityContext } from 'react-unity-webgl';
-import { useEffect, useCallback } from 'react';
+import { useEffect, useCallback, useRef } from 'react';
 
 /**
  * Génère un parseur de message générique pour un jeu Unity.
@@ -100,6 +100,37 @@ export function useUnity() {
 
   const { unityProvider, sendMessage, addEventListener, removeEventListener, isLoaded, loadingProgression } = unityContext;
 
+  // Anti-loop protection refs
+  const sendingMessageRef = useRef(false);
+  const lastMessageRef = useRef<string>('');
+  const messageTimestampRef = useRef<number>(0);
+
+  // Protected send function with anti-loop guards
+  const protectedSend = useCallback((message: string) => {
+    if (!isLoaded) return;
+    
+    // Block duplicate messages (< 100ms)
+    const now = Date.now();
+    if (message === lastMessageRef.current && 
+        (now - messageTimestampRef.current) < 100) {
+      return;
+    }
+    
+    // Block recursive sending
+    if (sendingMessageRef.current) return;
+    
+    try {
+      sendingMessageRef.current = true;
+      lastMessageRef.current = message;
+      messageTimestampRef.current = now;
+      sendMessage('WebBridge', 'ReceiveStringMessageFromJs', message);
+    } finally {
+      setTimeout(() => {
+        sendingMessageRef.current = false;
+      }, 50);
+    }
+  }, [isLoaded, sendMessage]);
+
   // Expose Unity instance globally when loaded
   useEffect(() => {
     if (isLoaded) {
@@ -115,52 +146,34 @@ export function useUnity() {
   // Function to change the current value displayed on the machine
   // SetValue322 -> the machine will display 0322
   const changeCurrentValue = useCallback((value: string | number) => {
-    if (isLoaded) {
-      sendMessage('WebBridge', 'ReceiveStringMessageFromJs', `SetValue${value}`);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isLoaded]);
+    protectedSend(`SetValue${value}`);
+  }, [protectedSend]);
 
   // Function to send the list of goals to Unity
   // ChangeList544/1352/9871 -> goals will be 544 then 1352 then 9871
   const changeCurrentGoalList = useCallback((value: string) => {
-    if (isLoaded) {
-      sendMessage('WebBridge', 'ReceiveStringMessageFromJs', `ChangeList${value}`);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isLoaded]);
+    protectedSend(`ChangeList${value}`);
+  }, [protectedSend]);
 
   // Function to lock/unlock the thousands roll
   const lockThousandRoll = useCallback((locked: boolean) => {
-    if (isLoaded) {
-      sendMessage('WebBridge', 'ReceiveStringMessageFromJs', `LockThousand:${locked ? 1 : 0}`);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isLoaded]);
+    protectedSend(`LockThousand:${locked ? 1 : 0}`);
+  }, [protectedSend]);
 
   // Function to lock/unlock the hundreds roll
   const lockHundredRoll = useCallback((locked: boolean) => {
-    if (isLoaded) {
-      sendMessage('WebBridge', 'ReceiveStringMessageFromJs', `LockHundred:${locked ? 1 : 0}`);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isLoaded]);
+    protectedSend(`LockHundred:${locked ? 1 : 0}`);
+  }, [protectedSend]);
 
   // Function to lock/unlock the tens roll
   const lockTenRoll = useCallback((locked: boolean) => {
-    if (isLoaded) {
-      sendMessage('WebBridge', 'ReceiveStringMessageFromJs', `LockTen:${locked ? 1 : 0}`);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isLoaded]);
+    protectedSend(`LockTen:${locked ? 1 : 0}`);
+  }, [protectedSend]);
 
   // Function to lock/unlock the units roll
   const lockUnitRoll = useCallback((locked: boolean) => {
-    if (isLoaded) {
-      sendMessage('WebBridge', 'ReceiveStringMessageFromJs', `LockUnit:${locked ? 1 : 0}`);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isLoaded]);
+    protectedSend(`LockUnit:${locked ? 1 : 0}`);
+  }, [protectedSend]);
 
   return {
     unityProvider,
