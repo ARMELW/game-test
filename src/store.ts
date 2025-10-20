@@ -165,7 +165,7 @@ export const useStore = create<MachineState>((set, get) => ({
     thousandsSimpleCombinationTargetIndex: 0,
     thousandsSimpleCombinationSuccessCount: 0,
     userInput: "",
-    showInputField: false,
+    showInputField: true, // Set to true since initial phase is intro-welcome-personalized
 
     // Error management and feedback system
     attemptCount: 0,
