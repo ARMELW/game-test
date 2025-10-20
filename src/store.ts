@@ -2798,6 +2798,9 @@ export const useStore = create<MachineState>((set, get) => ({
                 // Send next goal message to Unity
                 sendNextGoal();
                 
+                // Send next goal message to Unity
+                sendNextGoal();
+                
                 const nextTarget = challenge.targets[tenToTwentyTargetIndex + 1];
                 const resetCols = initialColumns.map((col, i) => i === 1 ? { ...col, unlocked: true } : col);
                 set({ tenToTwentyTargetIndex: tenToTwentyTargetIndex + 1, columns: resetCols });
@@ -2911,6 +2914,9 @@ export const useStore = create<MachineState>((set, get) => ({
                 // Send next goal message to Unity
                 sendNextGoal();
                 
+                // Send next goal message to Unity
+                sendNextGoal();
+                
                 const nextTarget = challenge.targets[tensTargetIndex + 1];
                 const resetCols = initialColumns.map((col, i) => i === 1 ? { ...col, unlocked: true } : col);
                 set({ tensTargetIndex: tensTargetIndex + 1, columns: resetCols });
@@ -2968,6 +2974,9 @@ export const useStore = create<MachineState>((set, get) => ({
 
         if (totalNumber === targetNumber) {
             // SUCCESS!
+            // Send correct value message to Unity
+            sendCorrectValue();
+            
             const successMsg = getSuccessMessage(attemptCount + 1, false);
             get().setFeedback(successMsg);
 
@@ -2995,6 +3004,9 @@ export const useStore = create<MachineState>((set, get) => ({
                     sequenceFeedback("Maintenant, remplis tout jusqu'à 299 !", "Clique sur △ pour ajouter des billes !");
                 }, FEEDBACK_DELAY * 2);
             } else {
+                // Send next goal message to Unity
+                sendNextGoal();
+                
                 const nextTarget = challenge.targets[hundredToTwoHundredTargetIndex + 1];
                 const resetCols = initialColumns.map((col, i) => ({ ...col, unlocked: i <= 2 }));
                 set({ hundredToTwoHundredTargetIndex: hundredToTwoHundredTargetIndex + 1, columns: resetCols });
@@ -3002,6 +3014,9 @@ export const useStore = create<MachineState>((set, get) => ({
             }
         } else {
             // FAILURE - Generate progressive feedback
+            // Send wrong value message to Unity
+            sendWrongValue();
+            
             const newAttemptCount = attemptCount + 1;
             setAttemptCount(newAttemptCount);
 
@@ -3049,6 +3064,9 @@ export const useStore = create<MachineState>((set, get) => ({
 
         if (totalNumber === targetNumber) {
             // SUCCESS!
+            // Send correct value message to Unity
+            sendCorrectValue();
+            
             const successMsg = getSuccessMessage(attemptCount + 1, false);
             get().setFeedback(successMsg);
 
@@ -3074,6 +3092,9 @@ export const useStore = create<MachineState>((set, get) => ({
                     sequenceFeedback("Bravo ! Maintenant regarde la machine compter les centaines rondes !", "300, 400, 500... Observe bien !");
                 }, FEEDBACK_DELAY * 2);
             } else {
+                // Send next goal message to Unity
+                sendNextGoal();
+                
                 const nextTarget = challenge.targets[twoHundredToThreeHundredTargetIndex + 1];
                 const resetCols = initialColumns.map((col, i) => ({ ...col, unlocked: i <= 2 }));
                 set({ twoHundredToThreeHundredTargetIndex: twoHundredToThreeHundredTargetIndex + 1, columns: resetCols });
@@ -3081,6 +3102,9 @@ export const useStore = create<MachineState>((set, get) => ({
             }
         } else {
             // FAILURE - Generate progressive feedback
+            // Send wrong value message to Unity
+            sendWrongValue();
+            
             const newAttemptCount = attemptCount + 1;
             setAttemptCount(newAttemptCount);
 
@@ -3129,6 +3153,9 @@ export const useStore = create<MachineState>((set, get) => ({
 
         if (totalNumber === targetNumber) {
             // SUCCESS!
+            // Send correct value message to Unity
+            sendCorrectValue();
+            
             const successMsg = getSuccessMessage(attemptCount + 1, false);
             get().setFeedback(successMsg);
 
@@ -3173,6 +3200,9 @@ export const useStore = create<MachineState>((set, get) => ({
                     }, FEEDBACK_DELAY * 2);
                 }
             } else {
+                // Send next goal message to Unity
+                sendNextGoal();
+                
                 const nextTarget = challenge.targets[hundredsTargetIndex + 1];
                 const resetCols = initialColumns.map((col, i) => (i === 1 || i === 2) ? { ...col, unlocked: true } : col);
                 set({ hundredsTargetIndex: hundredsTargetIndex + 1, columns: resetCols });
@@ -3180,6 +3210,9 @@ export const useStore = create<MachineState>((set, get) => ({
             }
         } else {
             // FAILURE - Generate progressive feedback
+            // Send wrong value message to Unity
+            sendWrongValue();
+            
             const newAttemptCount = attemptCount + 1;
             setAttemptCount(newAttemptCount);
 
@@ -3227,6 +3260,9 @@ export const useStore = create<MachineState>((set, get) => ({
 
         if (totalNumber === targetNumber) {
             // SUCCESS!
+            // Send correct value message to Unity
+            sendCorrectValue();
+            
             const successMsg = getSuccessMessage(attemptCount + 1, false);
             get().setFeedback(successMsg);
 
@@ -3257,6 +3293,9 @@ export const useStore = create<MachineState>((set, get) => ({
                     sequenceFeedback("Bravo ! Maintenant on va découvrir 2000-3000 !", "DEUX-MILLE ! Monte directement à 2500 ! △");
                 }, FEEDBACK_DELAY * 2);
             } else {
+                // Send next goal message to Unity
+                sendNextGoal();
+                
                 const nextTarget = challenge.targets[thousandToTwoThousandTargetIndex + 1];
                 const resetCols = initialColumns.map((col) => ({ ...col, unlocked: true }));
                 set({ thousandToTwoThousandTargetIndex: thousandToTwoThousandTargetIndex + 1, columns: resetCols });
@@ -3264,6 +3303,9 @@ export const useStore = create<MachineState>((set, get) => ({
             }
         } else {
             // FAILURE - Generate progressive feedback
+            // Send wrong value message to Unity
+            sendWrongValue();
+            
             const newAttemptCount = attemptCount + 1;
             setAttemptCount(newAttemptCount);
 
@@ -3311,6 +3353,9 @@ export const useStore = create<MachineState>((set, get) => ({
 
         if (totalNumber === targetNumber) {
             // SUCCESS!
+            // Send correct value message to Unity
+            sendCorrectValue();
+            
             const successMsg = getSuccessMessage(attemptCount + 1, false);
             get().setFeedback(successMsg);
 
@@ -3337,6 +3382,9 @@ export const useStore = create<MachineState>((set, get) => ({
                     sequenceFeedback("Bravo ! Maintenant regarde la machine compter les milliers RONDS !", "3000, 4000, 5000... Observe bien !");
                 }, FEEDBACK_DELAY * 2);
             } else {
+                // Send next goal message to Unity
+                sendNextGoal();
+                
                 const nextTarget = challenge.targets[twoThousandToThreeThousandTargetIndex + 1];
                 const resetCols = initialColumns.map((col) => ({ ...col, unlocked: true }));
                 set({ twoThousandToThreeThousandTargetIndex: twoThousandToThreeThousandTargetIndex + 1, columns: resetCols });
@@ -3344,6 +3392,9 @@ export const useStore = create<MachineState>((set, get) => ({
             }
         } else {
             // FAILURE - Generate progressive feedback
+            // Send wrong value message to Unity
+            sendWrongValue();
+            
             const newAttemptCount = attemptCount + 1;
             setAttemptCount(newAttemptCount);
 
@@ -3391,6 +3442,9 @@ export const useStore = create<MachineState>((set, get) => ({
 
         if (totalNumber === targetNumber) {
             // SUCCESS!
+            // Send correct value message to Unity
+            sendCorrectValue();
+            
             const successMsg = getSuccessMessage(attemptCount + 1, false);
             get().setFeedback(successMsg);
 
@@ -3417,6 +3471,9 @@ export const useStore = create<MachineState>((set, get) => ({
                     sequenceFeedback("Bravo ! Maintenant regardons les nombres COMPLETS !", "1234, 2345... C'est long à dire mais tu vas voir la logique !");
                 }, FEEDBACK_DELAY * 2);
             } else {
+                // Send next goal message to Unity
+                sendNextGoal();
+                
                 const nextTarget = challenge.targets[thousandsSimpleCombinationTargetIndex + 1];
                 const resetCols = initialColumns.map((col) => ({ ...col, unlocked: true }));
                 set({ thousandsSimpleCombinationTargetIndex: thousandsSimpleCombinationTargetIndex + 1, columns: resetCols });
@@ -3424,6 +3481,9 @@ export const useStore = create<MachineState>((set, get) => ({
             }
         } else {
             // FAILURE - Generate progressive feedback
+            // Send wrong value message to Unity
+            sendWrongValue();
+            
             const newAttemptCount = attemptCount + 1;
             setAttemptCount(newAttemptCount);
 
@@ -3472,6 +3532,9 @@ export const useStore = create<MachineState>((set, get) => ({
 
         if (totalNumber === targetNumber) {
             // SUCCESS!
+            // Send correct value message to Unity
+            sendCorrectValue();
+            
             const successMsg = getSuccessMessage(attemptCount + 1, false);
             get().setFeedback(successMsg);
 
@@ -3505,6 +3568,9 @@ export const useStore = create<MachineState>((set, get) => ({
                     }, FEEDBACK_DELAY * 2);
                 }
             } else {
+                // Send next goal message to Unity
+                sendNextGoal();
+                
                 const nextTarget = challenge.targets[thousandsTargetIndex + 1];
                 const resetCols = get().columns.map((col: Column) => ({ ...col, unlocked: true }));
                 set({ thousandsTargetIndex: thousandsTargetIndex + 1, columns: resetCols });
@@ -3512,6 +3578,9 @@ export const useStore = create<MachineState>((set, get) => ({
             }
         } else {
             // FAILURE - Generate progressive feedback
+            // Send wrong value message to Unity
+            sendWrongValue();
+            
             const newAttemptCount = attemptCount + 1;
             setAttemptCount(newAttemptCount);
 

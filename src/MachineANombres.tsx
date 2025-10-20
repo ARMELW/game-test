@@ -100,10 +100,7 @@ function MachineANombres() {
       // Validation is now triggered manually by the user clicking the "Valider" button.
       console.log('addGoal message received but ignored - manual validation required');
     }
-  }, [handleAdd, handleSubtract, phase, handleValidateLearning, handleValidateTenToTwenty, handleValidateTens, 
-      handleValidateHundredToTwoHundred, handleValidateTwoHundredToThreeHundred, handleValidateHundreds,
-      handleValidateThousandToTwoThousand, handleValidateTwoThousandToThreeThousand, 
-      handleValidateThousandsSimpleCombination, handleValidateThousands]);
+  }, [handleAdd, handleSubtract, phase]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Handle manual validation button click
   const handleManualValidation = useCallback(() => {
@@ -134,10 +131,7 @@ function MachineANombres() {
     } else if (phase === 'challenge-thousands-1' || phase === 'challenge-thousands-2' || phase === 'challenge-thousands-3') {
       handleValidateThousands();
     }
-  }, [phase, handleValidateLearning, handleValidateTenToTwenty, handleValidateTens,
-      handleValidateHundredToTwoHundred, handleValidateTwoHundredToThreeHundred, handleValidateHundreds,
-      handleValidateThousandToTwoThousand, handleValidateTwoThousandToThreeThousand,
-      handleValidateThousandsSimpleCombination, handleValidateThousands]);
+  }, [phase]); // eslint-disable-line react-hooks/exhaustive-deps
 
 
   // Set up Unity message handler
