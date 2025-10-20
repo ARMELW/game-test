@@ -18,6 +18,13 @@ export function UnityGame({ onUnityMessage }: UnityGameProps) {
   // Handle messages from Unity
   const handleUnityMessage = useCallback((message: string) => {
     console.log('[UnityBridge] Message from Unity:', message);
+    
+    // Call global handler if it exists
+    if (window.onUnityMessage) {
+      window.onUnityMessage(message);
+    }
+    
+    // Call component-specific handler if provided
     if (onUnityMessage) {
       onUnityMessage(message);
     }
