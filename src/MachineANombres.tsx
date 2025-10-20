@@ -184,13 +184,17 @@ function MachineANombres() {
 
   // Sync Unity roll locks based on phase and unlocked columns
   useEffect(() => {
-    if (!unityLoaded) return;
+    // Check if Unity instance is available instead of relying on isLoaded flag
+    if (!window.unityInstance && !unityLoaded) return;
 
-    // Lock all rolls initially
-    let lockUnits = true;
-    let lockTens = true;
-    let lockHundreds = true;
-    let lockThousands = true;
+    // Add a delay to ensure Unity is ready to process lock commands
+    // Unity needs time after loading to fully initialize its message handling
+    const timeoutId = setTimeout(() => {
+      // Lock all rolls initially
+      let lockUnits = true;
+      let lockTens = true;
+      let lockHundreds = true;
+      let lockThousands = true;
 
     // Unlock based on unlocked columns and phase
     const isUnit = columns[0]?.unlocked || false;
@@ -282,11 +286,14 @@ function MachineANombres() {
       lockThousands = true;
     }
 
-    // Apply locks to Unity
-    lockUnitRoll(lockUnits);
-    lockTenRoll(lockTens);
-    lockHundredRoll(lockHundreds);
-    lockThousandRoll(lockThousands);
+      // Apply locks to Unity
+      lockUnitRoll(lockUnits);
+      lockTenRoll(lockTens);
+      lockHundredRoll(lockHundreds);
+      lockThousandRoll(lockThousands);
+    }, 500); // 500ms delay to ensure Unity is fully ready to process messages
+
+    return () => clearTimeout(timeoutId);
   }, [phase, columns, isCountingAutomatically, unityLoaded, lockUnitRoll, lockTenRoll, lockHundredRoll, lockThousandRoll, introMaxAttempt]);
 
   return (
