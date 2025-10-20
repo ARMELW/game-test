@@ -129,22 +129,24 @@ export function getErrorTypeHint(errorType: ErrorType, userAnswer: number, targe
     case 'magnitude':
       return "Attention à l'ordre de grandeur ! 🔍\nRegarde combien de colonnes tu dois utiliser ! 📏";
     
-    case 'direction':
+    case 'direction': {
       const diff = target - userAnswer;
       if (diff > 0) {
         return "C'est trop petit ! 📈\nLe nombre est PLUS GRAND que ça !\nMonte ! Utilise △ !";
       } else {
         return "C'est un peu trop grand ! 📉\nLe nombre est PLUS PETIT que ça !\nDescends ! Utilise ∇ !";
       }
+    }
     
     case 'random':
-    default:
+    default: {
       const difference = target - userAnswer;
       if (difference > 0) {
         return "Le nombre est beaucoup PLUS GRAND ! 📈\nRecommence tranquillement ! 😊";
       } else {
         return "Le nombre est beaucoup PLUS PETIT ! 📉\nRecommence tranquillement ! 😊";
       }
+    }
   }
 }
 
@@ -221,41 +223,52 @@ Regarde : ${units} petite${units > 1 ? 's' : ''} lumière${units > 1 ? 's' : ''}
   
   // For tens (10-99)
   if (target < 100) {
-    return `Il faut :
+    return `C'est une COMBINAISON ! 🧩
+    
+On assemble des paquets comme des LEGO ! 🧱
+
+Il faut :
 - ${tens} paquet${tens > 1 ? 's' : ''} de 10 dans les DIZAINES = ${tens * 10}
 - ${units} bille${units > 1 ? 's' : ''} dans les UNITÉS = ${units}
 
-Calcul : ${tens} paquet${tens > 1 ? 's' : ''} (${tens * 10}) + ${units} bille${units > 1 ? 's' : ''} (${units}) = ${target} ! 🎯
+COMBINAISON : ${tens * 10} + ${units} = ${target} ! 🎯
 
-Maintenant tu as toutes les informations ! 💡
-Lis bien la décomposition et construis le nombre ! 🔨`;
+C'est comme dire : ${tens} paquet${tens > 1 ? 's' : ''} ET ${units} bille${units > 1 ? 's' : ''} !
+Maintenant construis ce nombre ! 🔨`;
   }
   
   // For hundreds (100-999)
   if (target < 1000) {
-    return `Il faut :
-- ${hundreds} grand${hundreds > 1 ? 's' : ''} paquet${hundreds > 1 ? 's' : ''} de 100 dans les CENTAINES = ${hundreds * 100}
-- ${tens} paquet${tens > 1 ? 's' : ''} de 10 dans les DIZAINES = ${tens * 10}
-- ${units} bille${units > 1 ? 's' : ''} dans les UNITÉS = ${units}
+    return `C'est une COMBINAISON ! 🧩
+    
+On assemble 3 types de paquets ! 📦📦📦
 
-Calcul : ${hundreds * 100} + ${tens * 10} + ${units} = ${target} ! 🎯
+Il faut :
+- ${hundreds} GRAND${hundreds > 1 ? 'S' : ''} paquet${hundreds > 1 ? 's' : ''} de 100 = ${hundreds * 100}
+- ${tens} paquet${tens > 1 ? 's' : ''} de 10 = ${tens * 10}
+- ${units} bille${units > 1 ? 's' : ''} = ${units}
 
-Tu as toutes les infos ! Tu peux le faire avec ces indices ! 💪
-Essaie avec ces explications ! 🌟`;
+COMBINAISON : ${hundreds * 100} + ${tens * 10} + ${units} = ${target} ! 🎯
+
+C'est comme dire : ${hundreds} grand${hundreds > 1 ? 's' : ''} paquet${hundreds > 1 ? 's' : ''} ET ${tens} paquet${tens > 1 ? 's' : ''} ET ${units} bille${units > 1 ? 's' : ''} !
+Assemble ces paquets ensemble ! 🔨`;
   }
   
   // For thousands (1000-9999)
-  return `Il faut :
-- ${thousands} paquet${thousands > 1 ? 's' : ''} GÉANT${thousands > 1 ? 'S' : ''} de 1000 dans les MILLIERS = ${thousands * 1000}
-- ${hundreds} grand${hundreds > 1 ? 's' : ''} paquet${hundreds > 1 ? 's' : ''} de 100 dans les CENTAINES = ${hundreds * 100}
-- ${tens} paquet${tens > 1 ? 's' : ''} de 10 dans les DIZAINES = ${tens * 10}
-- ${units} bille${units > 1 ? 's' : ''} dans les UNITÉS = ${units}
+  return `C'est une GRANDE COMBINAISON ! 🧩
+  
+On assemble 4 types de paquets ! 📦📦📦📦
 
-Calcul : ${thousands * 1000} + ${hundreds * 100} + ${tens * 10} + ${units} = ${target} ! 🎯
+Il faut :
+- ${thousands} paquet${thousands > 1 ? 's' : ''} GÉANT${thousands > 1 ? 'S' : ''} de 1000 = ${thousands * 1000}
+- ${hundreds} GRAND${hundreds > 1 ? 'S' : ''} paquet${hundreds > 1 ? 's' : ''} de 100 = ${hundreds * 100}
+- ${tens} paquet${tens > 1 ? 's' : ''} de 10 = ${tens * 10}
+- ${units} bille${units > 1 ? 's' : ''} = ${units}
 
-Maintenant tu as toutes les informations ! 💡
-Lis bien la décomposition et construis le nombre ! 🔨
-Tu peux le faire avec ces indices ! 💪`;
+COMBINAISON : ${thousands * 1000} + ${hundreds * 100} + ${tens * 10} + ${units} = ${target} ! 🎯
+
+C'est comme assembler des paquets de différentes tailles ! 📦
+Prends ton temps et construis ce nombre ! 🔨`;
 }
 
 /**

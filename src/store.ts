@@ -1809,7 +1809,7 @@ export const useStore = create<MachineState>((set, get) => ({
             
             if (unitsValue === 0 && tensValue === 2) {
                 // Reached 20!
-                sequenceFeedback("💥 VINGT ! 2 paquets de 10 !", "Bravo ! 🎉 Tu as compté de 10 à 20 tout seul !");
+                sequenceFeedback("💥 VINGT ! 2 paquets de 10 !", "🎉 BRAVO ! Tu as compris la COMBINAISON ! 10 + 1 = 11, 10 + 2 = 12... jusqu'à 10 + 10 = 20 ! C'est comme assembler des LEGO ! 🧱");
                 setTimeout(() => {
                     const resetCols = initialColumns.map((col, i) => i === 1 ? { ...col, unlocked: true } : col);
                     set({
@@ -1821,23 +1821,23 @@ export const useStore = create<MachineState>((set, get) => ({
                     get().setFeedback(`🎯 Mini-défi ! Montre-moi **DOUZE** (12) avec les boutons !`);
                 }, FEEDBACK_DELAY * 2);
             } else if (unitsValue === 1 && tensValue === 1) {
-                get().setFeedback("ONZE ! 1 paquet + 1 bille. Continue ! △");
+                get().setFeedback("ONZE ! C'est 10 + 1. Tu vois la COMBINAISON ? Continue ! △");
             } else if (unitsValue === 2 && tensValue === 1) {
-                get().setFeedback("DOUZE ! 1 paquet + 2 billes. Encore ! △");
+                get().setFeedback("DOUZE ! 10 + 2. Tu assembles les paquets ! Encore ! △");
             } else if (unitsValue === 3 && tensValue === 1) {
-                get().setFeedback("TREIZE ! Continue ! △");
+                get().setFeedback("TREIZE ! 10 + 3. Continue ! △");
             } else if (unitsValue === 4 && tensValue === 1) {
-                get().setFeedback("QUATORZE ! Encore ! △");
+                get().setFeedback("QUATORZE ! 10 + 4. Encore ! △");
             } else if (unitsValue === 5 && tensValue === 1) {
-                get().setFeedback("QUINZE ! Continue ! △");
+                get().setFeedback("QUINZE ! 10 + 5. Continue ! △");
             } else if (unitsValue === 6 && tensValue === 1) {
-                get().setFeedback("SEIZE ! Encore ! △");
+                get().setFeedback("SEIZE ! 10 + 6. Encore ! △");
             } else if (unitsValue === 7 && tensValue === 1) {
-                get().setFeedback("DIX-SEPT ! Tu entends ? DIX-SEPT ! △");
+                get().setFeedback("DIX-SEPT ! 10 + 7. Tu entends le DIX dans le nom ? △");
             } else if (unitsValue === 8 && tensValue === 1) {
-                get().setFeedback("DIX-HUIT ! Continue ! △");
+                get().setFeedback("DIX-HUIT ! 10 + 8. Continue ! △");
             } else if (unitsValue === 9 && tensValue === 1) {
-                sequenceFeedback("DIX-NEUF ! STOP ✋ Tout est presque plein !", "Que va-t-il se passer ? Clique sur △ !");
+                sequenceFeedback("DIX-NEUF ! 10 + 9 ! STOP ✋ Tout est presque plein !", "Que va-t-il se passer ? Clique sur △ !");
             }
         } else if (phase.startsWith('challenge-ten-to-twenty')) {
             const challenge = TEN_TO_TWENTY_CHALLENGES[0];
@@ -1910,6 +1910,7 @@ export const useStore = create<MachineState>((set, get) => ({
             const unitsValue = newCols[0].value;
             const tensValue = newCols[1].value;
             const hundredsValue = newCols[2].value;
+            const number = hundredsValue * 100 + tensValue * 10 + unitsValue;
             
             if (!isUnitsColumn(idx)) {
                 get().setFeedback("Non ! Clique sur les UNITÉS (△ sur la colonne de droite) !");
@@ -1918,32 +1919,33 @@ export const useStore = create<MachineState>((set, get) => ({
                 return;
             }
             
-            if (unitsValue === 0 && tensValue === 1 && hundredsValue === 1) {
-                // Reached 110!
-                sequenceFeedback("💥 CENT-DIX ! Les billes deviennent 1 paquet de 10 !", "Bravo ! 🎉 Tu vois, ça marche pareil qu'avant, mais avec un grand paquet de base !");
+            // Now we go up to 120 instead of just 110
+            if (unitsValue === 0 && tensValue === 2 && hundredsValue === 1) {
+                // Reached 120!
+                sequenceFeedback("💥 CENT-VINGT ! 1 GRAND paquet + 2 paquets de 10 !", "🎉 BRAVO ! Tu comprends maintenant la COMBINAISON : 100 + 10 + 10 = 120 ! C'est comme assembler des paquets ! 📦📦");
                 setTimeout(() => {
-                    const startCols = initialColumns.map((col, i) => ({ ...col, unlocked: i <= 2 }));
-                    startCols[2].value = 1;
-                    startCols[1].value = 1;
-                    startCols[0].value = 0;
+                    const resetCols = initialColumns.map((col, i) => ({ ...col, unlocked: i <= 2 }));
                     set({
-                        columns: startCols,
+                        columns: resetCols,
                         phase: 'learn-hundred-ten-to-two-hundred'
                     });
                     get().updateButtonVisibility();
-                    get().setFeedback("CENT-DIX ! Maintenant monte à 120 ! △ sur DIZAINES ou UNITÉS");
+                    get().setFeedback("Maintenant tu peux pratiquer un peu si tu veux, monte vers 200 ! △");
                 }, FEEDBACK_DELAY * 2);
             } else if (unitsValue === 1 && tensValue === 0 && hundredsValue === 1) {
-                get().setFeedback("CENT-UN ! 1 grand paquet + 1 bille. Continue ! △");
+                get().setFeedback("CENT-UN ! 100 + 1. C'est la COMBINAISON ! Continue ! △");
             } else if (unitsValue === 2 && tensValue === 0 && hundredsValue === 1) {
-                get().setFeedback("CENT-DEUX ! Continue ! △");
-            } else if (unitsValue === 3 && tensValue === 0 && hundredsValue === 1) {
-                get().setFeedback("CENT-TROIS ! △");
-            } else if (unitsValue >= 4 && unitsValue <= 8 && tensValue === 0 && hundredsValue === 1) {
-                const number = hundredsValue * 100 + tensValue * 10 + unitsValue;
-                get().setFeedback(`${number} ! Continue ! △`);
+                get().setFeedback("CENT-DEUX ! 100 + 2. Continue ! △");
+            } else if (unitsValue >= 3 && unitsValue <= 8 && tensValue === 0 && hundredsValue === 1) {
+                get().setFeedback(`${number} ! C'est 100 + ${unitsValue}. Continue ! △`);
             } else if (unitsValue === 9 && tensValue === 0 && hundredsValue === 1) {
-                sequenceFeedback("CENT-NEUF ! Presque 10 billes !", "Clique sur △ pour voir la transformation !");
+                sequenceFeedback("CENT-NEUF ! 100 + 9. Presque 10 billes !", "Clique sur △ pour voir la transformation magique !");
+            } else if (unitsValue === 0 && tensValue === 1 && hundredsValue === 1) {
+                get().setFeedback("CENT-DIX ! 100 + 10. Les 10 billes sont devenues 1 paquet ! Continue ! △");
+            } else if (tensValue === 1 && hundredsValue === 1 && unitsValue > 0) {
+                get().setFeedback(`${number} ! C'est 100 + 10 + ${unitsValue}. Continue vers 120 ! △`);
+            } else if (tensValue === 1 && hundredsValue === 1 && unitsValue === 9) {
+                sequenceFeedback("CENT-DIX-NEUF ! 100 + 10 + 9 !", "Encore 1 clic et tu auras compris la combinaison ! △");
             }
         } else if (phase === 'learn-hundred-ten-to-two-hundred') {
             const unitsValue = newCols[0].value;
@@ -2085,30 +2087,37 @@ export const useStore = create<MachineState>((set, get) => ({
                 return;
             }
             
-            if (number === 1010) {
-                sequenceFeedback("💥 MILLE-DIX ! Les billes deviennent 1 paquet de 10 !", "Bravo ! 🎉 Tu vois, ça marche pareil qu'avant !");
+            // Now we go up to 1020 instead of just 1010
+            if (number === 1020) {
+                sequenceFeedback("💥 MILLE-VINGT ! 1 ÉNORME paquet + 2 paquets de 10 !", "🎉 BRAVO ! Tu comprends la COMBINAISON avec les milliers ! 1000 + 10 + 10 = 1020 ! C'est comme les centaines, mais ENCORE plus grand ! 🏔️");
                 setTimeout(() => {
                     const startCols = initialColumns.map((col) => ({ ...col, unlocked: true }));
                     startCols[3].value = 1;
-                    startCols[1].value = 1;
+                    startCols[1].value = 2;
                     startCols[0].value = 0;
                     set({
                         columns: startCols,
                         phase: 'learn-thousand-to-thousand-hundred'
                     });
                     get().updateButtonVisibility();
-                    get().setFeedback("MILLE-DIX ! Maintenant monte à 1100 ! △ sur UNITÉS");
+                    get().setFeedback("MILLE-VINGT ! Maintenant tu peux pratiquer si tu veux, monte à 1100 ! △");
                 }, FEEDBACK_DELAY * 2);
             } else if (number === 1001) {
-                get().setFeedback("MILLE-UN ! 1 énorme paquet + 1 bille. C'est facile ! △");
+                get().setFeedback("MILLE-UN ! C'est 1000 + 1. Tu vois la COMBINAISON ? Continue ! △");
             } else if (number === 1002) {
-                get().setFeedback("MILLE-DEUX ! Tu vois, c'est comme avant ! △");
-            } else if (number === 1003) {
-                get().setFeedback("MILLE-TROIS ! Continue ! △");
-            } else if (number >= 1004 && number <= 1008) {
-                get().setFeedback(`${number} ! Continue ! △`);
+                get().setFeedback("MILLE-DEUX ! 1000 + 2. Continue ! △");
+            } else if (number >= 1003 && number <= 1008) {
+                const units = number - 1000;
+                get().setFeedback(`${number} ! C'est 1000 + ${units}. Continue ! △`);
             } else if (number === 1009) {
-                sequenceFeedback("MILLE-NEUF ! Presque 10 billes !", "Clique sur △ pour voir la transformation !");
+                sequenceFeedback("MILLE-NEUF ! 1000 + 9. Presque 10 billes !", "Clique sur △ pour voir la transformation !");
+            } else if (number === 1010) {
+                get().setFeedback("MILLE-DIX ! 1000 + 10. Les 10 billes sont devenues 1 paquet ! Continue ! △");
+            } else if (number > 1010 && number < 1020) {
+                const afterThousandAndTen = number - 1010;
+                get().setFeedback(`${number} ! C'est 1000 + 10 + ${afterThousandAndTen}. Continue vers 1020 ! △`);
+            } else if (number === 1019) {
+                sequenceFeedback("MILLE-DIX-NEUF ! 1000 + 10 + 9 !", "Encore 1 clic et tu auras compris la combinaison ! △");
             }
         } else if (phase === 'learn-thousand-to-thousand-hundred') {
             const unitsValue = newCols[0].value;
@@ -3434,7 +3443,7 @@ export const useStore = create<MachineState>((set, get) => ({
                 newInstruction = "Pratique le concept de paquet ! Clique sur ∇ pour revenir à 9, puis △ pour refaire l'échange magique !";
                 break;
             case 'learn-ten-to-twenty':
-                newInstruction = "Compte de 10 à 20 ! Clique sur △ pour ajouter des billes dans les UNITÉS !";
+                newInstruction = "Tu as 1 paquet de 10 ! Maintenant ajoute des billes pour comprendre la COMBINAISON : 10 + 1 = 11, 10 + 2 = 12... Clique sur △ jusqu'à 20 !";
                 break;
             case 'challenge-ten-to-twenty': {
                 const challenge = TEN_TO_TWENTY_CHALLENGES[0];
@@ -3443,7 +3452,7 @@ export const useStore = create<MachineState>((set, get) => ({
                 break;
             }
             case 'learn-twenty-to-thirty':
-                newInstruction = "Remplis la colonne des unités jusqu'à 9 ! Clique sur △ sur les UNITÉS !";
+                newInstruction = "Parfait ! Tu comprends la combinaison : 1 dizaine + unités ! Maintenant un peu de pratique : remplis jusqu'à 30 pour voir l'échange magique !";
                 break;
             case 'learn-tens':
                 newInstruction = "Regarde ! 👀 La machine compte par dizaines : 40, 50, 60...";
@@ -3464,10 +3473,10 @@ export const useStore = create<MachineState>((set, get) => ({
                 newInstruction = "Pratique le concept de GRAND paquet ! Clique sur ∇ pour revenir à 99, puis △ pour refaire l'échange magique vers 100 !";
                 break;
             case 'learn-hundred-to-hundred-ten':
-                newInstruction = "Compte de 100 à 110 ! Clique sur △ pour ajouter des billes dans les UNITÉS !";
+                newInstruction = "Tu as 1 GRAND paquet de 100 ! Maintenant ajoute des billes pour comprendre la COMBINAISON : 100 + 1 = 101, 100 + 2 = 102... Clique sur △ jusqu'à 120 !";
                 break;
             case 'learn-hundred-ten-to-two-hundred':
-                newInstruction = "Monte vers 200 ! Clique sur △ pour remplir ! Observe les dizaines rondes !";
+                newInstruction = "Bravo ! Tu comprends : 1 centaine + dizaines + unités ! Pratique un peu : monte jusqu'à 200 pour voir l'échange magique !";
                 break;
             case 'challenge-hundred-to-two-hundred': {
                 const challenge = HUNDRED_TO_TWO_HUNDRED_CHALLENGES[0];
@@ -3509,13 +3518,13 @@ export const useStore = create<MachineState>((set, get) => ({
                 newInstruction = "STOP ! 🛑 Regarde bien : TOUT, TOUT, TOUT est plein ! 999 ! Que va-t-il se passer si on ajoute encore 1 toute petite bille ? Clique sur △ pour voir !";
                 break;
             case 'learn-thousand-to-thousand-ten':
-                newInstruction = "MILLE ! 1 énorme paquet ! Compte de 1000 à 1010 en cliquant sur △ sur les UNITÉS !";
+                newInstruction = "MILLE ! 1 énorme paquet ! Maintenant ajoute des billes pour comprendre la COMBINAISON : 1000 + 1 = 1001, 1000 + 2 = 1002... Clique sur △ jusqu'à 1020 !";
                 break;
             case 'learn-thousand-to-thousand-hundred':
-                newInstruction = "MILLE-DIX ! Maintenant monte jusqu'à 1100 ! Clique sur △ sur les UNITÉS !";
+                newInstruction = "Super ! Tu comprends la combinaison : 1 millier + centaines + dizaines + unités ! Monte jusqu'à 1100 pour pratiquer !";
                 break;
             case 'learn-thousand-hundred-to-two-thousand':
-                newInstruction = "MILLE-CENT ! Continue à remplir jusqu'à 2000 ! Clique sur △ sur les UNITÉS !";
+                newInstruction = "Excellent ! Continue à pratiquer jusqu'à 2000 pour bien comprendre les milliers !";
                 break;
             case 'challenge-thousand-to-two-thousand': {
                 const challenge = THOUSAND_TO_TWO_THOUSAND_CHALLENGES[0];
