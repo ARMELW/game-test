@@ -27,10 +27,10 @@ import {
     getSolutionAnimationStep,
     getGuidedClickFeedback
 } from './feedbackSystem.ts';
-import { LockHundredRoll, LockTenRoll, LockThousandRoll, LockUnitRoll, sendChallengeListToUnity, setValue } from './unityBridge.ts';
+import { sendChallengeListToUnity, setValue } from './unityBridge.ts';
 
 export const initialColumns: Column[] = [
-    { name: 'Unités', value: 0, unlocked: true, color: 'bg-green-500' },
+    { name: 'Unités', value: 0, unlocked: false, color: 'bg-green-500' },
     { name: 'Dizaines', value: 0, unlocked: false, color: 'bg-blue-500' },
     { name: 'Centaines', value: 0, unlocked: false, color: 'bg-yellow-500' },
     { name: 'Milliers', value: 0, unlocked: false, color: 'bg-red-500' },
@@ -533,7 +533,10 @@ export const useStore = create<MachineState>((set, get) => ({
         setTimeout(() => {
             set({ feedback: "Prêt(e) à découvrir ses secrets ?" });
             setTimeout(() => {
-                set({ phase: 'intro-first-interaction' });
+                // Unlock units column when starting interaction
+                const newCols = [...get().columns];
+                newCols[0].unlocked = true;
+                set({ columns: newCols, phase: 'intro-first-interaction' });
                 get().updateInstruction();
             }, FEEDBACK_DELAY);
         }, FEEDBACK_DELAY * 2);
@@ -748,6 +751,7 @@ export const useStore = create<MachineState>((set, get) => ({
             set({ feedback: "Regarde bien, je vais modifier la machine !" });
             setTimeout(() => {
                 const newCols = [...initialColumns];
+                newCols[0].unlocked = true;
                 newCols[1].unlocked = true;
                 set({ columns: newCols });
                 sequenceFeedback(
@@ -779,7 +783,10 @@ export const useStore = create<MachineState>((set, get) => ({
                 "Tu as bien réfléchi ! Chaque rouleau peut afficher 9, donc : 9 et 9 = 99 !"
             );
             setTimeout(() => {
-                set({ showInputField: false, phase: 'tutorial', introMaxAttempt: 0 });
+                // Unlock units when entering tutorial
+                const newCols = [...get().columns];
+                newCols[0].unlocked = true;
+                set({ columns: newCols, showInputField: false, phase: 'tutorial', introMaxAttempt: 0 });
                 get().updateInstruction();
             }, FEEDBACK_DELAY * 2);
         } else if (answer === 100) {
@@ -862,7 +869,10 @@ export const useStore = create<MachineState>((set, get) => ({
                 setTimeout(() => {
                     set({ feedback: "Mais... si je veux compter jusqu'à 100 ou plus... il faudra encore modifier la machine ! 🔧 Tu es prêt(e) pour la suite de l'aventure ? 🎉" });
                     setTimeout(() => {
-                        set({ phase: 'tutorial', introMaxAttempt: 0 });
+                        // Unlock units when entering tutorial
+                        const newCols = [...get().columns];
+                        newCols[0].unlocked = true;
+                        set({ columns: newCols, phase: 'tutorial', introMaxAttempt: 0 });
                         get().updateInstruction();
                     }, FEEDBACK_DELAY);
                 }, FEEDBACK_DELAY * 2);
@@ -915,7 +925,10 @@ export const useStore = create<MachineState>((set, get) => ({
                 setTimeout(() => {
                     get().setFeedback("Regarde combien chaque rouleau peut afficher de points : 9 et 9, ce qui veut dire qu'on peut compter jusqu'à 99 !");
                     setTimeout(() => {
-                        set({ showInputField: false, userInput: "", phase: 'tutorial' });
+                        // Unlock units when entering tutorial
+                        const newCols = [...get().columns];
+                        newCols[0].unlocked = true;
+                        set({ columns: newCols, showInputField: false, userInput: "", phase: 'tutorial' });
                         get().updateInstruction();
                     }, FEEDBACK_DELAY);
                 }, FEEDBACK_DELAY * 2);
@@ -925,7 +938,10 @@ export const useStore = create<MachineState>((set, get) => ({
                     "Avec deux rouleaux, on peut afficher jusqu'à 99 !"
                 );
                 setTimeout(() => {
-                    set({ showInputField: false, userInput: "", phase: 'tutorial' });
+                    // Unlock units when entering tutorial
+                    const newCols = [...get().columns];
+                    newCols[0].unlocked = true;
+                    set({ columns: newCols, showInputField: false, userInput: "", phase: 'tutorial' });
                     get().updateInstruction();
                 }, FEEDBACK_DELAY * 2);
             } else {
@@ -934,7 +950,10 @@ export const useStore = create<MachineState>((set, get) => ({
                     "Regarde combien chaque rouleau peut afficher de points : 9 et 9, ce qui veut dire qu'on peut compter jusqu'à 99 !"
                 );
                 setTimeout(() => {
-                    set({ showInputField: false, userInput: "", phase: 'tutorial' });
+                    // Unlock units when entering tutorial
+                    const newCols = [...get().columns];
+                    newCols[0].unlocked = true;
+                    set({ columns: newCols, showInputField: false, userInput: "", phase: 'tutorial' });
                     get().updateInstruction();
                 }, FEEDBACK_DELAY * 2);
             }
@@ -1000,7 +1019,10 @@ export const useStore = create<MachineState>((set, get) => ({
                 get().setFeedback("STOP ! 🛑 Le compteur est à 9. La colonne est PLEINE ! Attends, la machine va te montrer la suite !");
                 const newTimer = setTimeout(() => {
                     const targetPhase = nextPhaseAfterAuto ?? 'challenge-unit-1';
-                    get().setColumns(initialColumns);
+                    // Reset columns and keep units unlocked
+                    const newCols = initialColumns.map(col => ({ ...col }));
+                    newCols[0].unlocked = true;
+                    get().setColumns(newCols);
                     get().setIsCountingAutomatically(false);
                     get().setNextPhaseAfterAuto(null);
                     get().resetUnitChallenge();
@@ -1852,7 +1874,9 @@ export const useStore = create<MachineState>((set, get) => ({
                 set({ isTransitioningToChallenge: true, addClicks: addClicks + 1 });
                 sequenceFeedback("Magnifique ! 🎉 Tu as atteint 9 !", "Tu es prêt pour l'évaluation !");
                 setTimeout(() => {
-                    const resetCols = initialColumns.map((col, i) => i === 1 ? { ...col, unlocked: true } : col);
+                    // Keep units unlocked for challenges
+                    const resetCols = initialColumns.map(col => ({ ...col }));
+                    resetCols[0].unlocked = true;
                     resetUnitChallenge();
                     set({
                         columns: resetCols,
@@ -2570,8 +2594,11 @@ export const useStore = create<MachineState>((set, get) => ({
             else if (unitsValue === 0 && tempTotalBefore === 1) {
                 sequenceFeedback("Extraordinaire ! 🎉 Tu maîtrises les deux boutons ! Je vais t'apprendre les **NOMBRES** !", "Prépare-toi pour une grande aventure !");
                 setTimeout(() => {
+                    // Unlock units for learning phase
+                    const newCols = initialColumns.map(col => ({ ...col }));
+                    newCols[0].unlocked = true;
                     set({
-                        columns: initialColumns.map(col => ({ ...col })),
+                        columns: newCols,
                         nextPhaseAfterAuto: 'explore-units',
                         phase: 'learn-units',
                         pendingAutoCount: true
@@ -2593,7 +2620,9 @@ export const useStore = create<MachineState>((set, get) => ({
             else if (unitsValue === 0 && tempTotalBefore === 1) {
                 sequenceFeedback("**ZÉRO** (0) ! 🎉 Plus rien ! On est revenu au début !", "Fantastique ! Tu maîtrises les nombres de 0 à 9 !");
                 setTimeout(() => {
-                    const newCols = initialColumns.map((col, i) => i === 1 ? { ...col, unlocked: true } : col);
+                    // Keep units unlocked for challenges
+                    const newCols = initialColumns.map(col => ({ ...col }));
+                    newCols[0].unlocked = true;
                     resetUnitChallenge();
                     set({
                         columns: newCols,
@@ -2652,7 +2681,9 @@ export const useStore = create<MachineState>((set, get) => ({
                     }, FEEDBACK_DELAY);
                 } else {
                     setTimeout(() => {
-                        const resetCols = initialColumns.map((col, i) => i === 1 ? { ...col, unlocked: true } : col);
+                        // Keep units unlocked for challenges
+                        const resetCols = initialColumns.map(col => ({ ...col }));
+                        resetCols[0].unlocked = true;
                         resetUnitChallenge();
                         const nextPhase = challengePhases[challengeIndex + 1];
                         set({
@@ -2664,7 +2695,9 @@ export const useStore = create<MachineState>((set, get) => ({
                 }
             } else {
                 setTimeout(() => {
-                    const resetCols = initialColumns.map((col, i) => i === 1 ? { ...col, unlocked: true } : col);
+                    // Keep units unlocked for challenges
+                    const resetCols = initialColumns.map(col => ({ ...col }));
+                    resetCols[0].unlocked = true;
                     set({
                         columns: resetCols,
                         unitTargetIndex: unitTargetIndex + 1
