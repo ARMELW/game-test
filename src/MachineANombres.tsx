@@ -68,15 +68,15 @@ function MachineANombres() {
   // Handle messages from Unity (button clicks)
   const handleUnityMessage = useCallback((message: string) => {
     const data = parse(message);
-    console.log('data',data);
-    
+    console.log('data', data);
+
     // Check if data is valid and has the expected structure
     if (!data || typeof data !== 'object' || !('type' in data)) {
       return;
     }
-    
+
     const parsedData = data as { type: string; numericValue?: number };
-    
+
     // Map numeric value to column index
     // 1 = units (index 0), 10 = tens (index 1), 100 = hundreds (index 2), 1000 = thousands (index 3)
     const getColumnIndex = (value?: number): number => {
@@ -87,9 +87,9 @@ function MachineANombres() {
       if (value === 1000) return 3;   // thousands
       return 0; // default to units
     };
-    
+
     const columnIndex = getColumnIndex(parsedData.numericValue);
-    
+
     // Handle increase and decrease actions
     if (parsedData.type === 'increaseValue') {
       handleAdd(columnIndex);
@@ -100,14 +100,19 @@ function MachineANombres() {
       // Validation is now triggered manually by the user clicking the "Valider" button.
       console.log('addGoal message received but ignored - manual validation required');
     }
+    else if (parsedData.type == 'validButton') {
+      handleManualValidation();
+    }
+    else if (parsedData.type == 'wrongValue') {
+      // wrong   value when clique
+    }
+    else if (parsedData.type == 'nextGoal') {
+      // passage au challenge suivant
+    }
   }, [handleAdd, handleSubtract, phase]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Handle manual validation button click
   const handleManualValidation = useCallback(() => {
-    // Send message to Unity that validation button was clicked
-    if (window.unityInstance) {
-      window.unityInstance.SendMessage('WebBridge', 'ReceiveStringMessageFromJs', 'on valid button clicked');
-    }
 
     // Trigger appropriate validation based on current phase
     if (phase === 'challenge-ten-to-twenty') {
@@ -161,11 +166,11 @@ function MachineANombres() {
   // Typing animation effect for instruction
   useEffect(() => {
     if (!instruction) return;
-    
+
     setIsTypingInstruction(true);
     setTypedInstruction("");
     setTypedFeedback("");
-    
+
     let currentIndex = 0;
     const typeNextChar = () => {
       if (currentIndex <= instruction.length) {
@@ -176,9 +181,9 @@ function MachineANombres() {
         setIsTypingInstruction(false);
       }
     };
-    
+
     typeNextChar();
-    
+
     return () => {
       if (typingTimeoutRef.current) {
         clearTimeout(typingTimeoutRef.current);
@@ -189,10 +194,10 @@ function MachineANombres() {
   // Typing animation effect for feedback
   useEffect(() => {
     if (!feedback) return;
-    
+
     setIsTypingFeedback(true);
     setTypedFeedback("");
-    
+
     const prefixed = ` ${feedback}`;
     let currentIndex = 0;
     const typeNextChar = () => {
@@ -204,9 +209,9 @@ function MachineANombres() {
         setIsTypingFeedback(false);
       }
     };
-    
+
     typeNextChar();
-    
+
     return () => {
       if (typingTimeoutRef.current) {
         clearTimeout(typingTimeoutRef.current);
@@ -239,95 +244,95 @@ function MachineANombres() {
       let lockHundreds = true;
       let lockThousands = true;
 
-    // Unlock based on unlocked columns and phase
-    const isUnit = columns[0]?.unlocked || false;
-    const isTen = columns[1]?.unlocked || false;
-    const isHundred = columns[2]?.unlocked || false;
-    const isThousand = columns[3]?.unlocked || false;
+      // Unlock based on unlocked columns and phase
+      const isUnit = columns[0]?.unlocked || false;
+      const isTen = columns[1]?.unlocked || false;
+      const isHundred = columns[2]?.unlocked || false;
+      const isThousand = columns[3]?.unlocked || false;
 
-    // Determine which rolls should be unlocked based on phase
-    if (phase === 'intro-welcome' && isUnit) {
-      lockUnits = false;
-    }
-    else if (phase === 'intro-first-interaction' && isUnit) {
-      lockUnits = false;
-    }
-    else if (phase === 'intro-discover-carry' && (isUnit || isTen)) {
-      lockUnits = !isUnit;
-      lockTens = !isTen;
-    }
-    else if (phase === 'intro-count-digits' && isUnit) {
-      lockUnits = false;
-    }
-    else if (phase === 'intro-max-value-question' && introMaxAttempt === -1 && (isUnit || isTen)) {
-      lockUnits = !isUnit;
-      lockTens = !isTen;
-    }
-    else if (phase === 'intro-discover' && isUnit) {
-      lockUnits = false;
-    }
-    else if (phase === 'intro-add-roll' && isUnit) {
-      lockUnits = false;
-    }
-    else if (phase === 'normal') {
-      lockUnits = !isUnit;
-      lockTens = !isTen;
-      lockHundreds = !isHundred;
-      lockThousands = !isThousand;
-    }
-    else if ((phase === 'tutorial' || phase === 'explore-units' || phase === 'click-add' || phase === 'click-remove' || phase.startsWith('challenge-unit-') || phase === 'challenge-ten-to-twenty') && isUnit) {
-      lockUnits = false;
-    }
-    else if (phase === 'learn-carry' && isUnit) {
-      lockUnits = false;
-    }
-    else if (phase === 'practice-ten' && (isUnit || isTen)) {
-      lockUnits = !isUnit;
-      lockTens = !isTen;
-    }
-    else if ((phase === 'learn-ten-to-twenty' || phase === 'learn-twenty-to-thirty') && isUnit) {
-      lockUnits = false;
-    }
-    else if (phase === 'practice-hundred' && (isUnit || isTen || isHundred)) {
-      lockUnits = !isUnit;
-      lockTens = !isTen;
-      lockHundreds = !isHundred;
-    }
-    else if ((phase === 'learn-hundred-to-hundred-ten' || phase === 'learn-hundred-ten-to-two-hundred' || phase === 'challenge-hundred-to-two-hundred' || phase === 'learn-two-hundred-to-three-hundred' || phase === 'challenge-two-hundred-to-three-hundred') && isUnit) {
-      lockUnits = false;
-    }
-    else if ((phase.startsWith('challenge-tens-') || phase === 'learn-tens-combination') && (isUnit || isTen)) {
-      lockUnits = !isUnit;
-      lockTens = !isTen;
-    }
-    else if ((phase.startsWith('challenge-hundreds-') || phase === 'learn-hundreds-combination' || phase === 'learn-hundreds-simple-combination') && (isUnit || isTen || isHundred)) {
-      lockUnits = !isUnit;
-      lockTens = !isTen;
-      lockHundreds = !isHundred;
-    }
-    else if (phase === 'practice-thousand' && (isUnit || isTen || isHundred || isThousand)) {
-      lockUnits = !isUnit;
-      lockTens = !isTen;
-      lockHundreds = !isHundred;
-      lockThousands = !isThousand;
-    }
-    else if ((phase === 'learn-thousand-to-thousand-ten' || phase === 'learn-thousand-to-thousand-hundred' || phase === 'learn-thousand-hundred-to-two-thousand' || phase === 'challenge-thousand-to-two-thousand' || phase === 'learn-two-thousand-to-three-thousand' || phase === 'challenge-two-thousand-to-three-thousand') && isUnit) {
-      lockUnits = false;
-    }
-    else if ((phase.startsWith('challenge-thousands-') || phase === 'learn-thousands-combination' || phase === 'challenge-thousands-simple-combination' || phase === 'learn-thousands-very-simple-combination' || phase === 'learn-thousands-full-combination') && (isUnit || isTen || isHundred || isThousand)) {
-      lockUnits = !isUnit;
-      lockTens = !isTen;
-      lockHundreds = !isHundred;
-      lockThousands = !isThousand;
-    }
+      // Determine which rolls should be unlocked based on phase
+      if (phase === 'intro-welcome' && isUnit) {
+        lockUnits = false;
+      }
+      else if (phase === 'intro-first-interaction' && isUnit) {
+        lockUnits = false;
+      }
+      else if (phase === 'intro-discover-carry' && (isUnit || isTen)) {
+        lockUnits = !isUnit;
+        lockTens = !isTen;
+      }
+      else if (phase === 'intro-count-digits' && isUnit) {
+        lockUnits = false;
+      }
+      else if (phase === 'intro-max-value-question' && introMaxAttempt === -1 && (isUnit || isTen)) {
+        lockUnits = !isUnit;
+        lockTens = !isTen;
+      }
+      else if (phase === 'intro-discover' && isUnit) {
+        lockUnits = false;
+      }
+      else if (phase === 'intro-add-roll' && isUnit) {
+        lockUnits = false;
+      }
+      else if (phase === 'normal') {
+        lockUnits = !isUnit;
+        lockTens = !isTen;
+        lockHundreds = !isHundred;
+        lockThousands = !isThousand;
+      }
+      else if ((phase === 'tutorial' || phase === 'explore-units' || phase === 'click-add' || phase === 'click-remove' || phase.startsWith('challenge-unit-') || phase === 'challenge-ten-to-twenty') && isUnit) {
+        lockUnits = false;
+      }
+      else if (phase === 'learn-carry' && isUnit) {
+        lockUnits = false;
+      }
+      else if (phase === 'practice-ten' && (isUnit || isTen)) {
+        lockUnits = !isUnit;
+        lockTens = !isTen;
+      }
+      else if ((phase === 'learn-ten-to-twenty' || phase === 'learn-twenty-to-thirty') && isUnit) {
+        lockUnits = false;
+      }
+      else if (phase === 'practice-hundred' && (isUnit || isTen || isHundred)) {
+        lockUnits = !isUnit;
+        lockTens = !isTen;
+        lockHundreds = !isHundred;
+      }
+      else if ((phase === 'learn-hundred-to-hundred-ten' || phase === 'learn-hundred-ten-to-two-hundred' || phase === 'challenge-hundred-to-two-hundred' || phase === 'learn-two-hundred-to-three-hundred' || phase === 'challenge-two-hundred-to-three-hundred') && isUnit) {
+        lockUnits = false;
+      }
+      else if ((phase.startsWith('challenge-tens-') || phase === 'learn-tens-combination') && (isUnit || isTen)) {
+        lockUnits = !isUnit;
+        lockTens = !isTen;
+      }
+      else if ((phase.startsWith('challenge-hundreds-') || phase === 'learn-hundreds-combination' || phase === 'learn-hundreds-simple-combination') && (isUnit || isTen || isHundred)) {
+        lockUnits = !isUnit;
+        lockTens = !isTen;
+        lockHundreds = !isHundred;
+      }
+      else if (phase === 'practice-thousand' && (isUnit || isTen || isHundred || isThousand)) {
+        lockUnits = !isUnit;
+        lockTens = !isTen;
+        lockHundreds = !isHundred;
+        lockThousands = !isThousand;
+      }
+      else if ((phase === 'learn-thousand-to-thousand-ten' || phase === 'learn-thousand-to-thousand-hundred' || phase === 'learn-thousand-hundred-to-two-thousand' || phase === 'challenge-thousand-to-two-thousand' || phase === 'learn-two-thousand-to-three-thousand' || phase === 'challenge-two-thousand-to-three-thousand') && isUnit) {
+        lockUnits = false;
+      }
+      else if ((phase.startsWith('challenge-thousands-') || phase === 'learn-thousands-combination' || phase === 'challenge-thousands-simple-combination' || phase === 'learn-thousands-very-simple-combination' || phase === 'learn-thousands-full-combination') && (isUnit || isTen || isHundred || isThousand)) {
+        lockUnits = !isUnit;
+        lockTens = !isTen;
+        lockHundreds = !isHundred;
+        lockThousands = !isThousand;
+      }
 
-    // During auto-counting, lock everything
-    if (isCountingAutomatically) {
-      lockUnits = true;
-      lockTens = true;
-      lockHundreds = true;
-      lockThousands = true;
-    }
+      // During auto-counting, lock everything
+      if (isCountingAutomatically) {
+        lockUnits = true;
+        lockTens = true;
+        lockHundreds = true;
+        lockThousands = true;
+      }
 
       // Apply locks to Unity
       lockUnitRoll(lockUnits);
@@ -405,9 +410,9 @@ function MachineANombres() {
                   e.currentTarget.style.boxShadow = '0 4px 8px rgba(14, 165, 233, 0.3)';
                 }}
               >
-                {phase === 'celebration-before-thousands' ? "🚀 DÉMARRER L'APPRENTISSAGE DES MILLIERS" : 
-                 phase === 'celebration-thousands-complete' ? "🎮 MODE LIBRE : CRÉE TES NOMBRES !" :
-                 "Commencer l'apprentissage"}
+                {phase === 'celebration-before-thousands' ? "🚀 DÉMARRER L'APPRENTISSAGE DES MILLIERS" :
+                  phase === 'celebration-thousands-complete' ? "🎮 MODE LIBRE : CRÉE TES NOMBRES !" :
+                    "Commencer l'apprentissage"}
               </button>
             )}
             {showUnlockButton && (
@@ -769,38 +774,6 @@ function MachineANombres() {
           </div>
         </div>
 
-        {/* Manual Validation Button for Challenges */}
-        {(showValidateLearningButton || showValidateTensButton || showValidateHundredsButton || showValidateThousandsButton) && (
-          <div style={{ marginTop: 16, textAlign: 'center' }}>
-            <button
-              onClick={handleManualValidation}
-              style={{
-                fontSize: 18,
-                padding: '12px 32px',
-                background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
-                color: '#fff',
-                border: 'none',
-                borderRadius: 8,
-                cursor: 'pointer',
-                fontWeight: 'bold',
-                boxShadow: '0 4px 8px rgba(16, 185, 129, 0.3)',
-                transition: 'all 0.2s ease',
-                animation: 'pulse 2s ease-in-out infinite'
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.transform = 'translateY(-2px)';
-                e.currentTarget.style.boxShadow = '0 6px 12px rgba(16, 185, 129, 0.4)';
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.transform = 'translateY(0)';
-                e.currentTarget.style.boxShadow = '0 4px 8px rgba(16, 185, 129, 0.3)';
-              }}
-            >
-              ✓ Valider ma réponse
-            </button>
-          </div>
-        )}
-
         {/* Attempt indicator for challenges */}
         {(showValidateLearningButton || showValidateTensButton || showValidateHundredsButton || showValidateThousandsButton) && attemptCount > 0 && (
           <div style={{
@@ -922,7 +895,7 @@ function MachineANombres() {
             🌟 {totalChallengesCompleted} défi{totalChallengesCompleted > 1 ? 's' : ''} réussi{totalChallengesCompleted > 1 ? 's' : ''} ! Continue ! 💪
           </div>
         )}
-        
+
         {/* Guided mode indicator */}
         {guidedMode && (
           <div style={{
@@ -939,7 +912,7 @@ function MachineANombres() {
             🤝 Mode guidé actif - Suis les instructions !
           </div>
         )}
-        
+
         {/* Solution animation indicator */}
         {showSolutionAnimation && (
           <div style={{
