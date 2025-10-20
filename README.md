@@ -77,13 +77,40 @@ L'application suit un parcours d'apprentissage progressif :
 7. **Phase Échange** (learn-carry) : Découverte de l'échange 10 pour 1
 8. **Mode Libre** (normal) : Manipulation libre des nombres
 
+## 🎮 Integration Unity
+
+L'application intègre un jeu Unity WebGL qui affiche une **machine à compter virtuelle en 3D**. Cette machine remplace l'ancienne représentation visuelle avec jetons et offre une expérience plus immersive et engageante pour les enfants.
+
+### Machine Unity
+
+La machine Unity comprend :
+- **4 rouleaux** représentant les milliers, centaines, dizaines et unités
+- **Affichage numérique** montrant la valeur actuelle (0000-9999)
+- **Boutons interactifs** verts (△) et rouges (∇) pour ajouter/soustraire
+- **Points visuels** sur chaque rouleau montrant les quantités (1-9)
+- **Animations** pour les transitions et les échanges (10 pour 1)
+
+### Fonctionnalités Clés
+
+1. **Synchronisation automatique** : La valeur affichée sur la machine Unity est toujours synchronisée avec l'état React
+2. **Système de verrouillage** : Les rouleaux sont bloqués/débloqués selon la phase pédagogique
+3. **Intégration transparente** : Toutes les phases éducatives existantes fonctionnent avec Unity
+4. **Communication bidirectionnelle** : React et Unity échangent des messages pour coordonner les interactions
+
+### Documentation Technique
+
+Pour plus de détails sur l'intégration Unity, consultez :
+- [UNITY_INTEGRATION.md](UNITY_INTEGRATION.md) - Guide complet d'intégration
+- [UNITY_BRIDGE_API.md](UNITY_BRIDGE_API.md) - Documentation de l'API
+- [UNITY_IMPLEMENTATION_SUMMARY.md](UNITY_IMPLEMENTATION_SUMMARY.md) - Résumé de l'implémentation
+
 ## 🛠️ Technologies Utilisées
 
 - React 19
 - TypeScript
 - Vite
-- Unity WebGL (Counting Machine)
-- react-unity-webgl
+- **Unity WebGL (Counting Machine)** - Machine à compter 3D interactive
+- **react-unity-webgl** - Pont entre React et Unity
 - GitHub Actions pour le déploiement
 
 ## 🎮 Integration Unity
