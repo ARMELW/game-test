@@ -82,48 +82,49 @@ function sendChallengeToUnity(phase: string) {
 }
 
 // Helper function to send remaining targets to Unity based on phase and current index
-function sendRemainingTargetsToUnity(phase: string) {
+function sendRemainingTargetsToUnity(phase: string, currentIndex: number) {
     let targets: number[] = [];
-
+    
     // Determine targets based on phase
     if (phase.startsWith('challenge-unit-')) {
         const index = parseInt(phase.split('-')[2]) - 1;
-        targets = UNIT_CHALLENGES[index].targets;
+        if (index >= 0 && index < UNIT_CHALLENGES.length) {
+            targets = UNIT_CHALLENGES[index].targets.slice(currentIndex);
+        }
     } else if (phase === 'challenge-ten-to-twenty') {
-        targets = TEN_TO_TWENTY_CHALLENGES[0].targets;
+        targets = TEN_TO_TWENTY_CHALLENGES[0].targets.slice(currentIndex);
     } else if (phase.startsWith('challenge-tens-')) {
         const index = parseInt(phase.split('-')[2]) - 1;
-        targets = TENS_CHALLENGES[index].targets;
+        if (index >= 0 && index < TENS_CHALLENGES.length) {
+            targets = TENS_CHALLENGES[index].targets.slice(currentIndex);
+        }
     } else if (phase === 'challenge-hundred-to-two-hundred') {
-        targets = HUNDRED_TO_TWO_HUNDRED_CHALLENGES[0].targets;
+        targets = HUNDRED_TO_TWO_HUNDRED_CHALLENGES[0].targets.slice(currentIndex);
     } else if (phase === 'challenge-two-hundred-to-three-hundred') {
-        targets = TWO_HUNDRED_TO_THREE_HUNDRED_CHALLENGES[0].targets;
+        targets = TWO_HUNDRED_TO_THREE_HUNDRED_CHALLENGES[0].targets.slice(currentIndex);
     } else if (phase.startsWith('challenge-hundreds-')) {
         const index = parseInt(phase.split('-')[2]) - 1;
         if (index >= 0 && index < HUNDREDS_CHALLENGES.length) {
-            targets = HUNDREDS_CHALLENGES[index].targets;
+            targets = HUNDREDS_CHALLENGES[index].targets.slice(currentIndex);
         }
     } else if (phase === 'challenge-thousand-to-two-thousand') {
-        targets = THOUSAND_TO_TWO_THOUSAND_CHALLENGES[0].targets;
+        targets = THOUSAND_TO_TWO_THOUSAND_CHALLENGES[0].targets.slice(currentIndex);
     } else if (phase === 'challenge-two-thousand-to-three-thousand') {
-        targets = TWO_THOUSAND_TO_THREE_THOUSAND_CHALLENGES[0].targets;
+        targets = TWO_THOUSAND_TO_THREE_THOUSAND_CHALLENGES[0].targets.slice(currentIndex);
     } else if (phase === 'challenge-thousands-simple-combination') {
-        targets = THOUSANDS_SIMPLE_COMBINATION_CHALLENGES[0].targets;
+        targets = THOUSANDS_SIMPLE_COMBINATION_CHALLENGES[0].targets.slice(currentIndex);
     } else if (phase.startsWith('challenge-thousands-')) {
         const index = parseInt(phase.split('-')[2]) - 1;
         if (index >= 0 && index < THOUSANDS_CHALLENGES.length) {
-            targets = THOUSANDS_CHALLENGES[index].targets;
+            targets = THOUSANDS_CHALLENGES[index].targets.slice(currentIndex);
         }
     }
-
+    
     // Send to Unity if targets found
     if (targets.length > 0) {
-
-        console.log('phase ==>', phase, 'targets ==>', targets);
         sendChallengeListToUnity(targets);
     }
 }
-
 export const useStore = create<MachineState>((set, get) => ({
     columns: initialColumns,
     phase: 'intro-welcome-personalized',
