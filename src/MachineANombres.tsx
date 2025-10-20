@@ -335,16 +335,7 @@ function MachineANombres() {
         borderRadius: 4,
         border: '1px solid #cbd5e1',
       }}>
-        <h2 style={{
-          fontSize: 24,
-          marginBottom: 16,
-          textAlign: 'center',
-          color: '#1e293b'
-        }}>
-          Machine à Nombres
-        </h2>
 
-        {/* Unity Game Container */}
         <div style={{
           width: '100%',
           height: '450px',

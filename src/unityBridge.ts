@@ -44,46 +44,53 @@ export function sendChallengeListToUnity(targets: number[]) {
   }
 }
 
-// cette fonction sert à bloquer/débloquer le rouleau des 1000
-export function LockThousandRoll(locked: boolean) {
+export function setValue(value: number) {
   if (typeof window.unityInstance !== 'undefined') {
-    window.unityInstance.SendMessage('WebBridge', 'ReceiveStringMessageFromJs', 'LockThousand:' + (locked ? 1 : 0));
+    window.unityInstance.SendMessage('WebBridge', 'ReceiveStringMessageFromJs', `SetValue${value}`);
   }
 }
-
-// cette fonction sert à bloquer/débloquer le rouleau des 100
-export function LockHundredRoll(locked: boolean) {
-  if (typeof window.unityInstance !== 'undefined') {
-    window.unityInstance.SendMessage('WebBridge', 'ReceiveStringMessageFromJs', 'LockHundred:' + (locked ? 1 : 0));
+  // cette fonction sert à bloquer/débloquer le rouleau des 1000
+  export function LockThousandRoll(locked: boolean) {
+    if (typeof window.unityInstance !== 'undefined') {
+      window.unityInstance.SendMessage('WebBridge', 'ReceiveStringMessageFromJs', 'LockThousand:' + (locked ? 1 : 0));
+    }
   }
-}
+  
 
-// cette fonction sert à bloquer/débloquer le rouleau des 10
-export function LockTenRoll(locked: boolean) {
-  if (typeof window.unityInstance !== 'undefined') {
-    window.unityInstance.SendMessage('WebBridge', 'ReceiveStringMessageFromJs', 'LockTen:' + (locked ? 1 : 0));
+
+  // cette fonction sert à bloquer/débloquer le rouleau des 100
+  export function LockHundredRoll(locked: boolean) {
+    if (typeof window.unityInstance !== 'undefined') {
+      window.unityInstance.SendMessage('WebBridge', 'ReceiveStringMessageFromJs', 'LockHundred:' + (locked ? 1 : 0));
+    }
   }
-}
 
-// cette fonction sert à bloquer/débloquer le rouleau des 1
-export function LockUnitRoll(locked: boolean) {
-  if (typeof window.unityInstance !== 'undefined') {
-    window.unityInstance.SendMessage('WebBridge', 'ReceiveStringMessageFromJs', 'LockUnit:' + (locked ? 1 : 0));
+  // cette fonction sert à bloquer/débloquer le rouleau des 10
+  export function LockTenRoll(locked: boolean) {
+    if (typeof window.unityInstance !== 'undefined') {
+      window.unityInstance.SendMessage('WebBridge', 'ReceiveStringMessageFromJs', 'LockTen:' + (locked ? 1 : 0));
+    }
   }
-}
 
-// Default handler for Unity messages
-export function onUnityMessage(message: string) {
-  console.log("[UnityBridge override] Message:", message);
-}
+  // cette fonction sert à bloquer/débloquer le rouleau des 1
+  export function LockUnitRoll(locked: boolean) {
+    if (typeof window.unityInstance !== 'undefined') {
+      window.unityInstance.SendMessage('WebBridge', 'ReceiveStringMessageFromJs', 'LockUnit:' + (locked ? 1 : 0));
+    }
+  }
 
-// Initialize global functions
-export function initializeUnityBridge() {
-  window.ChangeCurrentValue = ChangeCurrentValue;
-  window.ChangeCurrentGoalList = ChangeCurrentGoalList;
-  window.LockThousandRoll = LockThousandRoll;
-  window.LockHundredRoll = LockHundredRoll;
-  window.LockTenRoll = LockTenRoll;
-  window.LockUnitRoll = LockUnitRoll;
-  window.onUnityMessage = onUnityMessage;
-}
+  // Default handler for Unity messages
+  export function onUnityMessage(message: string) {
+    console.log("[UnityBridge override] Message:", message);
+  }
+
+  // Initialize global functions
+  export function initializeUnityBridge() {
+    window.ChangeCurrentValue = ChangeCurrentValue;
+    window.ChangeCurrentGoalList = ChangeCurrentGoalList;
+    window.LockThousandRoll = LockThousandRoll;
+    window.LockHundredRoll = LockHundredRoll;
+    window.LockTenRoll = LockTenRoll;
+    window.LockUnitRoll = LockUnitRoll;
+    window.onUnityMessage = onUnityMessage;
+  }
