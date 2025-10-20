@@ -109,7 +109,8 @@ export function useUnity() {
         }
       };
     }
-  }, [isLoaded, sendMessage]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isLoaded]);
 
   // Function to change the current value displayed on the machine
   // SetValue322 -> the machine will display 0322
@@ -117,7 +118,8 @@ export function useUnity() {
     if (isLoaded) {
       sendMessage('WebBridge', 'ReceiveStringMessageFromJs', `SetValue${value}`);
     }
-  }, [isLoaded, sendMessage]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isLoaded]);
 
   // Function to send the list of goals to Unity
   // ChangeList544/1352/9871 -> goals will be 544 then 1352 then 9871
@@ -125,35 +127,40 @@ export function useUnity() {
     if (isLoaded) {
       sendMessage('WebBridge', 'ReceiveStringMessageFromJs', `ChangeList${value}`);
     }
-  }, [isLoaded, sendMessage]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isLoaded]);
 
   // Function to lock/unlock the thousands roll
   const lockThousandRoll = useCallback((locked: boolean) => {
     if (isLoaded) {
       sendMessage('WebBridge', 'ReceiveStringMessageFromJs', `LockThousand:${locked ? 1 : 0}`);
     }
-  }, [isLoaded, sendMessage]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isLoaded]);
 
   // Function to lock/unlock the hundreds roll
   const lockHundredRoll = useCallback((locked: boolean) => {
     if (isLoaded) {
       sendMessage('WebBridge', 'ReceiveStringMessageFromJs', `LockHundred:${locked ? 1 : 0}`);
     }
-  }, [isLoaded, sendMessage]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isLoaded]);
 
   // Function to lock/unlock the tens roll
   const lockTenRoll = useCallback((locked: boolean) => {
     if (isLoaded) {
       sendMessage('WebBridge', 'ReceiveStringMessageFromJs', `LockTen:${locked ? 1 : 0}`);
     }
-  }, [isLoaded, sendMessage]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isLoaded]);
 
   // Function to lock/unlock the units roll
   const lockUnitRoll = useCallback((locked: boolean) => {
     if (isLoaded) {
       sendMessage('WebBridge', 'ReceiveStringMessageFromJs', `LockUnit:${locked ? 1 : 0}`);
     }
-  }, [isLoaded, sendMessage]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isLoaded]);
 
   return {
     unityProvider,
