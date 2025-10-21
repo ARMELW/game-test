@@ -570,7 +570,7 @@ export const useStore = create<MachineState>((set, get) => ({
     },
 
     handleIntroFirstClick: () => {
-        const { introClickCount, columns, sequenceFeedback } = get();
+        const { introClickCount, columns, sequenceFeedback, speakAndThen } = get();
         const newCols = [...columns];
 
         if (introClickCount === 0) {
@@ -598,25 +598,26 @@ export const useStore = create<MachineState>((set, get) => ({
             ];
 
             if (messages[introClickCount + 1]) {
-                set({ feedback: messages[introClickCount + 1] });
+                speakAndThen(messages[introClickCount + 1]);
             }
 
             if (introClickCount + 1 === 9) {
-                setTimeout(() => {
+                // Use voice callback instead of setTimeout
+                speakAndThen(messages[introClickCount + 1], () => {
                     sequenceFeedback(
                         "Et voilà, on a REMPLI la machine ! 🎉",
-                        "Tu as vu comme les lumières s'allument en même temps que les chiffres changent ?"
+                        "Tu as vu comme les lumières s'allument en même temps que les chiffres changent ?",
+                        () => {
+                            speakAndThen("Maintenant essaie le bouton ROUGE avec la flèche vers le BAS ∇ !");
+                        }
                     );
-                    setTimeout(() => {
-                        set({ feedback: "Maintenant essaie le bouton ROUGE avec la flèche vers le BAS ∇ !" });
-                    }, FEEDBACK_DELAY * 2);
-                }, 1000);
+                });
             }
         }
     },
 
     handleIntroDigitsSubmit: () => {
-        const { userInput, introDigitsAttempt, sequenceFeedback } = get();
+        const { userInput, introDigitsAttempt, sequenceFeedback, speakAndThen } = get();
         const answer = parseInt(userInput.trim());
         const newAttempt = introDigitsAttempt + 1;
 
@@ -626,27 +627,31 @@ export const useStore = create<MachineState>((set, get) => ({
             // Correct answer!
             sequenceFeedback(
                 "BRAVO ! 🎉🎉🎉 C'est EXACT ! Il y a 10 chiffres différents !",
-                "Tu n'as pas oublié le ZÉRO ! 👏"
+                "Tu n'as pas oublié le ZÉRO ! 👏",
+                () => {
+                    speakAndThen(
+                        "0, 1, 2, 3, 4, 5, 6, 7, 8, 9 = 10 chiffres ! Le zéro est un peu spécial, mais il est TRÈS important !",
+                        () => {
+                            speakAndThen(
+                                "Donc en tout, nous avons bien 10 chiffres différents !",
+                                () => {
+                                    set({ showInputField: false, phase: 'intro-second-column', introDigitsAttempt: 0 });
+                                    get().updateInstruction();
+                                }
+                            );
+                        }
+                    );
+                }
             );
-            setTimeout(() => {
-                set({ feedback: "0, 1, 2, 3, 4, 5, 6, 7, 8, 9 = 10 chiffres ! Le zéro est un peu spécial, mais il est TRÈS important !" });
-                setTimeout(() => {
-                    set({ feedback: "Donc en tout, nous avons bien 10 chiffres différents !" });
-                    setTimeout(() => {
-                        set({ showInputField: false, phase: 'intro-second-column', introDigitsAttempt: 0 });
-                        get().updateInstruction();
-                    }, FEEDBACK_DELAY);
-                }, FEEDBACK_DELAY);
-            }, FEEDBACK_DELAY * 2);
         } else if (answer === 9) {
             if (newAttempt === 1) {
                 sequenceFeedback(
                     "Hmm... pas tout à fait ! 🤔 Je comprends pourquoi tu penses ça !",
-                    "Tu as compté : 1, 2, 3, 4, 5, 6, 7, 8, 9... ça fait 9 !"
+                    "Tu as compté : 1, 2, 3, 4, 5, 6, 7, 8, 9... ça fait 9 !",
+                    () => {
+                        speakAndThen("Mais... tu n'oublies pas quelque chose ? 😉 Réfléchis bien et réessaie !");
+                    }
                 );
-                setTimeout(() => {
-                    set({ feedback: "Mais... tu n'oublies pas quelque chose ? 😉 Réfléchis bien et réessaie !" });
-                }, FEEDBACK_DELAY * 2);
             } else if (newAttempt === 2) {
                 sequenceFeedback(
                     "Presque ! Mais regarde le PREMIER chiffre ! 👀",
@@ -657,11 +662,11 @@ export const useStore = create<MachineState>((set, get) => ({
                 set({ showInputField: false });
                 sequenceFeedback(
                     "Ce n'est pas grave ! On va compter ENSEMBLE ! 🤝",
-                    "Regarde l'écran et compte avec moi à voix haute !"
+                    "Regarde l'écran et compte avec moi à voix haute !",
+                    () => {
+                        get().runIntroDigitsGuided();
+                    }
                 );
-                setTimeout(() => {
-                    get().runIntroDigitsGuided();
-                }, FEEDBACK_DELAY * 2);
             }
         } else {
             if (newAttempt === 1) {
@@ -674,21 +679,21 @@ export const useStore = create<MachineState>((set, get) => ({
                 set({ showInputField: false });
                 sequenceFeedback(
                     "D'accord, regarde bien !",
-                    "Voici TOUS les chiffres que la machine peut afficher :"
+                    "Voici TOUS les chiffres que la machine peut afficher :",
+                    () => {
+                        get().showIntroDigitsVisual();
+                    }
                 );
-                setTimeout(() => {
-                    get().showIntroDigitsVisual();
-                }, FEEDBACK_DELAY * 2);
             } else {
                 // Attempt 3: guided counting
                 set({ showInputField: false });
                 sequenceFeedback(
                     "Ce n'est pas grave ! On va compter ENSEMBLE ! 🤝",
-                    "Regarde l'écran et compte avec moi à voix haute !"
+                    "Regarde l'écran et compte avec moi à voix haute !",
+                    () => {
+                        get().runIntroDigitsGuided();
+                    }
                 );
-                setTimeout(() => {
-                    get().runIntroDigitsGuided();
-                }, FEEDBACK_DELAY * 2);
             }
         }
     },

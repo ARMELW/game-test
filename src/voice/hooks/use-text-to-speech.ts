@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 import { textToSpeechService, type TextToSpeechConfig } from '../services/speech/text-to-speech';
+import { PersonaLanguage } from '../services/speech/persona.types';
 
 export interface UseTextToSpeechOptions {
   config?: Partial<TextToSpeechConfig>;
@@ -123,8 +124,10 @@ export function useVoiceReader(language = 'fr-FR') {
   
   // Set persona language separately
   useEffect(() => {
+    // Map string to PersonaLanguage enum
+    const langEnum = language === 'en-US' ? PersonaLanguage.Anglais : PersonaLanguage.Francais;
     textToSpeechService.setPersona({
-      language: language as any
+      language: langEnum
     });
   }, [language]);
   

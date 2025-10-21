@@ -275,6 +275,7 @@ export interface MachineState {
 
     // Business logic
     sequenceFeedback: (first: string, second?: string, onComplete?: () => void) => void;
+    speakAndThen: (message: string, onComplete?: () => void) => void;
     handleAdd: (idx: number) => void;
     handleSubtract: (idx: number) => void;
     handleSetValue: (value: string) => void;

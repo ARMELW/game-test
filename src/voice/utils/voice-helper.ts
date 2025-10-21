@@ -1,5 +1,6 @@
 import { speechToTextService } from '../services/speech/speech-to-text';
 import { textToSpeechService } from '../services/speech/text-to-speech';
+import { PersonaLanguage } from '../services/speech/persona.types';
 
 /**
  * Utilitaire simple pour déclencher la reconnaissance vocale
@@ -126,8 +127,10 @@ export class VoiceHelper {
       volume
     });
     
+    // Map string to PersonaLanguage enum
+    const langEnum = language === 'en-US' ? PersonaLanguage.Anglais : PersonaLanguage.Francais;
     textToSpeechService.setPersona({
-      language: language as any
+      language: langEnum
     });
 
     // Callbacks
