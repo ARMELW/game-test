@@ -36,6 +36,7 @@ import {
     GUIDED_MESSAGES,
 } from './instructions.ts';
 import { sendChallengeListToUnity, setValue, sendCorrectValue, sendWrongValue, sendNextGoal } from './unityBridge.ts';
+import { textToSpeechService } from './voice/services/speech/text-to-speech.ts';
 
 export const initialColumns: Column[] = [
     { name: 'Unités', value: 0, unlocked: false, color: 'bg-green-500' },
@@ -498,16 +499,20 @@ export const useStore = create<MachineState>((set, get) => ({
 
         sequenceFeedback(
             `Enchanté ${name} ! Moi c'est Professeur Numérix ! 🎩`,
-            "(Bruits de marteau sur du métal et de perceuse) Paf, Crac… Bim… Tchac ! Quel vacarme !"
+            "(Bruits de marteau sur du métal et de perceuse) Paf, Crac… Bim… Tchac ! Quel vacarme !",
+            () => {
+                // After both messages are spoken, show the next message
+                textToSpeechService.speak("Voilà, j'ai terminé ma nouvelle machine !");
+                set({ feedback: "Voilà, j'ai terminé ma nouvelle machine !" });
+                
+                textToSpeechService.setCallbacks({
+                    onEnd: () => {
+                        set({ phase: 'intro-discover-machine' });
+                        get().updateInstruction();
+                    }
+                });
+            }
         );
-
-        setTimeout(() => {
-            set({ feedback: "Voilà, j'ai terminé ma nouvelle machine !" });
-            setTimeout(() => {
-                set({ phase: 'intro-discover-machine' });
-                get().updateInstruction();
-            }, FEEDBACK_DELAY);
-        }, FEEDBACK_DELAY * 2);
     },
 
     handleIntroMachineResponse: () => {
@@ -516,43 +521,52 @@ export const useStore = create<MachineState>((set, get) => ({
 
         set({ showResponseButtons: false });
 
+        const continueToNextPhase = () => {
+            textToSpeechService.speak("Prêt(e) à découvrir ses secrets ?");
+            set({ feedback: "Prêt(e) à découvrir ses secrets ?" });
+            
+            textToSpeechService.setCallbacks({
+                onEnd: () => {
+                    // Unlock units column when starting interaction
+                    const newCols = [...get().columns];
+                    newCols[0].unlocked = true;
+                    set({ columns: newCols, phase: 'intro-first-interaction' });
+                    get().updateInstruction();
+                }
+            });
+        };
+
         if (selectedResponse === 'belle') {
             sequenceFeedback(
                 "Merci ! J'ai passé beaucoup de temps dessus ! 😊",
-                "Tu vas voir, elle est aussi MAGIQUE que belle !"
+                "Tu vas voir, elle est aussi MAGIQUE que belle !",
+                continueToNextPhase
             );
         } else if (selectedResponse === 'bof') {
             sequenceFeedback(
                 "Haha ! Je comprends, elle n'a pas l'air très impressionnante comme ça ! 😅",
-                "Mais attends de voir ce qu'elle peut faire !"
+                "Mais attends de voir ce qu'elle peut faire !",
+                continueToNextPhase
             );
         } else if (selectedResponse === 'comprends-rien') {
             sequenceFeedback(
                 "C'est NORMAL ! Même moi j'avais du mal au début ! 😄",
-                "C'est justement pour ça qu'on va l'explorer ENSEMBLE !"
+                "C'est justement pour ça qu'on va l'explorer ENSEMBLE !",
+                continueToNextPhase
             );
         } else if (selectedResponse === 'cest-quoi') {
             sequenceFeedback(
                 "Excellente question ! 🎓 C'est une MACHINE À COMPTER !",
-                "Elle va nous apprendre comment fonctionnent les nombres !"
+                "Elle va nous apprendre comment fonctionnent les nombres !",
+                continueToNextPhase
             );
         } else { // timeout
             sequenceFeedback(
                 `Tu es peut-être un peu timide ${name} ? Pas de problème ! 😊`,
-                "Laisse-moi te la présenter..."
+                "Laisse-moi te la présenter...",
+                continueToNextPhase
             );
         }
-
-        setTimeout(() => {
-            set({ feedback: "Prêt(e) à découvrir ses secrets ?" });
-            setTimeout(() => {
-                // Unlock units column when starting interaction
-                const newCols = [...get().columns];
-                newCols[0].unlocked = true;
-                set({ columns: newCols, phase: 'intro-first-interaction' });
-                get().updateInstruction();
-            }, FEEDBACK_DELAY);
-        }, FEEDBACK_DELAY * 2);
     },
 
     handleIntroFirstClick: () => {
@@ -1608,9 +1622,44 @@ export const useStore = create<MachineState>((set, get) => ({
     },
 
 
-    sequenceFeedback: (first: string, second?: string) => {
-        const combined = second ? `${first} - ${second}` : first;
-        get().setFeedback(combined);
+    sequenceFeedback: (first: string, second?: string, onComplete?: () => void) => {
+        // Speak the first message
+        textToSpeechService.speak(first);
+        
+        // Display the first message immediately
+        get().setFeedback(first);
+        
+        // Set up callback for when first message finishes
+        textToSpeechService.setCallbacks({
+            onEnd: () => {
+                if (second) {
+                    // Speak and display the second message
+                    textToSpeechService.speak(second);
+                    get().setFeedback(`${first} - ${second}`);
+                    
+                    // Set up callback for second message completion
+                    textToSpeechService.setCallbacks({
+                        onEnd: () => {
+                            onComplete?.();
+                        }
+                    });
+                } else {
+                    onComplete?.();
+                }
+            }
+        });
+    },
+
+    // Helper function to speak a message and execute callback when done
+    speakAndThen: (message: string, onComplete?: () => void) => {
+        textToSpeechService.speak(message);
+        get().setFeedback(message);
+        
+        if (onComplete) {
+            textToSpeechService.setCallbacks({
+                onEnd: onComplete
+            });
+        }
     },
 
     handleAdd: (idx: number) => {

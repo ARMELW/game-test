@@ -46,7 +46,7 @@ export class VoiceHelper {
 
     return new Promise((resolve, reject) => {
       let finalTranscript = '';
-      let timeoutId: NodeJS.Timeout;
+      let timeoutId: ReturnType<typeof setTimeout>;
 
       this.isActive = true;
 
@@ -120,11 +120,14 @@ export class VoiceHelper {
     } = options;
 
     // Configuration
-    textToSpeechService.setConfig({
-      language,
+    textToSpeechService.setVoiceConfig({
       rate,
       pitch,
       volume
+    });
+    
+    textToSpeechService.setPersona({
+      language: language as any
     });
 
     // Callbacks

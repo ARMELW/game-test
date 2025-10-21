@@ -274,7 +274,7 @@ export interface MachineState {
     setTimer: (timer: number | null) => void;
 
     // Business logic
-    sequenceFeedback: (first: string, second: string, delay?: number) => void;
+    sequenceFeedback: (first: string, second?: string, onComplete?: () => void) => void;
     handleAdd: (idx: number) => void;
     handleSubtract: (idx: number) => void;
     handleSetValue: (value: string) => void;

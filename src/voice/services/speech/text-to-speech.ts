@@ -1,4 +1,4 @@
-import { defaultPersonaConfig, PersonaConfig } from './persona.types';
+import { defaultPersonaConfig, type PersonaConfig } from './persona.types';
 
 /**
  * Service global de synthèse vocale (Text-to-Speech)

@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
-import { speechToTextService, SpeechResult, SpeechToTextConfig } from '../services/speech/speech-to-text';
+import { speechToTextService, type SpeechResult, type SpeechToTextConfig } from '../services/speech/speech-to-text';
 
 export interface UseSpeechToTextOptions {
   config?: Partial<SpeechToTextConfig>;
