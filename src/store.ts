@@ -2900,7 +2900,7 @@ export const useStore = create<MachineState>((set, get) => ({
                             set({ columns: newCols });
                         }
                         // Set up for practice-hundred: start at 99
-                        const resetCols = initialColumns.map((col, i) => (i === 1 || i === 2) ? { ...col, unlocked: true } : col);
+                        const resetCols = initialColumns.map((col, i) => ({ ...col, unlocked: i === 0 || i === 1 || i === 2 }));
                         resetCols[1].value = 9;
                         resetCols[0].value = 9;
                         set({
@@ -3207,7 +3207,7 @@ export const useStore = create<MachineState>((set, get) => ({
                     const nextChallenge = HUNDREDS_CHALLENGES[challengeIndex + 1];
                     setTimeout(() => {
                         resetHundredsChallenge();
-                        const resetCols = initialColumns.map((col, i) => (i === 1 || i === 2) ? { ...col, unlocked: true } : col);
+                        const resetCols = initialColumns.map((col, i) => ({ ...col, unlocked: i === 0 || i === 1 || i === 2 }));
                         set({
                             phase: nextChallenge.phase,
                             columns: resetCols
@@ -3221,7 +3221,7 @@ export const useStore = create<MachineState>((set, get) => ({
                 sendNextGoal();
                 
                 const nextTarget = challenge.targets[hundredsTargetIndex + 1];
-                const resetCols = initialColumns.map((col, i) => (i === 1 || i === 2) ? { ...col, unlocked: true } : col);
+                const resetCols = initialColumns.map((col, i) => ({ ...col, unlocked: i === 0 || i === 1 || i === 2 }));
                 set({ hundredsTargetIndex: hundredsTargetIndex + 1, columns: resetCols });
                 sequenceFeedback(`✅ Correct ! ${newSuccessCount}/${challenge.targets.length} réussis !`, `Maintenant affiche **${nextTarget}** !`);
             }
@@ -3930,7 +3930,7 @@ export const useStore = create<MachineState>((set, get) => ({
                 newCols[nextIdx].unlocked = true;
                 set({ columns: newCols });
                 setTimeout(() => {
-                    const resetCols = initialColumns.map((col, i) => (i === 1 || i === 2) ? { ...col, unlocked: true } : col);
+                    const resetCols = initialColumns.map((col, i) => ({ ...col, unlocked: i === 0 || i === 1 || i === 2 }));
                     set({
                         columns: resetCols,
                         phase: 'learn-hundreds',
