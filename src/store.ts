@@ -3732,7 +3732,7 @@ export const useStore = create<MachineState>((set, get) => ({
                 newInstruction = "Regarde ! 👀 La machine compte par dizaines : 40, 50, 60...";
                 break;
             case 'learn-tens-combination':
-                newInstruction = "🎯 Observe comment on combine dizaines et unités pour former des nombres !";
+                newInstruction = "Regarde maintenant la MAGIE des paquets ! 🎯 La machine va montrer comment assembler 1 paquet + 2 billes = DOUZE, puis 2 paquets + 5 billes = VINGT-CINQ ! C'est comme des LEGO ! 🧱";
                 break;
             case 'challenge-tens-1':
             case 'challenge-tens-2':
@@ -3771,10 +3771,10 @@ export const useStore = create<MachineState>((set, get) => ({
                 newInstruction = "Regarde ! 👀 La machine compte par centaines : 300, 400, 500...";
                 break;
             case 'learn-hundreds-simple-combination':
-                newInstruction = "🎯 Observe des exemples SIMPLES avec les centaines !";
+                newInstruction = "Maintenant les GRANDS paquets de 100 ! 📦 La machine va montrer : 1 GRAND paquet = CENT, puis 1 GRAND + 1 paquet = CENT-DIX ! C'est facile d'assembler les paquets ! 🎁";
                 break;
             case 'learn-hundreds-combination':
-                newInstruction = "🎯 Observe comment on combine centaines, dizaines et unités !";
+                newInstruction = "Maintenant on assemble TOUT ! 📦📦📦 La machine va montrer : 1 GRAND paquet + 2 paquets + 3 billes = CENT-VINGT-TROIS ! Comme une tour de LEGO avec 3 étages ! 🏗️";
                 break;
             case 'challenge-hundreds-1':
             case 'challenge-hundreds-2':
@@ -3819,7 +3819,7 @@ export const useStore = create<MachineState>((set, get) => ({
                 newInstruction = "Regarde ! 👀 La machine compte par milliers : 3000, 4000, 5000... Imagine combien de billes ça fait !";
                 break;
             case 'learn-thousands-very-simple-combination':
-                newInstruction = "🎯 Observe les combinaisons SIMPLES avec des nombres RONDS : 1000, 1100, 2000, 2500...";
+                newInstruction = "Les ÉNORMES paquets de 1000 ! 🎁✨ La machine va montrer : 1 ÉNORME paquet = MILLE, puis 1 ÉNORME + 1 GRAND = MILLE-CENT ! C'est magique d'assembler de si grands nombres ! 🚀";
                 break;
             case 'challenge-thousands-simple-combination': {
                 const challenge = THOUSANDS_SIMPLE_COMBINATION_CHALLENGES[0];
@@ -3828,10 +3828,10 @@ export const useStore = create<MachineState>((set, get) => ({
                 break;
             }
             case 'learn-thousands-full-combination':
-                newInstruction = "🎯 Maintenant regarde les nombres COMPLETS : 1234, 2345... Décomposition : 1 énorme + 2 grands + 3 paquets + 4 billes !";
+                newInstruction = "Prépare-toi pour le GRAND spectacle ! 🎪 La machine va montrer comment assembler TOUS les paquets ensemble : 1 ÉNORME + 2 GRANDS + 3 paquets + 4 billes = MILLE-DEUX-CENT-TRENTE-QUATRE ! Tu es un CHAMPION ! 🏆";
                 break;
             case 'learn-thousands-combination':
-                newInstruction = "🎯 Observe comment on combine tous les chiffres pour former des grands nombres !";
+                newInstruction = "Le niveau EXPERT ! 🎓 Regarde comment la machine assemble les plus GRANDS nombres en combinant ÉNORMES paquets + GRANDS paquets + paquets + billes ! C'est impressionnant ! 💪";
                 break;
             case 'challenge-thousands-1':
             case 'challenge-thousands-2':
