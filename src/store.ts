@@ -1976,7 +1976,7 @@ export const useStore = create<MachineState>((set, get) => ({
                 // Reached 20!
                 sequenceFeedback("💥 VINGT ! 2 paquets de 10 !", "🎉 BRAVO ! Tu as compris la COMBINAISON ! 10 + 1 = 11, 10 + 2 = 12... jusqu'à 10 + 10 = 20 ! C'est comme assembler des LEGO ! 🧱");
                 setTimeout(() => {
-                    const resetCols = initialColumns.map((col, i) => i === 1 ? { ...col, unlocked: true } : col);
+                    const resetCols = initialColumns.map((col, i) => ({ ...col, unlocked: i === 0 || i === 1 }));
                     set({
                         columns: resetCols,
                         phase: 'challenge-ten-to-twenty'
@@ -2026,7 +2026,7 @@ export const useStore = create<MachineState>((set, get) => ({
                 // Reached 30!
                 sequenceFeedback("💥 TRENTE ! TROIS paquets de 10 !", "Bravo ! 🎉 Tu as compris que c'est le même principe que 9→10 et 19→20 !");
                 setTimeout(() => {
-                    const resetCols = initialColumns.map((col, i) => i === 1 ? { ...col, unlocked: true } : col);
+                    const resetCols = initialColumns.map((col, i) => ({ ...col, unlocked: i === 0 || i === 1 }));
                     // Now move to learn-tens which will start at 30 and count to 90
                     set({
                         columns: resetCols,
@@ -2819,7 +2819,7 @@ export const useStore = create<MachineState>((set, get) => ({
                 sendNextGoal();
                 
                 const nextTarget = challenge.targets[tenToTwentyTargetIndex + 1];
-                const resetCols = initialColumns.map((col, i) => i === 1 ? { ...col, unlocked: true } : col);
+                const resetCols = initialColumns.map((col, i) => ({ ...col, unlocked: i === 0 || i === 1 }));
                 set({ tenToTwentyTargetIndex: tenToTwentyTargetIndex + 1, columns: resetCols });
                 sequenceFeedback(`✅ Correct ! ${newSuccessCount}/${challenge.targets.length} réussis !`, `Maintenant affiche **${nextTarget}** !`);
             }
@@ -2918,7 +2918,7 @@ export const useStore = create<MachineState>((set, get) => ({
                         sendNextGoal();
                         
                         resetTensChallenge();
-                        const resetCols = initialColumns.map((col, i) => i === 1 ? { ...col, unlocked: true } : col);
+                        const resetCols = initialColumns.map((col, i) => ({ ...col, unlocked: i === 0 || i === 1 }));
                         set({
                             phase: nextChallenge.phase,
                             columns: resetCols
@@ -2935,7 +2935,7 @@ export const useStore = create<MachineState>((set, get) => ({
                 sendNextGoal();
                 
                 const nextTarget = challenge.targets[tensTargetIndex + 1];
-                const resetCols = initialColumns.map((col, i) => i === 1 ? { ...col, unlocked: true } : col);
+                const resetCols = initialColumns.map((col, i) => ({ ...col, unlocked: i === 0 || i === 1 }));
                 set({ tensTargetIndex: tensTargetIndex + 1, columns: resetCols });
                 sequenceFeedback(`✅ Correct ! ${newSuccessCount}/${challenge.targets.length} réussis !`, `Maintenant affiche **${nextTarget}** !`);
             }
@@ -3875,7 +3875,7 @@ export const useStore = create<MachineState>((set, get) => ({
     startLearningPhase: () => {
         const { phase, sequenceFeedback } = get();
         if (phase === 'done') {
-            const newCols = initialColumns.map((col, i) => i === 1 ? { ...col, unlocked: true } : col);
+            const newCols = initialColumns.map((col, i) => ({ ...col, unlocked: i === 0 || i === 1 }));
             set({
                 columns: newCols,
                 nextPhaseAfterAuto: 'challenge-unit-1',
