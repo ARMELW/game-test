@@ -1709,7 +1709,9 @@ export const useStore = create<MachineState>((set, get) => ({
                 if (newCols[0].value === 9 && newCols[1].value === 9) {
                     setTimeout(() => {
                         get().completeIntroMaxGuided();
+
                     }, 500);
+                    //il faut que ca passe a intro idi
                 } else if (newCols[0].value === 9 && newCols[1].value < 9) {
                     set({ feedback: "Parfait ! Le premier rouleau est à 9 ! Maintenant clique sur △ du DEUXIÈME rouleau !" });
                 }
@@ -2647,6 +2649,8 @@ export const useStore = create<MachineState>((set, get) => ({
         if (challengeIndex === -1) return;
 
         const challenge = UNIT_CHALLENGES[challengeIndex];
+
+        console.log('Validating learning challenge:', phase);
         const targetNumber = challenge.targets[unitTargetIndex];
         const currentNumber = columns[0].value;
 

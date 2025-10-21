@@ -3,7 +3,8 @@ import { useStore } from './store.ts';
 import { UnityGame } from './components/UnityGame';
 import { parse, useUnity } from './hooks/useUnity';
 
-
+const store = useStore.getState();
+store.setPhase('challenge-unit-1');
 
 function MachineANombres() {
   const {
@@ -49,9 +50,7 @@ function MachineANombres() {
     setSelectedResponse,
     handleIntroNameSubmit,
     handleIntroMachineResponse,
-    handleIntroDigitsSubmit,
-    handleIntroSecondColumnChoice,
-    handleIntroMaxSubmit,
+  handleIntroSecondColumnChoice,
     introMaxAttempt,
   } = useStore();
 
@@ -85,7 +84,7 @@ function MachineANombres() {
       if (value === 10) return 1;     // tens
       if (value === 100) return 2;    // hundreds
       if (value === 1000) return 3;   // thousands
-      return 0; // default to units
+      return 0;
     };
 
     const columnIndex = getColumnIndex(parsedData.numericValue);
@@ -260,20 +259,6 @@ function MachineANombres() {
       if (phase === 'intro-welcome' && isUnit) {
         lockUnits = false;
       }
-      else if (phase === 'intro-first-interaction' && isUnit) {
-        lockUnits = false;
-      }
-      else if (phase === 'intro-discover-carry' && (isUnit || isTen)) {
-        lockUnits = !isUnit;
-        lockTens = !isTen;
-      }
-      else if (phase === 'intro-count-digits' && isUnit) {
-        lockUnits = false;
-      }
-      else if (phase === 'intro-max-value-question' && introMaxAttempt === -1 && (isUnit || isTen)) {
-        lockUnits = !isUnit;
-        lockTens = !isTen;
-      }
       else if (phase === 'intro-discover' && isUnit) {
         lockUnits = false;
       }
@@ -372,6 +357,7 @@ function MachineANombres() {
         border: '1px solid #cbd5e1',
       }}>
 
+          <p>{phase}</p>
         <div style={{
           width: '100%',
           height: '450px',
@@ -495,88 +481,6 @@ function MachineANombres() {
                   }}
                 >
                   ✓ Continuer
-                </button>
-              </>
-            ) : phase === 'intro-count-digits' ? (
-              // Number input for digit count
-              <>
-                <input
-                  type="number"
-                  value={userInput}
-                  onChange={(e) => setUserInput(e.target.value)}
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter') {
-                      handleIntroDigitsSubmit();
-                    }
-                  }}
-                  placeholder="Nombre de chiffres..."
-                  style={{
-                    fontSize: 16,
-                    padding: '8px 12px',
-                    borderRadius: 6,
-                    border: '2px solid #cbd5e1',
-                    width: '150px',
-                    textAlign: 'center',
-                    marginRight: 8
-                  }}
-                />
-                <button
-                  onClick={handleIntroDigitsSubmit}
-                  style={{
-                    fontSize: 16,
-                    padding: '8px 20px',
-                    background: 'linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%)',
-                    color: '#fff',
-                    border: 'none',
-                    borderRadius: 8,
-                    cursor: 'pointer',
-                    fontWeight: 'bold',
-                    boxShadow: '0 4px 8px rgba(14, 165, 233, 0.3)',
-                    transition: 'all 0.2s ease'
-                  }}
-                >
-                  ✓ Valider
-                </button>
-              </>
-            ) : phase === 'intro-max-value-question' ? (
-              // Number input for max value
-              <>
-                <input
-                  type="number"
-                  value={userInput}
-                  onChange={(e) => setUserInput(e.target.value)}
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter') {
-                      handleIntroMaxSubmit();
-                    }
-                  }}
-                  placeholder="Maximum..."
-                  style={{
-                    fontSize: 16,
-                    padding: '8px 12px',
-                    borderRadius: 6,
-                    border: '2px solid #cbd5e1',
-                    width: '120px',
-                    textAlign: 'center',
-                    marginRight: 8
-                  }}
-                />
-                <button
-                  onClick={handleIntroMaxSubmit}
-                  style={{
-                    fontSize: 16,
-                    padding: '8px 20px',
-                    background: 'linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%)',
-                    color: '#fff',
-                    border: 'none',
-                    borderRadius: 8,
-                    cursor: 'pointer',
-                    fontWeight: 'bold',
-                    boxShadow: '0 4px 8px rgba(14, 165, 233, 0.3)',
-                    transition: 'all 0.2s ease'
-                  }}
-                >
-                  ✓ Valider
                 </button>
               </>
             ) : (
