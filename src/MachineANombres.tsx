@@ -130,8 +130,8 @@ function MachineANombres() {
       }
      
     },
-    [handleAdd, handleSubtract, phase]
-  ); // eslint-disable-line react-hooks/exhaustive-deps
+    [handleAdd, handleSubtract, phase, handleSetValue]
+  );
 
   // Handle manual validation button click
   const handleManualValidation = useCallback(() => {
