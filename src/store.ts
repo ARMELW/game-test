@@ -1670,6 +1670,8 @@ export const useStore = create<MachineState>((set, get) => ({
                     }, 500);
                 } else {
                     set({ columns: newCols });
+                    // Update instruction to reflect the new state
+                    get().updateInstruction();
                 }
             }
             return;
@@ -1709,6 +1711,9 @@ export const useStore = create<MachineState>((set, get) => ({
                 } else if (newCols[0].value === 9 && newCols[1].value < 9) {
                     set({ feedback: "Parfait ! Le premier rouleau est à 9 ! Maintenant clique sur △ du DEUXIÈME rouleau !" });
                 }
+                
+                // Update instruction to reflect the new state
+                get().updateInstruction();
             }
             return;
         }
