@@ -133,6 +133,22 @@ function MachineANombres() {
 
   // Handle manual validation button click
   const handleManualValidation = useCallback(() => {
+    // Prevent duplicate validations within 500ms window
+    const now = Date.now();
+    if (validationInProgressRef.current || (now - lastValidationTimeRef.current) < 500) {
+      console.log("Validation skipped - too soon after previous validation");
+      return;
+    }
+    
+    // Set validation lock
+    validationInProgressRef.current = true;
+    lastValidationTimeRef.current = now;
+    
+    // Release lock after a short delay to allow validation to complete
+    setTimeout(() => {
+      validationInProgressRef.current = false;
+    }, 100);
+    
     // Trigger appropriate validation based on current phase
     if (phase === "challenge-ten-to-twenty") {
       handleValidateTenToTwenty();
@@ -187,6 +203,10 @@ function MachineANombres() {
   const [isTypingInstruction, setIsTypingInstruction] = useState(false);
   const [isTypingFeedback, setIsTypingFeedback] = useState(false);
   const typingTimeoutRef = useRef<number | null>(null);
+  
+  // Validation lock to prevent duplicate validations
+  const validationInProgressRef = useRef(false);
+  const lastValidationTimeRef = useRef(0);
 
   useEffect(() => {
     init();
