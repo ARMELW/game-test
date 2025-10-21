@@ -2,6 +2,7 @@ import { useEffect, useCallback, useMemo, useState, useRef } from "react";
 import { useStore } from "./store.ts";
 import { UnityGame } from "./components/UnityGame";
 import { parse, useUnity } from "./hooks/useUnity";
+import { UI_MESSAGES } from "./instructions.ts";
 
 const store = useStore.getState();
 store.setPhase("challenge-tens-1");
@@ -509,10 +510,10 @@ function MachineANombres() {
                 }}
               >
                 {phase === "celebration-before-thousands"
-                  ? "🚀 DÉMARRER L'APPRENTISSAGE DES MILLIERS"
+                  ? UI_MESSAGES.buttons.startLearning.thousands
                   : phase === "celebration-thousands-complete"
-                    ? "🎮 MODE LIBRE : CRÉE TES NOMBRES !"
-                    : "Commencer l'apprentissage"}
+                    ? UI_MESSAGES.buttons.startLearning.freeMode
+                    : UI_MESSAGES.buttons.startLearning.default}
               </button>
             )}
             {showUnlockButton && (
@@ -544,7 +545,7 @@ function MachineANombres() {
                     "0 4px 8px rgba(139, 92, 246, 0.3)";
                 }}
               >
-                🔓 Débloquer la colonne suivante
+                {UI_MESSAGES.buttons.unlock}
               </button>
             )}
           </div>
