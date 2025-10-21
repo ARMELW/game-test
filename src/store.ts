@@ -1885,10 +1885,9 @@ export const useStore = create<MachineState>((set, get) => ({
                     set({
                         columns: resetCols,
                         addClicks: 0,
-                        phase: 'challenge-unit-1',
                         isTransitioningToChallenge: false
                     });
-                    get().updateButtonVisibility();
+                    get().setPhase('challenge-unit-1');
                     get().setFeedback(`🎯 DÉFI 1 : Affiche le nombre **${UNIT_CHALLENGES[0].targets[0]}** avec les boutons, puis clique sur VALIDER !`);
                 }, FEEDBACK_DELAY * 2);
                 return;
@@ -1978,11 +1977,10 @@ export const useStore = create<MachineState>((set, get) => ({
                 setTimeout(() => {
                     const resetCols = initialColumns.map((col, i) => ({ ...col, unlocked: i === 0 || i === 1 }));
                     set({
-                        columns: resetCols,
-                        phase: 'challenge-ten-to-twenty'
+                        columns: resetCols
                     });
                     get().resetTenToTwentyChallenge();
-                    get().updateButtonVisibility();
+                    get().setPhase('challenge-ten-to-twenty');
                     get().setFeedback(`🎯 Mini-défi ! Montre-moi **DOUZE** (12) avec les boutons !`);
                 }, FEEDBACK_DELAY * 2);
             } else if (unitsValue === 1 && tensValue === 1) {
@@ -2131,11 +2129,10 @@ export const useStore = create<MachineState>((set, get) => ({
                 setTimeout(() => {
                     const resetCols = initialColumns.map((col, i) => ({ ...col, unlocked: i <= 2 }));
                     set({
-                        columns: resetCols,
-                        phase: 'challenge-hundred-to-two-hundred'
+                        columns: resetCols
                     });
                     get().resetHundredToTwoHundredChallenge();
-                    get().updateButtonVisibility();
+                    get().setPhase('challenge-hundred-to-two-hundred');
                     get().setFeedback(`🎯 Mini-défi ! Montre-moi **${HUNDRED_TO_TWO_HUNDRED_CHALLENGES[0].targets[0]}** (CENT-DIX) !`);
                 }, FEEDBACK_DELAY * 2);
             } else if (tensValue === 2 && unitsValue === 0) {
@@ -2185,11 +2182,10 @@ export const useStore = create<MachineState>((set, get) => ({
                 setTimeout(() => {
                     const resetCols = initialColumns.map((col, i) => ({ ...col, unlocked: i <= 2 }));
                     set({
-                        columns: resetCols,
-                        phase: 'challenge-two-hundred-to-three-hundred'
+                        columns: resetCols
                     });
                     get().resetTwoHundredToThreeHundredChallenge();
-                    get().updateButtonVisibility();
+                    get().setPhase('challenge-two-hundred-to-three-hundred');
                     get().setFeedback(`🎯 Mini-défi ! Montre-moi **${TWO_HUNDRED_TO_THREE_HUNDRED_CHALLENGES[0].targets[0]}** (DEUX-CENT-DIX) !`);
                 }, FEEDBACK_DELAY * 2);
             } else if (number === 299) {
@@ -2338,11 +2334,10 @@ export const useStore = create<MachineState>((set, get) => ({
                 setTimeout(() => {
                     const resetCols = initialColumns.map((col) => ({ ...col, unlocked: true }));
                     set({
-                        columns: resetCols,
-                        phase: 'challenge-thousand-to-two-thousand'
+                        columns: resetCols
                     });
                     get().resetThousandToTwoThousandChallenge();
-                    get().updateButtonVisibility();
+                    get().setPhase('challenge-thousand-to-two-thousand');
                     get().setFeedback(`🎯 Mini-défis 1000-2000 ! Montre-moi **${THOUSAND_TO_TWO_THOUSAND_CHALLENGES[0].targets[0]}** (MILLE-UN) !`);
                 }, FEEDBACK_DELAY * 2);
             } else if (number === 1999) {
@@ -2382,11 +2377,10 @@ export const useStore = create<MachineState>((set, get) => ({
                 setTimeout(() => {
                     const resetCols = initialColumns.map((col) => ({ ...col, unlocked: true }));
                     set({
-                        columns: resetCols,
-                        phase: 'challenge-two-thousand-to-three-thousand'
+                        columns: resetCols
                     });
                     get().resetTwoThousandToThreeThousandChallenge();
-                    get().updateButtonVisibility();
+                    get().setPhase('challenge-two-thousand-to-three-thousand');
                     get().setFeedback(`🎯 Mini-défi ! Montre-moi **${TWO_THOUSAND_TO_THREE_THOUSAND_CHALLENGES[0].targets[0]}** (DEUX-MILLE) !`);
                 }, FEEDBACK_DELAY * 2);
             } else if (number === 2999) {
@@ -2629,10 +2623,9 @@ export const useStore = create<MachineState>((set, get) => ({
                     newCols[0].unlocked = true;
                     resetUnitChallenge();
                     set({
-                        columns: newCols,
-                        phase: 'challenge-unit-1'
+                        columns: newCols
                     });
-                    get().updateButtonVisibility();
+                    get().setPhase('challenge-unit-1');
                     get().setFeedback(`Bravo ! 🎉 Maintenant, DÉFI 1 : Affiche le nombre **${UNIT_CHALLENGES[0].targets[0]}** avec les boutons, puis clique sur VALIDER !`);
                 }, FEEDBACK_DELAY);
             } else if (unitsValue > 0) {
@@ -2923,10 +2916,9 @@ export const useStore = create<MachineState>((set, get) => ({
                     resetTensChallenge();
                     const resetCols = initialColumns.map((col, i) => ({ ...col, unlocked: i === 0 || i === 1 }));
                     set({
-                        phase: nextChallenge.phase,
                         columns: resetCols
                     });
-                    get().updateButtonVisibility();
+                    get().setPhase(nextChallenge.phase);
                     get().setFeedback(`🎯 DÉFI ${challengeIndex + 2} : Affiche le nombre **${nextChallenge.targets[0]}** !`);
                 }, FEEDBACK_DELAY * 2);
             }
@@ -3204,10 +3196,9 @@ export const useStore = create<MachineState>((set, get) => ({
                         resetHundredsChallenge();
                         const resetCols = initialColumns.map((col, i) => ({ ...col, unlocked: i === 0 || i === 1 || i === 2 }));
                         set({
-                            phase: nextChallenge.phase,
                             columns: resetCols
                         });
-                        get().updateButtonVisibility();
+                        get().setPhase(nextChallenge.phase);
                         get().setFeedback(`🎯 DÉFI ${challengeIndex + 2} : Affiche le nombre **${nextChallenge.targets[0]}** !`);
                     }, FEEDBACK_DELAY * 2);
                 }
@@ -3572,10 +3563,9 @@ export const useStore = create<MachineState>((set, get) => ({
                         resetThousandsChallenge();
                         const resetCols = get().columns.map((col: Column) => ({ ...col, unlocked: true }));
                         set({
-                            phase: nextChallenge.phase,
                             columns: resetCols
                         });
-                        get().updateButtonVisibility();
+                        get().setPhase(nextChallenge.phase);
                         get().setFeedback(`🎯 DÉFI ${challengeIndex + 2} : Affiche le nombre **${nextChallenge.targets[0]}** !`);
                     }, FEEDBACK_DELAY * 2);
                 }
