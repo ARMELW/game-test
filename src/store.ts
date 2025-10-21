@@ -227,14 +227,14 @@ export const useStore = create<MachineState>((set, get) => ({
             set({ showInputField: true, feedback: "", instruction: "" });
         } else if (phase === 'intro-discover-machine') {
             set({ showResponseButtons: true, selectedResponse: null });
-            // Auto-timeout after 10 seconds if no response
+            // Auto-timeout after 60 seconds if no response
             const newTimer = setTimeout(() => {
                 const currentState = get();
                 if (currentState.phase === 'intro-discover-machine' && !currentState.selectedResponse) {
                     currentState.setSelectedResponse('timeout');
                     currentState.handleIntroMachineResponse();
                 }
-            }, 10000);
+            }, 60000);
             set({ timer: newTimer as unknown as number });
         } else if (phase === 'intro-welcome') {
             const newTimer = setTimeout(() => {
