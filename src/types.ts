@@ -186,6 +186,7 @@ export interface MachineState {
   introDigitsAttempt: number;
   introMaxAttempt: number;
   introBorrowAnimationShown: boolean;
+  introCarryAnimationShown: boolean;
   showResponseButtons: boolean;
   selectedResponse: string | null;
 
@@ -232,6 +233,7 @@ export interface MachineState {
     setIntroDigitsAttempt: (attempt: number) => void;
     setIntroMaxAttempt: (attempt: number) => void;
     setIntroBorrowAnimationShown: (shown: boolean) => void;
+    setIntroCarryAnimationShown: (shown: boolean) => void;
     setShowResponseButtons: (show: boolean) => void;
     setSelectedResponse: (response: string | null) => void;
     setUnitTargetIndex: (index: number) => void;
