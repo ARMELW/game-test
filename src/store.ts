@@ -2815,9 +2815,6 @@ export const useStore = create<MachineState>((set, get) => ({
                 // Send next goal message to Unity
                 sendNextGoal();
                 
-                // Send next goal message to Unity
-                sendNextGoal();
-                
                 const nextTarget = challenge.targets[tenToTwentyTargetIndex + 1];
                 const resetCols = initialColumns.map((col, i) => ({ ...col, unlocked: i === 0 || i === 1 }));
                 set({ tenToTwentyTargetIndex: tenToTwentyTargetIndex + 1, columns: resetCols });
@@ -4117,29 +4114,43 @@ useStore.subscribe(
 
         // Get the appropriate index based on the current phase
         let currentIndex = 0;
+        let previousIndex = 0;
         if (state.phase.startsWith('challenge-unit-')) {
             currentIndex = state.unitTargetIndex;
+            previousIndex = previousState.unitTargetIndex;
         } else if (state.phase === 'challenge-ten-to-twenty') {
             currentIndex = state.tenToTwentyTargetIndex;
+            previousIndex = previousState.tenToTwentyTargetIndex;
         } else if (state.phase.startsWith('challenge-tens-')) {
             currentIndex = state.tensTargetIndex;
+            previousIndex = previousState.tensTargetIndex;
         } else if (state.phase === 'challenge-hundred-to-two-hundred') {
             currentIndex = state.hundredToTwoHundredTargetIndex;
+            previousIndex = previousState.hundredToTwoHundredTargetIndex;
         } else if (state.phase === 'challenge-two-hundred-to-three-hundred') {
             currentIndex = state.twoHundredToThreeHundredTargetIndex;
+            previousIndex = previousState.twoHundredToThreeHundredTargetIndex;
         } else if (state.phase.startsWith('challenge-hundreds-')) {
             currentIndex = state.hundredsTargetIndex;
+            previousIndex = previousState.hundredsTargetIndex;
         } else if (state.phase === 'challenge-thousand-to-two-thousand') {
             currentIndex = state.thousandToTwoThousandTargetIndex;
+            previousIndex = previousState.thousandToTwoThousandTargetIndex;
         } else if (state.phase === 'challenge-two-thousand-to-three-thousand') {
             currentIndex = state.twoThousandToThreeThousandTargetIndex;
+            previousIndex = previousState.twoThousandToThreeThousandTargetIndex;
         } else if (state.phase === 'challenge-thousands-simple-combination') {
             currentIndex = state.thousandsSimpleCombinationTargetIndex;
+            previousIndex = previousState.thousandsSimpleCombinationTargetIndex;
         } else if (state.phase.startsWith('challenge-thousands-')) {
             currentIndex = state.thousandsTargetIndex;
+            previousIndex = previousState.thousandsTargetIndex;
         }
         
-        sendRemainingTargetsToUnity(state.phase, currentIndex);
+        // Only send remaining targets to Unity when phase changes or target index changes
+        if (state.phase !== previousState.phase || currentIndex !== previousIndex) {
+            sendRemainingTargetsToUnity(state.phase, currentIndex);
+        }
         // Handle intro-welcome phase transition
         if (state.phase === 'intro-welcome') {
             // Clear any existing timer first
