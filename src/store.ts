@@ -502,7 +502,6 @@ export const useStore = create<MachineState>((set, get) => ({
             "(Bruits de marteau sur du métal et de perceuse) Paf, Crac… Bim… Tchac ! Quel vacarme !",
             () => {
                 // After both messages are spoken, show the next message
-                textToSpeechService.speak("Voilà, j'ai terminé ma nouvelle machine !");
                 set({ feedback: "Voilà, j'ai terminé ma nouvelle machine !" });
                 
                 textToSpeechService.setCallbacks({
@@ -511,6 +510,8 @@ export const useStore = create<MachineState>((set, get) => ({
                         get().updateInstruction();
                     }
                 });
+                
+                textToSpeechService.speak("Voilà, j'ai terminé ma nouvelle machine !");
             }
         );
     },
@@ -522,7 +523,6 @@ export const useStore = create<MachineState>((set, get) => ({
         set({ showResponseButtons: false });
 
         const continueToNextPhase = () => {
-            textToSpeechService.speak("Prêt(e) à découvrir ses secrets ?");
             set({ feedback: "Prêt(e) à découvrir ses secrets ?" });
             
             textToSpeechService.setCallbacks({
@@ -534,6 +534,8 @@ export const useStore = create<MachineState>((set, get) => ({
                     get().updateInstruction();
                 }
             });
+            
+            textToSpeechService.speak("Prêt(e) à découvrir ses secrets ?");
         };
 
         if (selectedResponse === 'belle') {
@@ -1628,36 +1630,37 @@ export const useStore = create<MachineState>((set, get) => ({
 
 
     sequenceFeedback: (first: string, second?: string, onComplete?: () => void) => {
-        // Speak the first message
-        textToSpeechService.speak(first);
-        
         // Display the first message immediately
         get().setFeedback(first);
         
-        // Set up callback for when first message finishes
+        // Set up callback for when first message finishes BEFORE speaking
         textToSpeechService.setCallbacks({
             onEnd: () => {
                 if (second) {
-                    // Speak and display the second message
-                    textToSpeechService.speak(second);
+                    // Display the second message
                     get().setFeedback(`${first} - ${second}`);
                     
-                    // Set up callback for second message completion
+                    // Set up callback for second message completion BEFORE speaking
                     textToSpeechService.setCallbacks({
                         onEnd: () => {
                             onComplete?.();
                         }
                     });
+                    
+                    // Speak the second message
+                    textToSpeechService.speak(second);
                 } else {
                     onComplete?.();
                 }
             }
         });
+        
+        // Speak the first message (callbacks are already set)
+        textToSpeechService.speak(first);
     },
 
     // Helper function to speak a message and execute callback when done
     speakAndThen: (message: string, onComplete?: () => void) => {
-        textToSpeechService.speak(message);
         get().setFeedback(message);
         
         if (onComplete) {
@@ -1665,6 +1668,8 @@ export const useStore = create<MachineState>((set, get) => ({
                 onEnd: onComplete
             });
         }
+        
+        textToSpeechService.speak(message);
     },
 
     handleAdd: (idx: number) => {

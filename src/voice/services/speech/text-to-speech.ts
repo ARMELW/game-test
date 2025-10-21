@@ -64,12 +64,18 @@ class TextToSpeechService {
 
     utterance.onend = () => {
       this.currentUtterance = null;
-      this.callbacks.onEnd?.();
+      const endCallback = this.callbacks.onEnd;
+      // Clear callbacks after they fire to prevent them from being reused
+      this.callbacks = {};
+      endCallback?.();
     };
 
     utterance.onerror = (event) => {
       this.currentUtterance = null;
-      this.callbacks.onError?.(event.error);
+      const errorCallback = this.callbacks.onError;
+      // Clear callbacks after they fire to prevent them from being reused
+      this.callbacks = {};
+      errorCallback?.(event.error);
     };
 
     utterance.onpause = () => {
@@ -84,7 +90,8 @@ class TextToSpeechService {
   }
 
   setCallbacks(callbacks: TextToSpeechCallbacks) {
-    this.callbacks = { ...this.callbacks, ...callbacks };
+    // Replace callbacks instead of merging to avoid callback pollution from previous utterances
+    this.callbacks = callbacks;
   }
 
   setVoiceConfig(config: Partial<TextToSpeechConfig>) {
