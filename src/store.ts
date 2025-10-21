@@ -27,6 +27,14 @@ import {
     getSolutionAnimationStep,
     getGuidedClickFeedback
 } from './feedbackSystem.ts';
+import {
+    PHASE_INSTRUCTIONS,
+    CHALLENGE_INSTRUCTIONS,
+    SEQUENCE_FEEDBACK,
+    ERROR_MESSAGES,
+    HELP_CHOICE_MESSAGES,
+    GUIDED_MESSAGES,
+} from './instructions.ts';
 import { sendChallengeListToUnity, setValue, sendCorrectValue, sendWrongValue, sendNextGoal } from './unityBridge.ts';
 
 export const initialColumns: Column[] = [
@@ -82,6 +90,8 @@ function sendChallengeToUnity(phase: string) {
 }
 
 // Helper function to send remaining targets to Unity based on phase and current index
+// Currently unused but may be needed in the future
+/* 
 function sendRemainingTargetsToUnity(phase: string, currentIndex: number) {
     let targets: number[] = [];
     
@@ -125,6 +135,7 @@ function sendRemainingTargetsToUnity(phase: string, currentIndex: number) {
         sendChallengeListToUnity(targets);
     }
 }
+*/
 export const useStore = create<MachineState>((set, get) => ({
 
     columns: initialColumns,
@@ -3625,81 +3636,83 @@ export const useStore = create<MachineState>((set, get) => ({
         switch (phase) {
             // ... (cases from your existing updateInstruction)
             case 'intro-welcome-personalized':
-                newInstruction = "Bonjour ! Bienvenue dans mon atelier ! 👋 Comment tu t'appelles ? (Tu peux aussi sauter cette étape)";
+                newInstruction = PHASE_INSTRUCTIONS['intro-welcome-personalized'];
                 break;
             case 'intro-discover-machine':
-                newInstruction = `Oh, tu es là ${get().userName || 'l\'enfant'} ? Je ne t'avais pas entendu arriver avec tout ce bruit ! J'étais justement en train de terminer cette invention... qui va nous permettre de compter toutes sortes de choses ! Tu es prêt(e) à la découvrir ? Tadaaaaa ! 🎉 Comment tu la trouves ?`;
+                newInstruction = typeof PHASE_INSTRUCTIONS['intro-discover-machine'] === 'function' 
+                    ? PHASE_INSTRUCTIONS['intro-discover-machine'](get().userName) 
+                    : PHASE_INSTRUCTIONS['intro-discover-machine'];
                 break;
             case 'intro-first-interaction':
                 if (get().introClickCount === 0) {
-                    newInstruction = "Bon, elle peut paraître un peu compliquée comme ça... mais elle n'aura bientôt plus de secrets pour toi ! Grâce à cette machine bizarre, nous allons comprendre comment fonctionnent les nombres ! Et hop, je vais la mettre en route ! (Animation + bruit d'allumage : bzzzz, clic, ding !) Maintenant tu peux appuyer sur ses boutons ! Clique sur le bouton △ VERT pour voir ce qu'il se passe !";
+                    newInstruction = PHASE_INSTRUCTIONS['intro-first-interaction'].initial;
                 } else if (get().introClickCount < 9) {
-                    newInstruction = `Continue à cliquer sur △ pour remplir la machine !`;
+                    newInstruction = PHASE_INSTRUCTIONS['intro-first-interaction'].continuing;
                 } else {
-                    newInstruction = "La machine est pleine ! Essaie maintenant le bouton ROUGE ∇ pour voir ce qu'il fait !";
+                    newInstruction = PHASE_INSTRUCTIONS['intro-first-interaction'].full;
                 }
                 break;
             case 'intro-count-digits':
-                newInstruction = "Maintenant, une petite question pour voir si tu as bien regardé ! 🤔 Te rappelles-tu combien de chiffres DIFFÉRENTS tu as vu ? Prends ton temps pour réfléchir... 🤔";
+                newInstruction = PHASE_INSTRUCTIONS['intro-count-digits'];
                 break;
             case 'intro-second-column':
-                newInstruction = "Bon, tout ça c'est très bien... Mais j'ai un PROBLÈME ! 🤔 Comment va-t-on faire pour compter plus haut que 9 ? Pour l'instant, la machine BLOQUE à 9 ! Tu vois ? Ça ne bouge plus ! 😅 À ton avis, que peut-on faire ?";
+                newInstruction = PHASE_INSTRUCTIONS['intro-second-column'];
                 break;
             case 'intro-discover-carry':
                 if (get().columns[0].value < 9) {
-                    newInstruction = "Maintenant, on va voir quelque chose de MAGIQUE ! ✨ Amène le premier rouleau à 9 !";
+                    newInstruction = PHASE_INSTRUCTIONS['intro-discover-carry'].fillToNine;
                 } else if (get().columns[0].value === 9 && get().columns[1].value === 0) {
-                    newInstruction = "Parfait ! Tout est PLEIN ! 9 lumières allumées ! Maintenant... que va-t-il se passer si tu cliques encore une fois sur △ ? Réfléchis bien... 🤔 Tu ne sais pas ? C'est normal ! Clique et tu verras ! 😊";
+                    newInstruction = PHASE_INSTRUCTIONS['intro-discover-carry'].atNine;
                 } else {
-                    newInstruction = "WAOUH ! Tu as vu ça ??? 🤩 C'était MAGIQUE non ? Les 10 lumières ont VOYAGÉ ! Elles se sont regroupées pour devenir UNE seule lumière sur le deuxième rouleau ! Maintenant, refais l'inverse ! Clique sur ∇ pour voir ce qu'il se passe !";
+                    newInstruction = PHASE_INSTRUCTIONS['intro-discover-carry'].afterCarry;
                 }
                 break;
             case 'intro-max-value-question':
                 if (get().introMaxAttempt === -1) {
                     // Guided mode
                     if (get().columns[0].value < 9) {
-                        newInstruction = "Clique sur △ pour remplir le PREMIER rouleau au maximum !";
+                        newInstruction = PHASE_INSTRUCTIONS['intro-max-value-question'].guided.firstRoll;
                     } else if (get().columns[1].value < 9) {
-                        newInstruction = "Parfait ! Maintenant clique sur △ du DEUXIÈME rouleau pour le remplir aussi !";
+                        newInstruction = PHASE_INSTRUCTIONS['intro-max-value-question'].guided.secondRoll;
                     } else {
-                        newInstruction = "C'est le MAXIMUM ! 99 !";
+                        newInstruction = PHASE_INSTRUCTIONS['intro-max-value-question'].guided.maximum;
                     }
                 } else {
-                    newInstruction = "Maintenant que tu as vu comment ça marche... J'ai une question pour toi ! 🎯 Avec DEUX rouleaux, jusqu'à combien peut-on compter ? Réfléchis bien ! 🤔";
+                    newInstruction = PHASE_INSTRUCTIONS['intro-max-value-question'].question;
                 }
                 break;
             case 'intro-welcome':
-                newInstruction = "Paf, Crac… Bim… Tchac ! Quel vacarme ! Voilà, j'ai terminé ma nouvelle machine !";
+                newInstruction = PHASE_INSTRUCTIONS['intro-welcome'];
                 break;
             case 'intro-discover':
-                newInstruction = "Oh, tu es là ? Je ne t'avais pas entendu arriver avec tout ce bruit ! J'étais justement en train de terminer la nouvelle invention qui va nous permettre de compter toutes sortes de choses.";
+                newInstruction = PHASE_INSTRUCTIONS['intro-discover'];
                 break;
             case 'intro-question-digits':
-                newInstruction = "Te rappelles-tu combien de chiffres différents tu as vu ? (Saisis ta réponse)";
+                newInstruction = PHASE_INSTRUCTIONS['intro-question-digits'];
                 break;
             case 'intro-add-roll':
-                newInstruction = "Bon, tout ça c'est très bien, mais comment va-t-on faire pour utiliser cette machine lorsque je veux compter plus haut que 9 ? Pour l'instant elle bloque !";
+                newInstruction = PHASE_INSTRUCTIONS['intro-add-roll'];
                 break;
             case 'intro-question-max':
-                newInstruction = "Jusqu'à combien peut-on compter maintenant ? (Saisis ta réponse)";
+                newInstruction = PHASE_INSTRUCTIONS['intro-question-max'];
                 break;
             case 'tutorial':
-                newInstruction = "Bienvenue ! Clique sur △ pour découvrir la machine !";
+                newInstruction = PHASE_INSTRUCTIONS['tutorial'];
                 break;
             case 'explore-units':
-                newInstruction = "Clique sur △ pour ajouter une bille. Lève UN doigt à chaque clic. Répète : UN, DEUX, TROIS !";
+                newInstruction = PHASE_INSTRUCTIONS['explore-units'];
                 break;
             case 'click-add':
-                newInstruction = "Continue jusqu'à 9 ! Chaque clic ajoute UNE bille !";
+                newInstruction = PHASE_INSTRUCTIONS['click-add'];
                 break;
             case 'click-remove':
-                newInstruction = "Clique sur ∇ pour enlever les billes jusqu'à ZÉRO !";
+                newInstruction = PHASE_INSTRUCTIONS['click-remove'];
                 break;
             case 'done':
-                newInstruction = "Génial ! Clique sur 'Commencer l'apprentissage' pour découvrir l'échange 10 pour 1 ! 🎩";
+                newInstruction = PHASE_INSTRUCTIONS['done'];
                 break;
             case 'learn-units':
-                newInstruction = "Regarde ! 👀 La machine compte de 1 à 9. Compte avec tes doigts !";
+                newInstruction = PHASE_INSTRUCTIONS['learn-units'];
                 break;
             case 'challenge-unit-1':
             case 'challenge-unit-2':
@@ -3707,32 +3720,32 @@ export const useStore = create<MachineState>((set, get) => ({
                 const challengeIndex = ['challenge-unit-1', 'challenge-unit-2', 'challenge-unit-3'].indexOf(phase);
                 const challenge = UNIT_CHALLENGES[challengeIndex];
                 const targetNumber = challenge.targets[unitTargetIndex];
-                newInstruction = `DÉFI ${challengeIndex + 1} : Affiche **${targetNumber}** puis clique sur VALIDER ! (${unitSuccessCount}/${challenge.targets.length})`;
+                newInstruction = CHALLENGE_INSTRUCTIONS.units(challengeIndex, targetNumber, unitSuccessCount, challenge.targets.length);
                 break;
             }
             case 'learn-carry':
-                newInstruction = "Compte jusqu'à 9 en cliquant sur △ ! Quand tu arrives à 9, un clic de plus et... MAGIE ! 🎆";
+                newInstruction = PHASE_INSTRUCTIONS['learn-carry'];
                 break;
             case 'practice-ten':
-                newInstruction = "Pratique le concept de paquet ! Clique sur ∇ pour revenir à 9, puis △ pour refaire l'échange magique !";
+                newInstruction = PHASE_INSTRUCTIONS['practice-ten'];
                 break;
             case 'learn-ten-to-twenty':
-                newInstruction = "Tu as 1 paquet de 10 ! Maintenant ajoute des billes pour comprendre la COMBINAISON : 10 + 1 = 11, 10 + 2 = 12... Clique sur △ jusqu'à 20 !";
+                newInstruction = PHASE_INSTRUCTIONS['learn-ten-to-twenty'];
                 break;
             case 'challenge-ten-to-twenty': {
                 const challenge = TEN_TO_TWENTY_CHALLENGES[0];
                 const targetNumber = challenge.targets[get().tenToTwentyTargetIndex];
-                newInstruction = `Mini-défi : Affiche **${targetNumber}** puis clique sur VALIDER ! (${get().tenToTwentySuccessCount}/${challenge.targets.length})`;
+                newInstruction = CHALLENGE_INSTRUCTIONS.tenToTwenty(targetNumber, get().tenToTwentySuccessCount, challenge.targets.length);
                 break;
             }
             case 'learn-twenty-to-thirty':
-                newInstruction = "Parfait ! Tu comprends la combinaison : 1 dizaine + unités ! Maintenant un peu de pratique : remplis jusqu'à 30 pour voir l'échange magique !";
+                newInstruction = PHASE_INSTRUCTIONS['learn-twenty-to-thirty'];
                 break;
             case 'learn-tens':
-                newInstruction = "Regarde ! 👀 La machine compte par dizaines : 40, 50, 60...";
+                newInstruction = PHASE_INSTRUCTIONS['learn-tens'];
                 break;
             case 'learn-tens-combination':
-                newInstruction = "Regarde maintenant la MAGIE des paquets ! 🎯 La machine va montrer comment assembler 1 paquet + 2 billes = DOUZE, puis 2 paquets + 5 billes = VINGT-CINQ ! C'est comme des LEGO ! 🧱";
+                newInstruction = PHASE_INSTRUCTIONS['learn-tens-combination'];
                 break;
             case 'challenge-tens-1':
             case 'challenge-tens-2':
@@ -3740,41 +3753,41 @@ export const useStore = create<MachineState>((set, get) => ({
                 const challengeIndex = ['challenge-tens-1', 'challenge-tens-2', 'challenge-tens-3'].indexOf(phase);
                 const challenge = TENS_CHALLENGES[challengeIndex];
                 const targetNumber = challenge.targets[tensTargetIndex];
-                newInstruction = `DÉFI ${challengeIndex + 1} : Affiche **${targetNumber}** puis clique sur VALIDER ! (${tensSuccessCount}/${challenge.targets.length})`;
+                newInstruction = CHALLENGE_INSTRUCTIONS.tens(challengeIndex, targetNumber, tensSuccessCount, challenge.targets.length);
                 break;
             }
             case 'practice-hundred':
-                newInstruction = "Pratique le concept de GRAND paquet ! Clique sur ∇ pour revenir à 99, puis △ pour refaire l'échange magique vers 100 !";
+                newInstruction = PHASE_INSTRUCTIONS['practice-hundred'];
                 break;
             case 'learn-hundred-to-hundred-ten':
-                newInstruction = "Tu as 1 GRAND paquet de 100 ! Maintenant ajoute des billes pour comprendre la COMBINAISON : 100 + 1 = 101, 100 + 2 = 102... Clique sur △ jusqu'à 120 !";
+                newInstruction = PHASE_INSTRUCTIONS['learn-hundred-to-hundred-ten'];
                 break;
             case 'learn-hundred-ten-to-two-hundred':
-                newInstruction = "Bravo ! Tu comprends : 1 centaine + dizaines + unités ! Pratique un peu : monte jusqu'à 200 pour voir l'échange magique !";
+                newInstruction = PHASE_INSTRUCTIONS['learn-hundred-ten-to-two-hundred'];
                 break;
             case 'challenge-hundred-to-two-hundred': {
                 const challenge = HUNDRED_TO_TWO_HUNDRED_CHALLENGES[0];
                 const targetNumber = challenge.targets[get().hundredToTwoHundredTargetIndex];
-                newInstruction = `Mini-défi 100-200 : Affiche **${targetNumber}** puis clique sur VALIDER ! (${get().hundredToTwoHundredSuccessCount}/${challenge.targets.length})`;
+                newInstruction = CHALLENGE_INSTRUCTIONS.hundredToTwoHundred(targetNumber, get().hundredToTwoHundredSuccessCount, challenge.targets.length);
                 break;
             }
             case 'learn-two-hundred-to-three-hundred':
-                newInstruction = "Remplis tout jusqu'à 299 ! Clique sur △ pour ajouter des billes !";
+                newInstruction = PHASE_INSTRUCTIONS['learn-two-hundred-to-three-hundred'];
                 break;
             case 'challenge-two-hundred-to-three-hundred': {
                 const challenge = TWO_HUNDRED_TO_THREE_HUNDRED_CHALLENGES[0];
                 const targetNumber = challenge.targets[get().twoHundredToThreeHundredTargetIndex];
-                newInstruction = `Mini-défi 200-300 : Affiche **${targetNumber}** puis clique sur VALIDER ! (${get().twoHundredToThreeHundredSuccessCount}/${challenge.targets.length})`;
+                newInstruction = CHALLENGE_INSTRUCTIONS.twoHundredToThreeHundred(targetNumber, get().twoHundredToThreeHundredSuccessCount, challenge.targets.length);
                 break;
             }
             case 'learn-hundreds':
-                newInstruction = "Regarde ! 👀 La machine compte par centaines : 300, 400, 500...";
+                newInstruction = PHASE_INSTRUCTIONS['learn-hundreds'];
                 break;
             case 'learn-hundreds-simple-combination':
-                newInstruction = "Maintenant les GRANDS paquets de 100 ! 📦 La machine va montrer : 1 GRAND paquet = CENT, puis 1 GRAND + 1 paquet = CENT-DIX ! C'est facile d'assembler les paquets ! 🎁";
+                newInstruction = PHASE_INSTRUCTIONS['learn-hundreds-simple-combination'];
                 break;
             case 'learn-hundreds-combination':
-                newInstruction = "Maintenant on assemble TOUT ! 📦📦📦 La machine va montrer : 1 GRAND paquet + 2 paquets + 3 billes = CENT-VINGT-TROIS ! Comme une tour de LEGO avec 3 étages ! 🏗️";
+                newInstruction = PHASE_INSTRUCTIONS['learn-hundreds-combination'];
                 break;
             case 'challenge-hundreds-1':
             case 'challenge-hundreds-2':
@@ -3782,56 +3795,56 @@ export const useStore = create<MachineState>((set, get) => ({
                 const challengeIndex = ['challenge-hundreds-1', 'challenge-hundreds-2', 'challenge-hundreds-3'].indexOf(phase);
                 const challenge = HUNDREDS_CHALLENGES[challengeIndex];
                 const targetNumber = challenge.targets[hundredsTargetIndex];
-                newInstruction = `DÉFI ${challengeIndex + 1} : Affiche **${targetNumber}** puis clique sur VALIDER ! (${hundredsSuccessCount}/${challenge.targets.length})`;
+                newInstruction = CHALLENGE_INSTRUCTIONS.hundreds(challengeIndex, targetNumber, hundredsSuccessCount, challenge.targets.length);
                 break;
             }
             case 'celebration-before-thousands':
-                newInstruction = "🏆 BRAVO CHAMPION ! Tu maîtrises les centaines ! Maintenant, on va découvrir les MILLE ! C'est le niveau EXPERT ! 🎓 Si tu es fatigué, tu peux faire une pause. Sinon, clique sur DÉMARRER L'APPRENTISSAGE DES MILLIERS !";
+                newInstruction = PHASE_INSTRUCTIONS['celebration-before-thousands'];
                 break;
             case 'practice-thousand':
-                newInstruction = "STOP ! 🛑 Regarde bien : TOUT, TOUT, TOUT est plein ! 999 ! Que va-t-il se passer si on ajoute encore 1 toute petite bille ? Clique sur △ pour voir !";
+                newInstruction = PHASE_INSTRUCTIONS['practice-thousand'];
                 break;
             case 'learn-thousand-to-thousand-ten':
-                newInstruction = "MILLE ! 1 énorme paquet ! Maintenant ajoute des billes pour comprendre la COMBINAISON : 1000 + 1 = 1001, 1000 + 2 = 1002... Clique sur △ jusqu'à 1020 !";
+                newInstruction = PHASE_INSTRUCTIONS['learn-thousand-to-thousand-ten'];
                 break;
             case 'learn-thousand-to-thousand-hundred':
-                newInstruction = "Super ! Tu comprends la combinaison : 1 millier + centaines + dizaines + unités ! Monte jusqu'à 1100 pour pratiquer !";
+                newInstruction = PHASE_INSTRUCTIONS['learn-thousand-to-thousand-hundred'];
                 break;
             case 'learn-thousand-hundred-to-two-thousand':
-                newInstruction = "Excellent ! Continue à pratiquer jusqu'à 2000 pour bien comprendre les milliers !";
+                newInstruction = PHASE_INSTRUCTIONS['learn-thousand-hundred-to-two-thousand'];
                 break;
             case 'challenge-thousand-to-two-thousand': {
                 const challenge = THOUSAND_TO_TWO_THOUSAND_CHALLENGES[0];
                 const targetNumber = challenge.targets[get().thousandToTwoThousandTargetIndex];
-                newInstruction = `Mini-défi 1000-2000 ! Affiche **${targetNumber}** puis clique sur VALIDER ! (${get().thousandToTwoThousandSuccessCount}/${challenge.targets.length})`;
+                newInstruction = CHALLENGE_INSTRUCTIONS.thousandToTwoThousand(targetNumber, get().thousandToTwoThousandSuccessCount, challenge.targets.length);
                 break;
             }
             case 'learn-two-thousand-to-three-thousand':
-                newInstruction = "DEUX-MILLE ! Monte directement à 2500, puis 2900, puis 2999, puis 3000 ! Clique sur △ sur les UNITÉS !";
+                newInstruction = PHASE_INSTRUCTIONS['learn-two-thousand-to-three-thousand'];
                 break;
             case 'challenge-two-thousand-to-three-thousand': {
                 const challenge = TWO_THOUSAND_TO_THREE_THOUSAND_CHALLENGES[0];
                 const targetNumber = challenge.targets[get().twoThousandToThreeThousandTargetIndex];
-                newInstruction = `Mini-défi 2000-3000 ! Affiche **${targetNumber}** puis clique sur VALIDER ! (${get().twoThousandToThreeThousandSuccessCount}/${challenge.targets.length})`;
+                newInstruction = CHALLENGE_INSTRUCTIONS.twoThousandToThreeThousand(targetNumber, get().twoThousandToThreeThousandSuccessCount, challenge.targets.length);
                 break;
             }
             case 'learn-thousands':
-                newInstruction = "Regarde ! 👀 La machine compte par milliers : 3000, 4000, 5000... Imagine combien de billes ça fait !";
+                newInstruction = PHASE_INSTRUCTIONS['learn-thousands'];
                 break;
             case 'learn-thousands-very-simple-combination':
-                newInstruction = "Les ÉNORMES paquets de 1000 ! 🎁✨ La machine va montrer : 1 ÉNORME paquet = MILLE, puis 1 ÉNORME + 1 GRAND = MILLE-CENT ! C'est magique d'assembler de si grands nombres ! 🚀";
+                newInstruction = PHASE_INSTRUCTIONS['learn-thousands-very-simple-combination'];
                 break;
             case 'challenge-thousands-simple-combination': {
                 const challenge = THOUSANDS_SIMPLE_COMBINATION_CHALLENGES[0];
                 const targetNumber = challenge.targets[get().thousandsSimpleCombinationTargetIndex];
-                newInstruction = `Défi nombres RONDS ! Affiche **${targetNumber}** puis clique sur VALIDER ! (${get().thousandsSimpleCombinationSuccessCount}/${challenge.targets.length})`;
+                newInstruction = CHALLENGE_INSTRUCTIONS.thousandsSimpleCombination(targetNumber, get().thousandsSimpleCombinationSuccessCount, challenge.targets.length);
                 break;
             }
             case 'learn-thousands-full-combination':
-                newInstruction = "Prépare-toi pour le GRAND spectacle ! 🎪 La machine va montrer comment assembler TOUS les paquets ensemble : 1 ÉNORME + 2 GRANDS + 3 paquets + 4 billes = MILLE-DEUX-CENT-TRENTE-QUATRE ! Tu es un CHAMPION ! 🏆";
+                newInstruction = PHASE_INSTRUCTIONS['learn-thousands-full-combination'];
                 break;
             case 'learn-thousands-combination':
-                newInstruction = "Le niveau EXPERT ! 🎓 Regarde comment la machine assemble les plus GRANDS nombres en combinant ÉNORMES paquets + GRANDS paquets + paquets + billes ! C'est impressionnant ! 💪";
+                newInstruction = PHASE_INSTRUCTIONS['learn-thousands-combination'];
                 break;
             case 'challenge-thousands-1':
             case 'challenge-thousands-2':
@@ -3839,18 +3852,17 @@ export const useStore = create<MachineState>((set, get) => ({
                 const challengeIndex = ['challenge-thousands-1', 'challenge-thousands-2', 'challenge-thousands-3'].indexOf(phase);
                 const challenge = THOUSANDS_CHALLENGES[challengeIndex];
                 const targetNumber = challenge.targets[thousandsTargetIndex];
-                const difficultyNames = ['FACILE', 'MOYEN', 'DIFFICILE'];
-                newInstruction = `DÉFI ${challengeIndex + 1} (${difficultyNames[challengeIndex]}) : Affiche **${targetNumber}** puis clique sur VALIDER ! (${thousandsSuccessCount}/${challenge.targets.length})`;
+                newInstruction = CHALLENGE_INSTRUCTIONS.thousands(challengeIndex, targetNumber, thousandsSuccessCount, challenge.targets.length);
                 break;
             }
             case 'celebration-thousands-complete':
-                newInstruction = "🏆🎉 INCROYABLE ! TU ES UN CHAMPION DES NOMBRES ! Tu sais maintenant compter jusqu'à 9999 ! Très peu d'enfants de ton âge savent faire ça ! Tu peux être très fier de toi ! 💪 Clique sur MODE LIBRE pour créer tes nombres !";
+                newInstruction = PHASE_INSTRUCTIONS['celebration-thousands-complete'];
                 break;
             case 'normal':
-                newInstruction = "Mode exploration ! 🚀 Construis des grands nombres !";
+                newInstruction = PHASE_INSTRUCTIONS['normal'];
                 break;
             default:
-                newInstruction = "Prépare-toi pour l'aventure des nombres !";
+                newInstruction = PHASE_INSTRUCTIONS['default'];
         }
 
         console.log('newInstruction', newInstruction);
@@ -3869,7 +3881,7 @@ export const useStore = create<MachineState>((set, get) => ({
                 isCountingAutomatically: false
             });
             get().updateButtonVisibility();
-            sequenceFeedback("C'est parti ! 🎉 La machine va compter de 1 à 9 !", "Observe bien les billes ! Compte avec tes doigts !");
+            sequenceFeedback(SEQUENCE_FEEDBACK.learnUnits.part1, SEQUENCE_FEEDBACK.learnUnits.part2);
         } else if (phase === 'celebration-before-thousands') {
             // Start thousands learning
             const resetCols = initialColumns.map((col) => ({ ...col, unlocked: true }));
@@ -3884,7 +3896,7 @@ export const useStore = create<MachineState>((set, get) => ({
                 isCountingAutomatically: false
             });
             get().updateButtonVisibility();
-            sequenceFeedback("STOP ! 🛑 Regarde bien : TOUT, TOUT, TOUT est plein !", "9 GRANDS paquets + 9 paquets + 9 billes. C'est le MAXIMUM ! Que va-t-il se passer si on ajoute encore 1 toute petite bille ? Clique sur △");
+            sequenceFeedback(SEQUENCE_FEEDBACK.practiceThousand.part1, SEQUENCE_FEEDBACK.practiceThousand.part2);
         } else if (phase === 'celebration-thousands-complete') {
             // Go to normal mode
             const resetCols = initialColumns.map((col) => ({ ...col, unlocked: true }));
@@ -3895,7 +3907,7 @@ export const useStore = create<MachineState>((set, get) => ({
                 isCountingAutomatically: false
             });
             get().updateButtonVisibility();
-            sequenceFeedback("Mode libre activé ! 🚀", "Tu peux maintenant créer TOUS les nombres que tu veux jusqu'à 9999 !");
+            sequenceFeedback(SEQUENCE_FEEDBACK.normalMode.part1, SEQUENCE_FEEDBACK.normalMode.part2);
         }
     },
 
@@ -3905,11 +3917,11 @@ export const useStore = create<MachineState>((set, get) => ({
         if (nextIdx !== -1) {
             const newCols = [...columns];
             if (nextIdx === 1 && !completedChallenges.tens) {
-                get().setFeedback("⚠️ Tu dois d'abord compléter le défi des dizaines !");
+                get().setFeedback(ERROR_MESSAGES.mustCompleteTens);
                 return;
             } else if (nextIdx === 2) {
                 if (!completedChallenges.tens) {
-                    get().setFeedback("⚠️ Tu dois d'abord maîtriser les dizaines !");
+                    get().setFeedback(ERROR_MESSAGES.mustMasterTens);
                     return;
                 }
                 newCols[nextIdx].unlocked = true;
@@ -3923,11 +3935,11 @@ export const useStore = create<MachineState>((set, get) => ({
                         isCountingAutomatically: false
                     });
                     get().updateButtonVisibility();
-                    sequenceFeedback("NIVEAU DÉBLOQUÉ : Les CENTAINES ! 💯", "Regarde ! 👀 La machine va compter par centaines : 100, 200, 300... !");
+                    sequenceFeedback(SEQUENCE_FEEDBACK.unlockHundreds.part1, SEQUENCE_FEEDBACK.unlockHundreds.part2);
                 }, FEEDBACK_DELAY);
             } else if (nextIdx === 3) {
                 if (!completedChallenges.hundreds) {
-                    get().setFeedback("⚠️ Tu dois d'abord maîtriser les centaines !");
+                    get().setFeedback(ERROR_MESSAGES.mustMasterHundreds);
                     return;
                 }
                 newCols[nextIdx].unlocked = true;
@@ -3941,7 +3953,7 @@ export const useStore = create<MachineState>((set, get) => ({
                         isCountingAutomatically: false
                     });
                     get().updateButtonVisibility();
-                    sequenceFeedback("NIVEAU MAXIMUM : Les MILLIERS ! 🎉", "Regarde ! 👀 La machine va compter par milliers : 1000, 2000, 3000... !");
+                    sequenceFeedback(SEQUENCE_FEEDBACK.unlockThousands.part1, SEQUENCE_FEEDBACK.unlockThousands.part2);
                 }, FEEDBACK_DELAY);
             } else {
                 newCols[nextIdx].unlocked = true;
@@ -3961,17 +3973,7 @@ export const useStore = create<MachineState>((set, get) => ({
         if (choice === 'tryAgain') {
             // Option 1: Try again with all hints visible
             const decomp = decomposeNumber(currentTarget);
-            get().setFeedback(`D'accord champion ! Dernier essai ! 🎯
-Je laisse TOUS les indices affichés pour t'aider !
-
-RAPPEL : Il faut faire ${currentTarget}
-
-DÉCOMPOSITION :
-${decomp.thousands > 0 ? `- ${decomp.thousands} milliers = ${decomp.thousands * 1000}\n` : ''}${decomp.hundreds > 0 ? `- ${decomp.hundreds} centaines = ${decomp.hundreds * 100}\n` : ''}${decomp.tens > 0 ? `- ${decomp.tens} dizaines = ${decomp.tens * 10}\n` : ''}${decomp.units > 0 ? `- ${decomp.units} unités = ${decomp.units}\n` : ''}
-TOTAL = ${currentTarget}
-
-Tu peux le faire ! Je crois en toi ! ⭐
-Prends ton temps ! Pas de pression ! 😊`);
+            get().setFeedback(HELP_CHOICE_MESSAGES.tryAgain(currentTarget, decomp));
         } else if (choice === 'guided') {
             // Option 2: Guided step-by-step construction
             setGuidedMode(true);
@@ -3981,9 +3983,7 @@ Prends ton temps ! Pas de pression ! 😊`);
             const resetCols = columns.map(col => ({ ...col, value: 0 }));
             set({ columns: resetCols });
 
-            get().setFeedback(`On va le construire ENSEMBLE ! 🤝
-Je vais te guider colonne par colonne !
-Tu fais exactement ce que je te dis, d'accord ? 😊`);
+            get().setFeedback(GUIDED_MESSAGES.start);
 
             // Start guided mode after a delay
             setTimeout(() => {
@@ -3998,10 +3998,7 @@ Tu fais exactement ce que je te dis, d'accord ? 😊`);
             const resetCols = columns.map(col => ({ ...col, value: 0 }));
             set({ columns: resetCols });
 
-            get().setFeedback(`D'accord ! 👀
-Je vais te MONTRER comment on fait !
-Regarde bien l'écran ! 👁️
-Tu vas VOIR comment se construit ce nombre !`);
+            get().setFeedback(HELP_CHOICE_MESSAGES.showSolution(currentTarget));
 
             // Start animation
             setTimeout(() => {
@@ -4101,6 +4098,9 @@ useStore.subscribe(
         // Automatically trigger transitions and auto-counting when conditions are met
 
         // Get the appropriate index based on the current phase
+        // These variables were used for tracking but are currently unused
+        // Keeping the logic in case it's needed in the future
+        /*
         let currentIndex = 0;
         let previousIndex = 0;
         if (state.phase.startsWith('challenge-unit-')) {
@@ -4134,11 +4134,14 @@ useStore.subscribe(
             currentIndex = state.thousandsTargetIndex;
             previousIndex = previousState.thousandsTargetIndex;
         }
+        */
         
         // Only send remaining targets to Unity when phase changes or target index changes
-        /**if (state.phase !== previousState.phase || currentIndex !== previousIndex) {
-            sendRemainingTargetsToUnity(state.phase, currentIndex);
-        }**/
+        // Currently disabled as not needed
+        // if (state.phase !== previousState.phase || currentIndex !== previousIndex) {
+        //     sendRemainingTargetsToUnity(state.phase, currentIndex);
+        // }
+        
         // Handle intro-welcome phase transition
         if (state.phase === 'intro-welcome') {
             // Clear any existing timer first
