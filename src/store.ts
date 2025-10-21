@@ -3921,6 +3921,11 @@ export const useStore = create<MachineState>((set, get) => ({
 
         console.log('newInstruction', newInstruction);
         set({ instruction: newInstruction });
+        
+        // Speak the instruction using text-to-speech
+        if (newInstruction) {
+            textToSpeechService.speak(newInstruction);
+        }
     },
 
     startLearningPhase: () => {
