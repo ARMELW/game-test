@@ -2703,9 +2703,9 @@ export const useStore = create<MachineState>((set, get) => ({
                         resetUnitChallenge();
                         const nextPhase = challengePhases[challengeIndex + 1];
                         set({
-                            columns: resetCols,
-                            phase: nextPhase
+                            columns: resetCols
                         });
+                        get().setPhase(nextPhase);
                         get().setFeedback(`🎯 DÉFI ${challengeIndex + 2} : Affiche le nombre **${UNIT_CHALLENGES[challengeIndex + 1].targets[0]}** puis clique sur VALIDER !`);
                     }, FEEDBACK_DELAY);
                 }
