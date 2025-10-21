@@ -4,7 +4,7 @@ import { UnityGame } from "./components/UnityGame";
 import { parse, useUnity } from "./hooks/useUnity";
 
 const store = useStore.getState();
-store.setPhase("challenge-unit-1");
+store.setPhase("challenge-tens-1");
 
 function formatNumber(num: number, length = 4) {
   return num.toString().padStart(length, "0");
@@ -439,6 +439,7 @@ function MachineANombres() {
         }}
       >
         <p>{phase}</p>
+        <p>{currentTarget}</p>
         <div
           style={{
             width: "100%",

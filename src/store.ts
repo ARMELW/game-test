@@ -2859,120 +2859,118 @@ export const useStore = create<MachineState>((set, get) => ({
     },
 
     handleValidateTens: () => {
-        const { phase, columns, tensTargetIndex, tensSuccessCount, sequenceFeedback, resetTensChallenge, attemptCount, consecutiveFailures, resetAttempts, setAttemptCount, setConsecutiveFailures, setShowHelpOptions, totalChallengesCompleted, setTotalChallengesCompleted, setCurrentTarget } = get();
-        const totalNumber = columns.reduce((acc: number, col: Column, idx: number) => acc + col.value * Math.pow(10, idx), 0);
-        const challengePhases = ['challenge-tens-1', 'challenge-tens-2', 'challenge-tens-3'] as const;
-        const challengeIndex = challengePhases.indexOf(phase as typeof challengePhases[number]);
-        if (challengeIndex === -1) return;
+    const { phase, columns, tensTargetIndex, tensSuccessCount, sequenceFeedback, resetTensChallenge, attemptCount, consecutiveFailures, resetAttempts, setAttemptCount, setConsecutiveFailures, setShowHelpOptions, totalChallengesCompleted, setTotalChallengesCompleted, setCurrentTarget } = get();
+    
+    const totalNumber = columns.reduce((acc: number, col: Column, idx: number) => {
+        return acc + (col.value * Math.pow(10, idx));
+    }, 0);
+    
+    const challengePhases = ['challenge-tens-1', 'challenge-tens-2', 'challenge-tens-3'] as const;
+    const challengeIndex = challengePhases.indexOf(phase as typeof challengePhases[number]);
+    if (challengeIndex === -1) return;
 
-        const challenge = TENS_CHALLENGES[challengeIndex];
-        const targetNumber = challenge.targets[tensTargetIndex];
+    const challenge = TENS_CHALLENGES[challengeIndex];
+    const targetNumber = challenge.targets[tensTargetIndex];
+    
 
-        // Set current target for help system
-        setCurrentTarget(targetNumber);
+    console.log('Colonnes:', columns.map((c, i) => `[${i}] value:${c.value} unlocked:${c.unlocked}`));
+    console.log('Target:', targetNumber, 'Calculé:', totalNumber);
+    
+    // Set current target for help system
+    setCurrentTarget(targetNumber);
 
-        if (totalNumber === targetNumber) {
-            // SUCCESS!
-            // Send correct value message to Unity
-            sendCorrectValue();
-            
-            const successMsg = getSuccessMessage(attemptCount + 1, false);
-            get().setFeedback(successMsg);
+    if (totalNumber === targetNumber) {
+        // SUCCESS!
+        sendCorrectValue();
+        
+        const successMsg = getSuccessMessage(attemptCount + 1, false);
+        get().setFeedback(successMsg);
 
-            // Reset attempts and update stats
-            resetAttempts();
-            setConsecutiveFailures(0);
-            setTotalChallengesCompleted(totalChallengesCompleted + 1);
+        // Reset attempts and update stats
+        resetAttempts();
+        setConsecutiveFailures(0);
+        setTotalChallengesCompleted(totalChallengesCompleted + 1);
 
-            const newSuccessCount = tensSuccessCount + 1;
-            set({ tensSuccessCount: newSuccessCount });
+        const newSuccessCount = tensSuccessCount + 1;
+        set({ tensSuccessCount: newSuccessCount });
 
-            if (tensTargetIndex + 1 >= challenge.targets.length) {
-                if (challengeIndex === TENS_CHALLENGES.length - 1) {
-                    set((state: MachineState) => ({ completedChallenges: { ...state.completedChallenges, tens: true } }));
-                    setTimeout(() => {
-                        const newCols = [...get().columns];
-                        if (!newCols[2].unlocked) {
-                            newCols[2].unlocked = true;
-                            set({ columns: newCols });
-                        }
-                        // Set up for practice-hundred: start at 99
-                        const resetCols = initialColumns.map((col, i) => ({ ...col, unlocked: i === 0 || i === 1 || i === 2 }));
-                        resetCols[1].value = 9;
-                        resetCols[0].value = 9;
-                        set({
-                            columns: resetCols,
-                            phase: 'practice-hundred',
-                            practiceHundredCount: 0
-                        });
-                        get().updateButtonVisibility();
-                        sequenceFeedback("APPRENTISSAGE DES DIZAINES TERMINÉ ! Bravo ! 🎉", "NIVEAU DÉBLOQUÉ : Les CENTAINES ! 💯 STOP ! Regarde bien : TOUT est plein ! 9 paquets de 10 + 9 billes. Clique sur △ pour voir une GRANDE MAGIE ! ✨");
-                    }, FEEDBACK_DELAY * 2);
-                } else {
-                    const nextChallenge = TENS_CHALLENGES[challengeIndex + 1];
-                    setTimeout(() => {
-                        // Send next goal message to Unity
-                        sendNextGoal();
-                        
-                        resetTensChallenge();
-                        const resetCols = initialColumns.map((col, i) => ({ ...col, unlocked: i === 0 || i === 1 }));
-                        set({
-                            phase: nextChallenge.phase,
-                            columns: resetCols
-                        });
-                        get().updateButtonVisibility();
-                        get().setFeedback(`🎯 DÉFI ${challengeIndex + 2} : Affiche le nombre **${nextChallenge.targets[0]}** !`);
-                    }, FEEDBACK_DELAY * 2);
-                }
+        if (tensTargetIndex + 1 >= challenge.targets.length) {
+            if (challengeIndex === TENS_CHALLENGES.length - 1) {
+                set((state: MachineState) => ({ completedChallenges: { ...state.completedChallenges, tens: true } }));
+                setTimeout(() => {
+                    const newCols = [...get().columns];
+                    if (!newCols[2].unlocked) {
+                        newCols[2].unlocked = true;
+                        set({ columns: newCols });
+                    }
+                    // Set up for practice-hundred: start at 99
+                    const resetCols = initialColumns.map((col, i) => ({ ...col, unlocked: i === 0 || i === 1 || i === 2 }));
+                    resetCols[1].value = 9;
+                    resetCols[0].value = 9;
+                    set({
+                        columns: resetCols,
+                        phase: 'practice-hundred',
+                        practiceHundredCount: 0
+                    });
+                    get().updateButtonVisibility();
+                    sequenceFeedback("APPRENTISSAGE DES DIZAINES TERMINÉ ! Bravo ! 🎉", "NIVEAU DÉBLOQUÉ : Les CENTAINES ! 💯 STOP ! Regarde bien : TOUT est plein ! 9 paquets de 10 + 9 billes. Clique sur △ pour voir une GRANDE MAGIE ! ✨");
+                }, FEEDBACK_DELAY * 2);
             } else {
-                // Send next goal message to Unity
-                sendNextGoal();
-                
-                // Send next goal message to Unity
-                sendNextGoal();
-                
-                const nextTarget = challenge.targets[tensTargetIndex + 1];
-                const resetCols = initialColumns.map((col, i) => ({ ...col, unlocked: i === 0 || i === 1 }));
-                set({ tensTargetIndex: tensTargetIndex + 1, columns: resetCols });
-                sequenceFeedback(`✅ Correct ! ${newSuccessCount}/${challenge.targets.length} réussis !`, `Maintenant affiche **${nextTarget}** !`);
+                const nextChallenge = TENS_CHALLENGES[challengeIndex + 1];
+                setTimeout(() => {
+                    sendNextGoal();
+                    
+                    resetTensChallenge();
+                    const resetCols = initialColumns.map((col, i) => ({ ...col, unlocked: i === 0 || i === 1 }));
+                    set({
+                        phase: nextChallenge.phase,
+                        columns: resetCols
+                    });
+                    get().updateButtonVisibility();
+                    get().setFeedback(`🎯 DÉFI ${challengeIndex + 2} : Affiche le nombre **${nextChallenge.targets[0]}** !`);
+                }, FEEDBACK_DELAY * 2);
             }
         } else {
-            // FAILURE - Generate progressive feedback
-            // Send wrong value message to Unity
-            sendWrongValue();
+            sendNextGoal();
             
-            const newAttemptCount = attemptCount + 1;
-            setAttemptCount(newAttemptCount);
+            const nextTarget = challenge.targets[tensTargetIndex + 1];
+            const resetCols = initialColumns.map((col, i) => ({ ...col, unlocked: i === 0 || i === 1 }));
+            set({ tensTargetIndex: tensTargetIndex + 1, columns: resetCols });
+            sequenceFeedback(`✅ Correct ! ${newSuccessCount}/${challenge.targets.length} réussis !`, `Maintenant affiche **${nextTarget}** !`);
+        }
+    } else {
+        // FAILURE
+        sendWrongValue();
+        
+        const newAttemptCount = attemptCount + 1;
+        setAttemptCount(newAttemptCount);
 
-            const feedbackMsg = generateFeedback({
-                attemptCount: newAttemptCount,
-                consecutiveFailures,
-                frustrationLevel: detectFrustration(consecutiveFailures),
-                currentTarget: targetNumber,
-                lastUserAnswer: totalNumber
-            });
+        const feedbackMsg = generateFeedback({
+            attemptCount: newAttemptCount,
+            consecutiveFailures,
+            frustrationLevel: detectFrustration(consecutiveFailures),
+            currentTarget: targetNumber,
+            lastUserAnswer: totalNumber
+        });
 
-            get().setFeedback(feedbackMsg.message);
+        get().setFeedback(feedbackMsg.message);
 
-            // Show help options on 4th attempt
-            if (feedbackMsg.showHelp) {
-                setShowHelpOptions(true);
-            }
+        if (feedbackMsg.showHelp) {
+            setShowHelpOptions(true);
+        }
 
-            // If too many attempts, increase consecutive failures
-            if (newAttemptCount >= 4) {
-                const newConsecutiveFailures = consecutiveFailures + 1;
-                setConsecutiveFailures(newConsecutiveFailures);
+        if (newAttemptCount >= 4) {
+            const newConsecutiveFailures = consecutiveFailures + 1;
+            setConsecutiveFailures(newConsecutiveFailures);
 
-                // Check for high frustration
-                if (newConsecutiveFailures >= 3) {
-                    setTimeout(() => {
-                        get().setFeedback(getFrustrationInterventionMessage());
-                    }, FEEDBACK_DELAY * 2);
-                }
+            if (newConsecutiveFailures >= 3) {
+                setTimeout(() => {
+                    get().setFeedback(getFrustrationInterventionMessage());
+                }, FEEDBACK_DELAY * 2);
             }
         }
-    },
+    }
+},
 
     handleValidateHundredToTwoHundred: () => {
         const { phase, columns, hundredToTwoHundredTargetIndex, hundredToTwoHundredSuccessCount, sequenceFeedback, attemptCount, consecutiveFailures, resetAttempts, setAttemptCount, setConsecutiveFailures, setShowHelpOptions, totalChallengesCompleted, setTotalChallengesCompleted, setCurrentTarget } = get();
