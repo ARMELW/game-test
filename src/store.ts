@@ -36,6 +36,7 @@ import {
     GUIDED_MESSAGES,
 } from './instructions.ts';
 import { sendChallengeListToUnity, setValue, sendCorrectValue, sendWrongValue, sendNextGoal } from './unityBridge.ts';
+import { textToSpeechService } from './voice/services/speech/text-to-speech.ts';
 
 export const initialColumns: Column[] = [
     { name: 'Unités', value: 0, unlocked: false, color: 'bg-green-500' },
@@ -498,16 +499,20 @@ export const useStore = create<MachineState>((set, get) => ({
 
         sequenceFeedback(
             `Enchanté ${name} ! Moi c'est Professeur Numérix ! 🎩`,
-            "(Bruits de marteau sur du métal et de perceuse) Paf, Crac… Bim… Tchac ! Quel vacarme !"
+            "(Bruits de marteau sur du métal et de perceuse) Paf, Crac… Bim… Tchac ! Quel vacarme !",
+            () => {
+                // After both messages are spoken, show the next message
+                textToSpeechService.speak("Voilà, j'ai terminé ma nouvelle machine !");
+                set({ feedback: "Voilà, j'ai terminé ma nouvelle machine !" });
+                
+                textToSpeechService.setCallbacks({
+                    onEnd: () => {
+                        set({ phase: 'intro-discover-machine' });
+                        get().updateInstruction();
+                    }
+                });
+            }
         );
-
-        setTimeout(() => {
-            set({ feedback: "Voilà, j'ai terminé ma nouvelle machine !" });
-            setTimeout(() => {
-                set({ phase: 'intro-discover-machine' });
-                get().updateInstruction();
-            }, FEEDBACK_DELAY);
-        }, FEEDBACK_DELAY * 2);
     },
 
     handleIntroMachineResponse: () => {
@@ -516,47 +521,56 @@ export const useStore = create<MachineState>((set, get) => ({
 
         set({ showResponseButtons: false });
 
+        const continueToNextPhase = () => {
+            textToSpeechService.speak("Prêt(e) à découvrir ses secrets ?");
+            set({ feedback: "Prêt(e) à découvrir ses secrets ?" });
+            
+            textToSpeechService.setCallbacks({
+                onEnd: () => {
+                    // Unlock units column when starting interaction
+                    const newCols = [...get().columns];
+                    newCols[0].unlocked = true;
+                    set({ columns: newCols, phase: 'intro-first-interaction' });
+                    get().updateInstruction();
+                }
+            });
+        };
+
         if (selectedResponse === 'belle') {
             sequenceFeedback(
                 "Merci ! J'ai passé beaucoup de temps dessus ! 😊",
-                "Tu vas voir, elle est aussi MAGIQUE que belle !"
+                "Tu vas voir, elle est aussi MAGIQUE que belle !",
+                continueToNextPhase
             );
         } else if (selectedResponse === 'bof') {
             sequenceFeedback(
                 "Haha ! Je comprends, elle n'a pas l'air très impressionnante comme ça ! 😅",
-                "Mais attends de voir ce qu'elle peut faire !"
+                "Mais attends de voir ce qu'elle peut faire !",
+                continueToNextPhase
             );
         } else if (selectedResponse === 'comprends-rien') {
             sequenceFeedback(
                 "C'est NORMAL ! Même moi j'avais du mal au début ! 😄",
-                "C'est justement pour ça qu'on va l'explorer ENSEMBLE !"
+                "C'est justement pour ça qu'on va l'explorer ENSEMBLE !",
+                continueToNextPhase
             );
         } else if (selectedResponse === 'cest-quoi') {
             sequenceFeedback(
                 "Excellente question ! 🎓 C'est une MACHINE À COMPTER !",
-                "Elle va nous apprendre comment fonctionnent les nombres !"
+                "Elle va nous apprendre comment fonctionnent les nombres !",
+                continueToNextPhase
             );
         } else { // timeout
             sequenceFeedback(
                 `Tu es peut-être un peu timide ${name} ? Pas de problème ! 😊`,
-                "Laisse-moi te la présenter..."
+                "Laisse-moi te la présenter...",
+                continueToNextPhase
             );
         }
-
-        setTimeout(() => {
-            set({ feedback: "Prêt(e) à découvrir ses secrets ?" });
-            setTimeout(() => {
-                // Unlock units column when starting interaction
-                const newCols = [...get().columns];
-                newCols[0].unlocked = true;
-                set({ columns: newCols, phase: 'intro-first-interaction' });
-                get().updateInstruction();
-            }, FEEDBACK_DELAY);
-        }, FEEDBACK_DELAY * 2);
     },
 
     handleIntroFirstClick: () => {
-        const { introClickCount, columns, sequenceFeedback } = get();
+        const { introClickCount, columns, sequenceFeedback, speakAndThen } = get();
         const newCols = [...columns];
 
         if (introClickCount === 0) {
@@ -584,25 +598,26 @@ export const useStore = create<MachineState>((set, get) => ({
             ];
 
             if (messages[introClickCount + 1]) {
-                set({ feedback: messages[introClickCount + 1] });
+                speakAndThen(messages[introClickCount + 1]);
             }
 
             if (introClickCount + 1 === 9) {
-                setTimeout(() => {
+                // Use voice callback instead of setTimeout
+                speakAndThen(messages[introClickCount + 1], () => {
                     sequenceFeedback(
                         "Et voilà, on a REMPLI la machine ! 🎉",
-                        "Tu as vu comme les lumières s'allument en même temps que les chiffres changent ?"
+                        "Tu as vu comme les lumières s'allument en même temps que les chiffres changent ?",
+                        () => {
+                            speakAndThen("Maintenant essaie le bouton ROUGE avec la flèche vers le BAS ∇ !");
+                        }
                     );
-                    setTimeout(() => {
-                        set({ feedback: "Maintenant essaie le bouton ROUGE avec la flèche vers le BAS ∇ !" });
-                    }, FEEDBACK_DELAY * 2);
-                }, 1000);
+                });
             }
         }
     },
 
     handleIntroDigitsSubmit: () => {
-        const { userInput, introDigitsAttempt, sequenceFeedback } = get();
+        const { userInput, introDigitsAttempt, sequenceFeedback, speakAndThen } = get();
         const answer = parseInt(userInput.trim());
         const newAttempt = introDigitsAttempt + 1;
 
@@ -612,27 +627,31 @@ export const useStore = create<MachineState>((set, get) => ({
             // Correct answer!
             sequenceFeedback(
                 "BRAVO ! 🎉🎉🎉 C'est EXACT ! Il y a 10 chiffres différents !",
-                "Tu n'as pas oublié le ZÉRO ! 👏"
+                "Tu n'as pas oublié le ZÉRO ! 👏",
+                () => {
+                    speakAndThen(
+                        "0, 1, 2, 3, 4, 5, 6, 7, 8, 9 = 10 chiffres ! Le zéro est un peu spécial, mais il est TRÈS important !",
+                        () => {
+                            speakAndThen(
+                                "Donc en tout, nous avons bien 10 chiffres différents !",
+                                () => {
+                                    set({ showInputField: false, phase: 'intro-second-column', introDigitsAttempt: 0 });
+                                    get().updateInstruction();
+                                }
+                            );
+                        }
+                    );
+                }
             );
-            setTimeout(() => {
-                set({ feedback: "0, 1, 2, 3, 4, 5, 6, 7, 8, 9 = 10 chiffres ! Le zéro est un peu spécial, mais il est TRÈS important !" });
-                setTimeout(() => {
-                    set({ feedback: "Donc en tout, nous avons bien 10 chiffres différents !" });
-                    setTimeout(() => {
-                        set({ showInputField: false, phase: 'intro-second-column', introDigitsAttempt: 0 });
-                        get().updateInstruction();
-                    }, FEEDBACK_DELAY);
-                }, FEEDBACK_DELAY);
-            }, FEEDBACK_DELAY * 2);
         } else if (answer === 9) {
             if (newAttempt === 1) {
                 sequenceFeedback(
                     "Hmm... pas tout à fait ! 🤔 Je comprends pourquoi tu penses ça !",
-                    "Tu as compté : 1, 2, 3, 4, 5, 6, 7, 8, 9... ça fait 9 !"
+                    "Tu as compté : 1, 2, 3, 4, 5, 6, 7, 8, 9... ça fait 9 !",
+                    () => {
+                        speakAndThen("Mais... tu n'oublies pas quelque chose ? 😉 Réfléchis bien et réessaie !");
+                    }
                 );
-                setTimeout(() => {
-                    set({ feedback: "Mais... tu n'oublies pas quelque chose ? 😉 Réfléchis bien et réessaie !" });
-                }, FEEDBACK_DELAY * 2);
             } else if (newAttempt === 2) {
                 sequenceFeedback(
                     "Presque ! Mais regarde le PREMIER chiffre ! 👀",
@@ -643,11 +662,11 @@ export const useStore = create<MachineState>((set, get) => ({
                 set({ showInputField: false });
                 sequenceFeedback(
                     "Ce n'est pas grave ! On va compter ENSEMBLE ! 🤝",
-                    "Regarde l'écran et compte avec moi à voix haute !"
+                    "Regarde l'écran et compte avec moi à voix haute !",
+                    () => {
+                        get().runIntroDigitsGuided();
+                    }
                 );
-                setTimeout(() => {
-                    get().runIntroDigitsGuided();
-                }, FEEDBACK_DELAY * 2);
             }
         } else {
             if (newAttempt === 1) {
@@ -660,21 +679,21 @@ export const useStore = create<MachineState>((set, get) => ({
                 set({ showInputField: false });
                 sequenceFeedback(
                     "D'accord, regarde bien !",
-                    "Voici TOUS les chiffres que la machine peut afficher :"
+                    "Voici TOUS les chiffres que la machine peut afficher :",
+                    () => {
+                        get().showIntroDigitsVisual();
+                    }
                 );
-                setTimeout(() => {
-                    get().showIntroDigitsVisual();
-                }, FEEDBACK_DELAY * 2);
             } else {
                 // Attempt 3: guided counting
                 set({ showInputField: false });
                 sequenceFeedback(
                     "Ce n'est pas grave ! On va compter ENSEMBLE ! 🤝",
-                    "Regarde l'écran et compte avec moi à voix haute !"
+                    "Regarde l'écran et compte avec moi à voix haute !",
+                    () => {
+                        get().runIntroDigitsGuided();
+                    }
                 );
-                setTimeout(() => {
-                    get().runIntroDigitsGuided();
-                }, FEEDBACK_DELAY * 2);
             }
         }
     },
@@ -1608,9 +1627,44 @@ export const useStore = create<MachineState>((set, get) => ({
     },
 
 
-    sequenceFeedback: (first: string, second?: string) => {
-        const combined = second ? `${first} - ${second}` : first;
-        get().setFeedback(combined);
+    sequenceFeedback: (first: string, second?: string, onComplete?: () => void) => {
+        // Speak the first message
+        textToSpeechService.speak(first);
+        
+        // Display the first message immediately
+        get().setFeedback(first);
+        
+        // Set up callback for when first message finishes
+        textToSpeechService.setCallbacks({
+            onEnd: () => {
+                if (second) {
+                    // Speak and display the second message
+                    textToSpeechService.speak(second);
+                    get().setFeedback(`${first} - ${second}`);
+                    
+                    // Set up callback for second message completion
+                    textToSpeechService.setCallbacks({
+                        onEnd: () => {
+                            onComplete?.();
+                        }
+                    });
+                } else {
+                    onComplete?.();
+                }
+            }
+        });
+    },
+
+    // Helper function to speak a message and execute callback when done
+    speakAndThen: (message: string, onComplete?: () => void) => {
+        textToSpeechService.speak(message);
+        get().setFeedback(message);
+        
+        if (onComplete) {
+            textToSpeechService.setCallbacks({
+                onEnd: onComplete
+            });
+        }
     },
 
     handleAdd: (idx: number) => {
@@ -3867,6 +3921,11 @@ export const useStore = create<MachineState>((set, get) => ({
 
         console.log('newInstruction', newInstruction);
         set({ instruction: newInstruction });
+        
+        // Speak the instruction using text-to-speech
+        if (newInstruction) {
+            textToSpeechService.speak(newInstruction);
+        }
     },
 
     startLearningPhase: () => {

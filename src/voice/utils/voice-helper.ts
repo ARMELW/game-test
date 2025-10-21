@@ -1,5 +1,6 @@
 import { speechToTextService } from '../services/speech/speech-to-text';
 import { textToSpeechService } from '../services/speech/text-to-speech';
+import { PersonaLanguage } from '../services/speech/persona.types';
 
 /**
  * Utilitaire simple pour déclencher la reconnaissance vocale
@@ -46,7 +47,7 @@ export class VoiceHelper {
 
     return new Promise((resolve, reject) => {
       let finalTranscript = '';
-      let timeoutId: NodeJS.Timeout;
+      let timeoutId: ReturnType<typeof setTimeout>;
 
       this.isActive = true;
 
@@ -120,11 +121,16 @@ export class VoiceHelper {
     } = options;
 
     // Configuration
-    textToSpeechService.setConfig({
-      language,
+    textToSpeechService.setVoiceConfig({
       rate,
       pitch,
       volume
+    });
+    
+    // Map string to PersonaLanguage enum
+    const langEnum = language === 'en-US' ? PersonaLanguage.Anglais : PersonaLanguage.Francais;
+    textToSpeechService.setPersona({
+      language: langEnum
     });
 
     // Callbacks
