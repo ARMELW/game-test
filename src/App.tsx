@@ -1,5 +1,4 @@
 
-import { useStore } from "./store";
 import MachineANombres from "./MachineANombres";
 
 function App() {

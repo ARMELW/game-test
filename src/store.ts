@@ -238,9 +238,7 @@ export const useStore = create<MachineState>((set, get) => ({
             set({ timer: newTimer as unknown as number });
         } else if (phase === 'intro-welcome') {
             const newTimer = setTimeout(() => {
-                set({ phase: 'intro-discover', timer: null });
-                get().updateButtonVisibility();
-                get().updateInstruction();
+                get().setPhase('intro-discover');
             }, 3000); // ≈ 3 secondes
             set({ timer: newTimer as unknown as number });
         }
@@ -492,8 +490,7 @@ export const useStore = create<MachineState>((set, get) => ({
         setTimeout(() => {
             set({ feedback: "Voilà, j'ai terminé ma nouvelle machine !" });
             setTimeout(() => {
-                set({ phase: 'intro-discover-machine' });
-                get().updateInstruction();
+                get().setPhase('intro-discover-machine');
             }, FEEDBACK_DELAY);
         }, FEEDBACK_DELAY * 2);
     },
@@ -537,8 +534,8 @@ export const useStore = create<MachineState>((set, get) => ({
                 // Unlock units column when starting interaction
                 const newCols = [...get().columns];
                 newCols[0].unlocked = true;
-                set({ columns: newCols, phase: 'intro-first-interaction' });
-                get().updateInstruction();
+                set({ columns: newCols });
+                get().setPhase('intro-first-interaction');
             }, FEEDBACK_DELAY);
         }, FEEDBACK_DELAY * 2);
     },
@@ -607,8 +604,8 @@ export const useStore = create<MachineState>((set, get) => ({
                 setTimeout(() => {
                     set({ feedback: "Donc en tout, nous avons bien 10 chiffres différents !" });
                     setTimeout(() => {
-                        set({ showInputField: false, phase: 'intro-second-column', introDigitsAttempt: 0 });
-                        get().updateInstruction();
+                        set({ showInputField: false, introDigitsAttempt: 0 });
+                        get().setPhase('intro-second-column');
                     }, FEEDBACK_DELAY);
                 }, FEEDBACK_DELAY);
             }, FEEDBACK_DELAY * 2);
@@ -721,8 +718,8 @@ export const useStore = create<MachineState>((set, get) => ({
                         setTimeout(() => {
                             setFeedback("Le ZÉRO est un peu particulier... on l'oublie parfois, mais il est AUSSI important que les autres !");
                             setTimeout(() => {
-                                set({ phase: 'intro-second-column', introDigitsAttempt: 0 });
-                                get().updateInstruction();
+                                set({ introDigitsAttempt: 0 });
+                                get().setPhase('intro-second-column');
                             }, FEEDBACK_DELAY);
                         }, FEEDBACK_DELAY);
                     }, FEEDBACK_DELAY);
@@ -762,8 +759,7 @@ export const useStore = create<MachineState>((set, get) => ({
                 setTimeout(() => {
                     set({ feedback: "(Bruit d'allumage : bzzzz, ding !)" });
                     setTimeout(() => {
-                        set({ phase: 'intro-discover-carry' });
-                        get().updateInstruction();
+                        get().setPhase('intro-discover-carry');
                     }, FEEDBACK_DELAY);
                 }, FEEDBACK_DELAY * 2);
             }, FEEDBACK_DELAY);
@@ -787,8 +783,8 @@ export const useStore = create<MachineState>((set, get) => ({
                 // Unlock units when entering tutorial
                 const newCols = [...get().columns];
                 newCols[0].unlocked = true;
-                set({ columns: newCols, showInputField: false, phase: 'tutorial', introMaxAttempt: 0 });
-                get().updateInstruction();
+                set({ columns: newCols, showInputField: false, introMaxAttempt: 0 });
+                get().setPhase('tutorial');
             }, FEEDBACK_DELAY * 2);
         } else if (answer === 100) {
             if (newAttempt === 1) {
@@ -873,8 +869,8 @@ export const useStore = create<MachineState>((set, get) => ({
                         // Unlock units when entering tutorial
                         const newCols = [...get().columns];
                         newCols[0].unlocked = true;
-                        set({ columns: newCols, phase: 'tutorial', introMaxAttempt: 0 });
-                        get().updateInstruction();
+                        set({ columns: newCols, introMaxAttempt: 0 });
+                        get().setPhase('tutorial');
                     }, FEEDBACK_DELAY);
                 }, FEEDBACK_DELAY * 2);
             }, FEEDBACK_DELAY);
@@ -894,8 +890,8 @@ export const useStore = create<MachineState>((set, get) => ({
                 setTimeout(() => {
                     get().setFeedback("Donc en tout, nous avons bien 10 chiffres différents : 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 !");
                     setTimeout(() => {
-                        set({ showInputField: false, userInput: "", phase: 'intro-add-roll' });
-                        get().updateInstruction();
+                        set({ showInputField: false, userInput: "" });
+                        get().setPhase('intro-add-roll');
                     }, FEEDBACK_DELAY);
                 }, FEEDBACK_DELAY * 2);
             } else if (answer === 10) {
@@ -904,8 +900,8 @@ export const useStore = create<MachineState>((set, get) => ({
                     "0, 1, 2, 3, 4, 5, 6, 7, 8, 9, le compte est bon, nous en avons bien 10 ! Il est un peu particulier et parfois on l'oublie, mais ce 0 est aussi important que les autres chiffres !"
                 );
                 setTimeout(() => {
-                    set({ showInputField: false, userInput: "", phase: 'intro-add-roll' });
-                    get().updateInstruction();
+                    set({ showInputField: false, userInput: "" });
+                    get().setPhase('intro-add-roll');
                 }, FEEDBACK_DELAY * 2);
             } else {
                 sequenceFeedback(
@@ -913,8 +909,8 @@ export const useStore = create<MachineState>((set, get) => ({
                     "0, 1, 2, 3, 4, 5, 6, 7, 8, 9, le compte est bon, nous en avons 10 ! Au début la machine affichait aussi 0 et ce 0 est aussi important que les autres chiffres."
                 );
                 setTimeout(() => {
-                    set({ showInputField: false, userInput: "", phase: 'intro-add-roll' });
-                    get().updateInstruction();
+                    set({ showInputField: false, userInput: "" });
+                    get().setPhase('intro-add-roll');
                 }, FEEDBACK_DELAY * 2);
             }
         } else if (phase === 'intro-question-max') {
@@ -929,8 +925,8 @@ export const useStore = create<MachineState>((set, get) => ({
                         // Unlock units when entering tutorial
                         const newCols = [...get().columns];
                         newCols[0].unlocked = true;
-                        set({ columns: newCols, showInputField: false, userInput: "", phase: 'tutorial' });
-                        get().updateInstruction();
+                        set({ columns: newCols, showInputField: false, userInput: "" });
+                        get().setPhase('tutorial');
                     }, FEEDBACK_DELAY);
                 }, FEEDBACK_DELAY * 2);
             } else if (answer === 99) {
@@ -942,8 +938,8 @@ export const useStore = create<MachineState>((set, get) => ({
                     // Unlock units when entering tutorial
                     const newCols = [...get().columns];
                     newCols[0].unlocked = true;
-                    set({ columns: newCols, showInputField: false, userInput: "", phase: 'tutorial' });
-                    get().updateInstruction();
+                    set({ columns: newCols, showInputField: false, userInput: "" });
+                    get().setPhase('tutorial');
                 }, FEEDBACK_DELAY * 2);
             } else {
                 sequenceFeedback(
@@ -954,8 +950,8 @@ export const useStore = create<MachineState>((set, get) => ({
                     // Unlock units when entering tutorial
                     const newCols = [...get().columns];
                     newCols[0].unlocked = true;
-                    set({ columns: newCols, showInputField: false, userInput: "", phase: 'tutorial' });
-                    get().updateInstruction();
+                    set({ columns: newCols, showInputField: false, userInput: "" });
+                    get().setPhase('tutorial');
                 }, FEEDBACK_DELAY * 2);
             }
         }
@@ -1723,8 +1719,7 @@ export const useStore = create<MachineState>((set, get) => ({
             setTimeout(() => {
 
                 setTimeout(() => {
-                    set({ phase: 'intro-discover' });
-                    get().updateInstruction();
+                    get().setPhase('intro-discover');
                 }, FEEDBACK_DELAY * 2);
             }, FEEDBACK_DELAY * 2);
             return;
@@ -1799,8 +1794,8 @@ export const useStore = create<MachineState>((set, get) => ({
                     "Tu as vu comme les lumières s'allument en même temps que les chiffres changent ?"
                 );
                 setTimeout(() => {
-                    set({ showInputField: true, phase: 'tutorial' });
-                    get().updateInstruction();
+                    set({ showInputField: true });
+                    get().setPhase('tutorial');
                 }, FEEDBACK_DELAY * 2);
             } else if (unitsValue > 0) {
                 get().setFeedback(`${unitsValue}... Continue à cliquer sur △ !`);
@@ -1823,8 +1818,8 @@ export const useStore = create<MachineState>((set, get) => ({
                         "Elles se regroupent pour n'allumer qu'une autre lumière du rouleau suivant. C'est un peu comme si chaque lumière du nouveau rouleau avait dix petites lumières à l'intérieur."
                     );
                     setTimeout(() => {
-                        set({ showInputField: true, phase: 'intro-question-max' });
-                        get().updateInstruction();
+                        set({ showInputField: true });
+                        get().setPhase('intro-question-max');
                     }, FEEDBACK_DELAY * 2);
                 }, FEEDBACK_DELAY * 2);
             } else if (unitsValue > 0) {
@@ -1849,8 +1844,8 @@ export const useStore = create<MachineState>((set, get) => ({
             else if (unitsValue === 3) {
                 sequenceFeedback("Merveilleux ! 🎉 **Dis : TROIS !** Trois doigts !", `Clique sur △ pour continuer !`);
                 setTimeout(() => {
-                    set({ phase: 'click-add', feedback: "Bravo ! Continuons jusqu'à 9 ! Clique sur △ !" });
-                    get().updateButtonVisibility();
+                    set({ feedback: "Bravo ! Continuons jusqu'à 9 ! Clique sur △ !" });
+                    get().setPhase('click-add');
                 }, FEEDBACK_DELAY * 1.5);
             } else if (unitsValue > 3) {
                 newCols[0].value = 3;
@@ -1865,9 +1860,8 @@ export const useStore = create<MachineState>((set, get) => ({
                 set({ columns: newCols });
                 get().setFeedback("Parfait ! 🎉 Tu as atteint 9 ! Maintenant clique sur ∇ pour descendre à zéro !");
                 setTimeout(() => {
-                    set({ phase: 'click-remove' });
-                    get().updateButtonVisibility();
                     get().setFeedback("Super ! Clique sur ∇ pour enlever les billes jusqu'à zéro !");
+                    get().setPhase('click-remove');
                 }, FEEDBACK_DELAY);
                 return;
             }
@@ -2484,8 +2478,8 @@ export const useStore = create<MachineState>((set, get) => ({
                     setTimeout(() => {
                         set({ feedback: "Alors, tu as compris le truc ? 😊 Continue à explorer !" });
                         setTimeout(() => {
-                            set({ showInputField: true, phase: 'intro-count-digits' });
-                            get().updateInstruction();
+                            set({ showInputField: true });
+                            get().setPhase('intro-count-digits');
                         }, FEEDBACK_DELAY * 2);
                     }, FEEDBACK_DELAY);
                 }, 500);
@@ -2507,8 +2501,8 @@ export const useStore = create<MachineState>((set, get) => ({
                 if (get().introClickCount === 9 && columns[0].value > 0) {
                     set({ feedback: "Le bouton ROUGE enlève les lumières ! △ ajoute, ∇ enlève ! C'est simple ! 😊" });
                     setTimeout(() => {
-                        set({ showInputField: true, phase: 'intro-count-digits' });
-                        get().updateInstruction();
+                        set({ showInputField: true });
+                        get().setPhase('intro-count-digits');
                     }, 2000);
                 }
             }
@@ -3551,8 +3545,7 @@ export const useStore = create<MachineState>((set, get) => ({
                 if (challengeIndex === THOUSANDS_CHALLENGES.length - 1) {
                     set((state: MachineState) => ({ completedChallenges: { ...state.completedChallenges, thousands: true } }));
                     setTimeout(() => {
-                        set({ phase: 'celebration-thousands-complete' });
-                        get().updateButtonVisibility();
+                        get().setPhase('celebration-thousands-complete');
                         sequenceFeedback("🏆🎉 INCROYABLE ! TU ES UN CHAMPION DES NOMBRES !", "Tu sais maintenant compter jusqu'à 9999 ! C'est ÉNORME !");
                     }, FEEDBACK_DELAY * 2);
                 } else {
