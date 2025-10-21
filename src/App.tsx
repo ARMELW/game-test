@@ -1,8 +1,6 @@
 
 import { useStore } from "./store";
 import MachineANombres from "./MachineANombres";
-const store = useStore.getState();
-store.setPhase('intro-welcome');
 
 function App() {
 
