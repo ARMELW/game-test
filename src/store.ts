@@ -4136,9 +4136,9 @@ useStore.subscribe(
         }
         
         // Only send remaining targets to Unity when phase changes or target index changes
-        if (state.phase !== previousState.phase || currentIndex !== previousIndex) {
+        /**if (state.phase !== previousState.phase || currentIndex !== previousIndex) {
             sendRemainingTargetsToUnity(state.phase, currentIndex);
-        }
+        }**/
         // Handle intro-welcome phase transition
         if (state.phase === 'intro-welcome') {
             // Clear any existing timer first

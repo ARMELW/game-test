@@ -117,7 +117,8 @@ function MachineANombres() {
         console.log(
           "Wrong value event received from Unity - triggering validation"
         );
-        handleManualValidation();
+
+      //  handleManualValidation();
       } else if (parsedData.type == "nextGoal") {
         // Handle next goal event from Unity
         // When Unity signals to move to next challenge, trigger validation
@@ -125,8 +126,9 @@ function MachineANombres() {
         console.log(
           "Next goal event received from Unity - triggering validation"
         );
-        handleManualValidation();
+       // handleManualValidation();
       }
+     
     },
     [handleAdd, handleSubtract, phase]
   ); // eslint-disable-line react-hooks/exhaustive-deps
@@ -134,6 +136,7 @@ function MachineANombres() {
   // Handle manual validation button click
   const handleManualValidation = useCallback(() => {
     // Prevent duplicate validations within 500ms window
+    console.log('handleManualValidation');
     const now = Date.now();
     if (validationInProgressRef.current || (now - lastValidationTimeRef.current) < 500) {
       console.log("Validation skipped - too soon after previous validation");
