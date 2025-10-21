@@ -186,6 +186,8 @@ export const useStore = create<MachineState>((set, get) => ({
     introClickCount: 0,
     introDigitsAttempt: 0,
     introMaxAttempt: 0,
+    introBorrowAnimationShown: false,
+    introCarryAnimationShown: false,
     showResponseButtons: false,
     selectedResponse: null,
 
@@ -236,6 +238,9 @@ export const useStore = create<MachineState>((set, get) => ({
                 }
             }, 60000);
             set({ timer: newTimer as unknown as number });
+        } else if (phase === 'intro-discover-carry') {
+            // Reset the borrow and carry animation flags when entering this phase
+            set({ introBorrowAnimationShown: false, introCarryAnimationShown: false });
         } else if (phase === 'intro-welcome') {
             const newTimer = setTimeout(() => {
                 get().setPhase('intro-discover');
@@ -472,6 +477,8 @@ export const useStore = create<MachineState>((set, get) => ({
     setIntroClickCount: (count) => set({ introClickCount: count }),
     setIntroDigitsAttempt: (attempt) => set({ introDigitsAttempt: attempt }),
     setIntroMaxAttempt: (attempt) => set({ introMaxAttempt: attempt }),
+    setIntroBorrowAnimationShown: (shown) => set({ introBorrowAnimationShown: shown }),
+    setIntroCarryAnimationShown: (shown) => set({ introCarryAnimationShown: shown }),
     setShowResponseButtons: (show) => set({ showResponseButtons: show }),
     setSelectedResponse: (response) => set({ selectedResponse: response }),
 
@@ -1656,18 +1663,22 @@ export const useStore = create<MachineState>((set, get) => ({
                     newCols[1].value++;
                     set({ columns: newCols });
 
-                    setTimeout(() => {
-                        sequenceFeedback(
-                            "WAOUH ! Tu as vu ça ??? 🤩 C'était MAGIQUE non ?",
-                            "Les 10 lumières ont VOYAGÉ ! Elles se sont regroupées pour devenir UNE seule lumière sur le deuxième rouleau !"
-                        );
+                    // Check if carry animation has already been shown
+                    if (!get().introCarryAnimationShown) {
+                        set({ introCarryAnimationShown: true });
                         setTimeout(() => {
-                            set({ feedback: "C'est comme si... chaque lumière du nouveau rouleau avait 10 petites lumières à l'intérieur ! 🎒 10 petites = 1 grosse ! C'est le SECRET des nombres ! 🔑" });
+                            sequenceFeedback(
+                                "WAOUH ! Tu as vu ça ??? 🤩 C'était MAGIQUE non ?",
+                                "Les 10 lumières ont VOYAGÉ ! Elles se sont regroupées pour devenir UNE seule lumière sur le deuxième rouleau !"
+                            );
                             setTimeout(() => {
-                                set({ feedback: "Maintenant, refais l'inverse ! Clique sur ∇ pour voir ce qu'il se passe !" });
-                            }, FEEDBACK_DELAY);
-                        }, FEEDBACK_DELAY * 2);
-                    }, 500);
+                                set({ feedback: "C'est comme si... chaque lumière du nouveau rouleau avait 10 petites lumières à l'intérieur ! 🎒 10 petites = 1 grosse ! C'est le SECRET des nombres ! 🔑" });
+                                setTimeout(() => {
+                                    set({ feedback: "Maintenant, refais l'inverse ! Clique sur ∇ pour voir ce qu'il se passe !" });
+                                }, FEEDBACK_DELAY);
+                            }, FEEDBACK_DELAY * 2);
+                        }, 500);
+                    }
                 } else {
                     set({ columns: newCols });
                     // Update instruction to reflect the new state
@@ -2469,11 +2480,21 @@ export const useStore = create<MachineState>((set, get) => ({
         // Handle new intro phases
         if (phase === 'intro-discover-carry') {
             if (idx === 0 && columns[0].value === 0 && columns[1].value > 0) {
-                // Borrow from tens
+                // Check if borrow animation has already been shown
+                if (get().introBorrowAnimationShown) {
+                    // Just perform the borrow without animation
+                    const newCols = [...columns];
+                    newCols[1].value--;
+                    newCols[0].value = 9;
+                    set({ columns: newCols });
+                    return;
+                }
+                
+                // First time showing borrow animation
                 const newCols = [...columns];
                 newCols[1].value--;
                 newCols[0].value = 9;
-                set({ columns: newCols });
+                set({ columns: newCols, introBorrowAnimationShown: true });
 
                 setTimeout(() => {
                     sequenceFeedback(
