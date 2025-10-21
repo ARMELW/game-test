@@ -126,6 +126,7 @@ function sendRemainingTargetsToUnity(phase: string, currentIndex: number) {
     }
 }
 export const useStore = create<MachineState>((set, get) => ({
+    
     columns: initialColumns,
     phase: 'intro-welcome-personalized',
     addClicks: 0,
@@ -2640,6 +2641,14 @@ export const useStore = create<MachineState>((set, get) => ({
         } else if (phase === 'normal' && hasBorrow) {
             get().setFeedback("🔄 Emprunt magique ! Continue avec ∇ si nécessaire !");
         }
+    },
+    handleSetValue: (idx: number, value: number) => {
+        const { columns } = get();
+        if (idx < 0 || idx >= columns.length) return;
+        const safeValue = Math.max(0, Math.min(9, value));
+        const newCols = [...columns];
+        newCols[idx].value = safeValue;
+        set({ columns: newCols });
     },
 
     handleValidateLearning: () => {

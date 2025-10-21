@@ -18,6 +18,7 @@ function MachineANombres() {
     showInputField,
     handleAdd,
     handleSubtract,
+    handleSetValue,
     handleValidateLearning,
     handleValidateTenToTwenty,
     handleValidateTens,
@@ -88,13 +89,18 @@ function MachineANombres() {
     };
 
     const columnIndex = getColumnIndex(parsedData.numericValue);
-
+    console.log('parsedData.numericValue',parsedData.type);
     // Handle increase and decrease actions
     if (parsedData.type === 'increaseValue') {
       handleAdd(columnIndex);
     } else if (parsedData.type === 'decreaseValue') {
       handleSubtract(columnIndex);
-    } else if (parsedData.type === 'addGoal') {
+    }
+    else if(parsedData.type == 'setValue'){
+      handleSetValue(columnIndex, parsedData.numericValue || 0);
+    }
+  
+    else if (parsedData.type === 'addGoal') {
       // Note: This message type is no longer used for automatic validation.
       // Validation is now triggered manually by the user clicking the "Valider" button.
       console.log('addGoal message received but ignored - manual validation required');

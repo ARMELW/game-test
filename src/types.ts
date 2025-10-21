@@ -277,6 +277,7 @@ export interface MachineState {
     sequenceFeedback: (first: string, second: string, delay?: number) => void;
     handleAdd: (idx: number) => void;
     handleSubtract: (idx: number) => void;
+    handleSetValue: (idx: number, value: number) => void;
     handleIntroNameSubmit: () => void;
     handleIntroMachineResponse: () => void;
     handleIntroFirstClick: () => void;
