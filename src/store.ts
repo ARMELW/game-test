@@ -186,6 +186,7 @@ export const useStore = create<MachineState>((set, get) => ({
     introClickCount: 0,
     introDigitsAttempt: 0,
     introMaxAttempt: 0,
+    introBorrowAnimationShown: false,
     showResponseButtons: false,
     selectedResponse: null,
 
@@ -236,6 +237,9 @@ export const useStore = create<MachineState>((set, get) => ({
                 }
             }, 60000);
             set({ timer: newTimer as unknown as number });
+        } else if (phase === 'intro-discover-carry') {
+            // Reset the borrow animation flag when entering this phase
+            set({ introBorrowAnimationShown: false });
         } else if (phase === 'intro-welcome') {
             const newTimer = setTimeout(() => {
                 get().setPhase('intro-discover');
@@ -472,6 +476,7 @@ export const useStore = create<MachineState>((set, get) => ({
     setIntroClickCount: (count) => set({ introClickCount: count }),
     setIntroDigitsAttempt: (attempt) => set({ introDigitsAttempt: attempt }),
     setIntroMaxAttempt: (attempt) => set({ introMaxAttempt: attempt }),
+    setIntroBorrowAnimationShown: (shown) => set({ introBorrowAnimationShown: shown }),
     setShowResponseButtons: (show) => set({ showResponseButtons: show }),
     setSelectedResponse: (response) => set({ selectedResponse: response }),
 
@@ -2469,11 +2474,21 @@ export const useStore = create<MachineState>((set, get) => ({
         // Handle new intro phases
         if (phase === 'intro-discover-carry') {
             if (idx === 0 && columns[0].value === 0 && columns[1].value > 0) {
-                // Borrow from tens
+                // Check if borrow animation has already been shown
+                if (get().introBorrowAnimationShown) {
+                    // Just perform the borrow without animation
+                    const newCols = [...columns];
+                    newCols[1].value--;
+                    newCols[0].value = 9;
+                    set({ columns: newCols });
+                    return;
+                }
+                
+                // First time showing borrow animation
                 const newCols = [...columns];
                 newCols[1].value--;
                 newCols[0].value = 9;
-                set({ columns: newCols });
+                set({ columns: newCols, introBorrowAnimationShown: true });
 
                 setTimeout(() => {
                     sequenceFeedback(
