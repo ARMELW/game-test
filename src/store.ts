@@ -126,7 +126,7 @@ function sendRemainingTargetsToUnity(phase: string, currentIndex: number) {
     }
 }
 export const useStore = create<MachineState>((set, get) => ({
-    
+
     columns: initialColumns,
     phase: 'intro-welcome-personalized',
     addClicks: 0,
@@ -2642,14 +2642,17 @@ export const useStore = create<MachineState>((set, get) => ({
             get().setFeedback("🔄 Emprunt magique ! Continue avec ∇ si nécessaire !");
         }
     },
-    handleSetValue: (idx: number, value: number) => {
+    handleSetValue: (value: string | number) => {
         const { columns } = get();
-        if (idx < 0 || idx >= columns.length) return;
-        const safeValue = Math.max(0, Math.min(9, value));
+        const strValue = value.toString().padStart(4, '0');
         const newCols = [...columns];
-        newCols[idx].value = safeValue;
+        for (let i = 0; i < 4; i++) {
+            const digit = parseInt(strValue[3 - i], 10);
+            newCols[i].value = isNaN(digit) ? 0 : Math.max(0, Math.min(9, digit));
+        }
         set({ columns: newCols });
     },
+    
 
     handleValidateLearning: () => {
         const { phase, columns, unitTargetIndex, unitSuccessCount, sequenceFeedback, resetUnitChallenge, attemptCount, consecutiveFailures, resetAttempts, setAttemptCount, setConsecutiveFailures, setShowHelpOptions, totalChallengesCompleted, setTotalChallengesCompleted, setCurrentTarget } = get();
