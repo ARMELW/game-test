@@ -4,14 +4,7 @@ import { UnityGame } from "./components/UnityGame";
 import { parse, useUnity } from "./hooks/useUnity";
 import { UI_MESSAGES } from "./instructions.ts";
 
- const currentState = useStore.getState();
- // intro-welcome
- //intro-discover
- // intro-discover-machine
- //intro-first-interaction
- //
 
- currentState.setPhase('intro-discover-carry');
 function formatNumber(num: number, length = 4) {
   return num.toString().padStart(length, "0");
 }

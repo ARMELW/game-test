@@ -269,7 +269,9 @@ export const useStore = create<MachineState>((set, get) => ({
             set({ timer: null });
         }
 
-        set({ phase });
+    // Afficher le champ de saisie uniquement pour la phase 'intro-count-digits'
+    set({ showInputField: phase === 'intro-count-digits' });
+    set({ phase });
 
         // Send challenge list to Unity when entering a challenge phase
         if (phase.startsWith('challenge-')) {
@@ -627,7 +629,7 @@ export const useStore = create<MachineState>((set, get) => ({
                     // Unlock units column when starting interaction
                     const newCols = [...get().columns];
                     newCols[0].unlocked = true;
-                    set({ columns: newCols, phase: 'intro-first-interaction' });
+                   // set({ columns: newCols, phase: 'intro-first-interaction' });
                     get().updateInstruction();
                 }
             });
@@ -715,7 +717,7 @@ export const useStore = create<MachineState>((set, get) => ({
                             get().speakAndThen(
                                 "Donc en tout, nous avons bien 10 chiffres différents !",
                                 () => {
-                                    set({ showInputField: false, phase: 'intro-second-column', introDigitsAttempt: 0 });
+                                    set({ showInputField: false, introDigitsAttempt: 0 });
                                     get().updateInstruction();
                                 }
                             );
@@ -983,9 +985,13 @@ export const useStore = create<MachineState>((set, get) => ({
     },
 
     handleUserInputSubmit: () => {
-        const { phase, userInput, sequenceFeedback } = get();
+        const { phase, userInput, sequenceFeedback, handleIntroDigitsSubmit } = get();
         const answer = parseInt(userInput.trim());
 
+        if (phase === 'intro-count-digits') {
+            handleIntroDigitsSubmit();
+            return;
+        }
         if (phase === 'intro-question-digits') {
             if (answer === 9) {
                 sequenceFeedback(
@@ -3950,7 +3956,7 @@ export const useStore = create<MachineState>((set, get) => ({
         
         // Speak the instruction, but handle automatic transitions in phase-specific logic
         // Only phases with automatic transitions after speaking should be handled here
-        if (phase === 'intro-welcome') {
+        /**if (phase === 'intro-welcome') {
             get().speakAndThen(newInstruction, () => {
                 // Transition to intro-discover after welcome message
                 console.log('[updateInstruction] intro-welcome complete, transitioning to intro-discover');
@@ -3972,8 +3978,8 @@ export const useStore = create<MachineState>((set, get) => ({
         } else {
             // For all other phases, just speak without automatic transition
             get().speakAndThen(newInstruction);
-        }
-
+        }**/
+        get().speakAndThen(newInstruction);
 
     },
 
@@ -4249,6 +4255,8 @@ Tu veux :
             newCols[2].unlocked = true;
             newCols[3].unlocked = true;
         }
+
+
 
         set({ 
             columns: newCols,

@@ -87,7 +87,6 @@ export type PhaseStatusMap = Record<Phase, PhaseCompletionStatus>;
 export const ALL_PHASES: readonly Phase[] = [
   'loading',
   'intro-welcome',
-  'intro-welcome-personalized',
   'intro-discover',
   'intro-discover-machine',
   'intro-first-interaction',
