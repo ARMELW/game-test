@@ -77,6 +77,12 @@ DÉMARRAGE DU JEU
          ↓
     L'utilisateur décrémente de 3 à 0 avec ∇
          ↓
+    [tutorial-challenge]
+    "Maintenant, un petit défi pour apprendre ! 🎯"
+    🎯 Action : Afficher le nombre 3 et cliquer sur VALIDER
+    - ✅ SUCCÈS → Explique ce qu'il se passe quand on gagne
+    - ❌ ÉCHEC → Explique ce qu'il se passe quand on perd et permet de réessayer
+         ↓
     Transition vers apprentissage des nombres
          ↓
 ┌────────────────────────────────────────────────────────────────┐
@@ -282,16 +288,16 @@ DÉMARRAGE DU JEU
 
 ## 📊 Diagramme simplifié des transitions
 ```
-PHASES D'INTRO          TUTORIEL           UNITÉS              RETENUE
-─────────────────       ─────────          ──────              ───────
-intro-welcome      →    tutorial      →    learn-units    →    learn-carry
-intro-discover          ↓                   explore-units       ↓
-intro-question-digits   (décrémentation)    click-add           (10 pour 1)
-intro-add-roll          ↓                   click-remove
-intro-question-max      Transition          ↓
-                                           challenge-unit-1
-                                           challenge-unit-2
-                                           challenge-unit-3
+PHASES D'INTRO          TUTORIEL                  UNITÉS              RETENUE
+─────────────────       ─────────                 ──────              ───────
+intro-welcome      →    tutorial           →      learn-units    →    learn-carry
+intro-discover          ↓                          explore-units       ↓
+intro-question-digits   (décrémentation)           click-add           (10 pour 1)
+intro-add-roll          ↓                          click-remove
+intro-question-max      tutorial-challenge         ↓
+                        (apprendre défis)         challenge-unit-1
+                        ↓                          challenge-unit-2
+                        Transition                 challenge-unit-3
 
 DIZAINES                CENTAINES           MILLIERS            FINAL
 ────────                ─────────           ────────            ─────
@@ -396,44 +402,45 @@ challenge-tens-3        challenge-hund-3    challenge-thou-3
 6. `intro-discover-carry` - Découverte interactive de la retenue 9→10
 7. `intro-max-value-question` - Question sur le maximum (système à 3 tentatives)
 
-### Tutoriel (4 phases)
-6. `tutorial` - Apprentissage des boutons △ et ∇
-7. `explore-units` - Exploration guidée 1-3
-8. `click-add` - Montée jusqu'à 9
-9. `click-remove` - Descente jusqu'à 0
+### Tutoriel (5 phases)
+8. `tutorial` - Apprentissage des boutons △ et ∇
+9. `tutorial-challenge` - Apprentissage des mécaniques de défi (gagner/perdre)
+10. `explore-units` - Exploration guidée 1-3
+11. `click-add` - Montée jusqu'à 9
+12. `click-remove` - Descente jusqu'à 0
 
 ### Unités (5 phases)
-10. `learn-units` - Comptage auto 1-9
-11. `challenge-unit-1` - Premier défi
-12. `challenge-unit-2` - Deuxième défi
-13. `challenge-unit-3` - Troisième défi
-14. `learn-carry` - Apprentissage de la retenue
+13. `learn-units` - Comptage auto 1-9
+14. `challenge-unit-1` - Premier défi
+15. `challenge-unit-2` - Deuxième défi
+16. `challenge-unit-3` - Troisième défi
+17. `learn-carry` - Apprentissage de la retenue
 
 ### Dizaines (5 phases)
-15. `learn-tens` - Comptage auto par dizaines
-16. `learn-tens-combination` - Exemples de combinaisons
-17. `challenge-tens-1` - Premier défi
-18. `challenge-tens-2` - Deuxième défi
-19. `challenge-tens-3` - Troisième défi
+18. `learn-tens` - Comptage auto par dizaines
+19. `learn-tens-combination` - Exemples de combinaisons
+20. `challenge-tens-1` - Premier défi
+21. `challenge-tens-2` - Deuxième défi
+22. `challenge-tens-3` - Troisième défi
 
 ### Centaines (5 phases)
-20. `learn-hundreds` - Comptage auto par centaines
-21. `learn-hundreds-combination` - Exemples de combinaisons
-22. `challenge-hundreds-1` - Premier défi
-23. `challenge-hundreds-2` - Deuxième défi
-24. `challenge-hundreds-3` - Troisième défi
+23. `learn-hundreds` - Comptage auto par centaines
+24. `learn-hundreds-combination` - Exemples de combinaisons
+25. `challenge-hundreds-1` - Premier défi
+26. `challenge-hundreds-2` - Deuxième défi
+27. `challenge-hundreds-3` - Troisième défi
 
 ### Milliers (5 phases)
-25. `learn-thousands` - Comptage auto par milliers
-26. `learn-thousands-combination` - Exemples de combinaisons
-27. `challenge-thousands-1` - Premier défi
-28. `challenge-thousands-2` - Deuxième défi
-29. `challenge-thousands-3` - Troisième défi
+28. `learn-thousands` - Comptage auto par milliers
+29. `learn-thousands-combination` - Exemples de combinaisons
+30. `challenge-thousands-1` - Premier défi
+31. `challenge-thousands-2` - Deuxième défi
+32. `challenge-thousands-3` - Troisième défi
 
 ### Mode libre (1 phase)
-30. `normal` - Exploration libre jusqu'à 9999
+33. `normal` - Exploration libre jusqu'à 9999
 
-**TOTAL : 32 phases distinctes** 🎮 (7 intro + 4 tutorial + 5 units + 5 tens + 5 hundreds + 5 thousands + 1 normal)
+**TOTAL : 33 phases distinctes** 🎮 (7 intro + 5 tutorial + 5 units + 5 tens + 5 hundreds + 5 thousands + 1 normal)
 
 ---
 

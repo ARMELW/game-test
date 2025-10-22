@@ -5,6 +5,7 @@ import type {
 } from './types.ts';
 import {
     FEEDBACK_DELAY,
+    TUTORIAL_CHALLENGE,
     UNIT_CHALLENGES,
     TEN_TO_TWENTY_CHALLENGES,
     TENS_CHALLENGES,
@@ -50,7 +51,9 @@ function sendChallengeToUnity(phase: string) {
     let targets: number[] = [];
 
     // Determine targets based on phase
-    if (phase.startsWith('challenge-unit-')) {
+    if (phase === 'tutorial-challenge') {
+        targets = TUTORIAL_CHALLENGE.targets;
+    } else if (phase.startsWith('challenge-unit-')) {
         const index = parseInt(phase.split('-')[2]) - 1;
         if (index >= 0 && index < UNIT_CHALLENGES.length) {
             targets = UNIT_CHALLENGES[index].targets;
@@ -157,6 +160,8 @@ export const useStore = create<MachineState>((set, get) => ({
     feedbackSequence: [],
     feedbackSequenceStep: 0,
     feedbackSequenceCallback: null,
+    tutorialChallengeTargetIndex: 0,
+    tutorialChallengeSuccessCount: 0,
     unitTargetIndex: 0,
     unitSuccessCount: 0,
     tenToTwentyTargetIndex: 0,
@@ -417,6 +422,16 @@ export const useStore = create<MachineState>((set, get) => ({
         set({ thousandsSimpleCombinationSuccessCount: count });
         get().updateInstruction();
     },
+    resetTutorialChallenge: () => {
+        set({ tutorialChallengeTargetIndex: 0, tutorialChallengeSuccessCount: 0 });
+        get().resetAttempts();
+        const { phase } = get();
+        setValue(0);
+        if (phase === 'tutorial-challenge') {
+            sendChallengeToUnity(phase);
+        }
+        get().updateInstruction();
+    },
     resetUnitChallenge: () => {
         set({ unitTargetIndex: 0, unitSuccessCount: 0 });
         get().resetAttempts();
@@ -548,6 +563,14 @@ export const useStore = create<MachineState>((set, get) => ({
     setShowResponseButtons: (show) => set({ showResponseButtons: show }),
     setSelectedResponse: (response) => set({ selectedResponse: response }),
 
+    setTutorialChallengeTargetIndex: (index) => {
+        set({ tutorialChallengeTargetIndex: index });
+        get().updateInstruction();
+    },
+    setTutorialChallengeSuccessCount: (count) => {
+        set({ tutorialChallengeSuccessCount: count });
+        get().updateInstruction();
+    },
 
     // New intro phase handlers
     handleIntroNameSubmit: () => {
@@ -1028,7 +1051,7 @@ export const useStore = create<MachineState>((set, get) => ({
         set({
             showUnlockButton: phase === 'normal' && !allColumnsUnlocked,
             showStartLearningButton: phase === 'done' || phase === 'celebration-before-thousands' || phase === 'celebration-thousands-complete',
-            showValidateLearningButton: phase.startsWith('challenge-unit-') || phase === 'challenge-ten-to-twenty',
+            showValidateLearningButton: phase === 'tutorial-challenge' || phase.startsWith('challenge-unit-') || phase === 'challenge-ten-to-twenty',
             showValidateTensButton: phase.startsWith('challenge-tens-'),
             showValidateHundredsButton: phase.startsWith('challenge-hundreds-') || phase === 'challenge-hundred-to-two-hundred' || phase === 'challenge-two-hundred-to-three-hundred',
             showValidateThousandsButton: phase.startsWith('challenge-thousands-') || phase === 'challenge-thousand-to-two-thousand' || phase === 'challenge-two-thousand-to-three-thousand' || phase === 'challenge-thousands-simple-combination',
@@ -2664,17 +2687,18 @@ export const useStore = create<MachineState>((set, get) => ({
             else if (unitsValue === 1) sequenceFeedback("Bravo ! Clique encore sur ROUGE pour tout enlever !", "Plus qu'une bille ! Un dernier clic !");
             else if (unitsValue === 0 && tempTotalBefore === 1) {
                 sequenceFeedback("Extraordinaire ! 🎉 Tu maîtrises les deux boutons ! Je vais t'apprendre les **NOMBRES** !", "Prépare-toi pour une grande aventure !", () => {
-                    // Unlock units for learning phase
+                    // Transition to tutorial-challenge to teach challenge mechanics
                     const newCols = initialColumns.map(col => ({ ...col }));
                     newCols[0].unlocked = true;
                     set({
                         columns: newCols,
-                        nextPhaseAfterAuto: 'explore-units',
-                        phase: 'learn-units',
-                        pendingAutoCount: true
+                        phase: 'tutorial-challenge',
+                        tutorialChallengeTargetIndex: 0,
+                        tutorialChallengeSuccessCount: 0
                     });
                     get().updateButtonVisibility();
-                    sequenceFeedback("Bienvenue dans le monde des NOMBRES ! ✨ Un nombre dit COMBIEN il y a de choses.", "Regarde ! 👀 La machine compte de 1 à 9. Compte avec tes doigts !");
+                    get().resetTutorialChallenge();
+                    sequenceFeedback("Maintenant, un petit défi pour apprendre comment ça marche ! 🎯", "Tu vas voir ce qui se passe quand tu gagnes et quand tu perds !");
                 });
             } else if (unitsValue > 0) {
                 sequenceFeedback(`Bien joué ! Continue à cliquer sur ROUGE !`, "Le bouton ROUGE retire une bille à chaque fois !");
@@ -2718,6 +2742,61 @@ export const useStore = create<MachineState>((set, get) => ({
         set({ columns: newCols });
     },
 
+    handleValidateTutorialChallenge: () => {
+        const { phase, columns, tutorialChallengeTargetIndex, sequenceFeedback, speakAndThen, resetAttempts, setCurrentTarget } = get();
+        
+        if (phase !== 'tutorial-challenge') return;
+
+        const totalNumber = columns.reduce((acc: number, col: Column, idx: number) => {
+            return acc + (col.value * Math.pow(10, idx));
+        }, 0);
+
+        const targetNumber = TUTORIAL_CHALLENGE.targets[tutorialChallengeTargetIndex];
+
+        // Set current target for help system
+        setCurrentTarget(targetNumber);
+
+        if (totalNumber === targetNumber) {
+            // SUCCESS! Show what happens when you win
+            sendCorrectValue();
+            
+            speakAndThen("🎉 BRAVO ! TU AS RÉUSSI ! 🎉", () => {
+                speakAndThen("Quand tu GAGNES, tu vois des félicitations ! 🌟", () => {
+                    speakAndThen("C'est comme ça que ça marche dans les défis ! Tu affiches le bon nombre, tu cliques sur VALIDER, et si c'est correct, tu passes au suivant ! 🎯", () => {
+                        resetAttempts();
+                        
+                        // Transition to learn-units
+                        const newCols = initialColumns.map((col, i) => ({ ...col, unlocked: i === 0 || i === 1 }));
+                        set({
+                            columns: newCols,
+                            nextPhaseAfterAuto: 'challenge-unit-1',
+                            phase: 'learn-units',
+                            pendingAutoCount: true,
+                            isCountingAutomatically: false
+                        });
+                        get().updateButtonVisibility();
+                        sequenceFeedback("Maintenant que tu sais comment fonctionnent les défis, on va apprendre les nombres ! 📚", "Regarde bien la machine compter de 1 à 9 ! 👀");
+                    });
+                });
+            });
+        } else {
+            // FAILURE - Show what happens when you lose (but be encouraging)
+            sendWrongValue();
+            
+            speakAndThen("Ce n'est pas le bon nombre ! 😊", () => {
+                speakAndThen(`Quand tu te TROMPES, on te dit que ce n'est pas correct. 💭 Le nombre demandé était ${targetNumber}, mais tu as affiché ${totalNumber}.`, () => {
+                    speakAndThen("Mais pas de panique ! Tu peux RÉESSAYER autant de fois que tu veux ! 🔄", () => {
+                        speakAndThen(`Essaie encore ! Affiche ${targetNumber} et clique sur VALIDER ! 💪`, () => {
+                            // Reset columns to let them try again
+                            const resetCols = initialColumns.map(col => ({ ...col }));
+                            resetCols[0].unlocked = true;
+                            set({ columns: resetCols });
+                        });
+                    });
+                });
+            });
+        }
+    },
 
     handleValidateLearning: () => {
         const { phase, columns, unitTargetIndex, unitSuccessCount, sequenceFeedback, resetUnitChallenge, attemptCount, consecutiveFailures, resetAttempts, setAttemptCount, setConsecutiveFailures, setShowHelpOptions, totalChallengesCompleted, setTotalChallengesCompleted, setCurrentTarget } = get();
@@ -3712,6 +3791,11 @@ export const useStore = create<MachineState>((set, get) => ({
             case 'tutorial':
                 newInstruction = PHASE_INSTRUCTIONS['tutorial'];
                 break;
+            case 'tutorial-challenge': {
+                const targetNumber = TUTORIAL_CHALLENGE.targets[get().tutorialChallengeTargetIndex];
+                newInstruction = CHALLENGE_INSTRUCTIONS.tutorialChallenge(targetNumber);
+                break;
+            }
             case 'explore-units':
                 newInstruction = PHASE_INSTRUCTIONS['explore-units'];
                 break;

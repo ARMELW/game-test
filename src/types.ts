@@ -20,6 +20,7 @@ export type Phase =
     | 'intro-add-roll'
     | 'intro-question-max'
     | 'tutorial'
+    | 'tutorial-challenge'
     | 'explore-units'
     | 'click-add'
     | 'click-remove'
@@ -75,6 +76,11 @@ export type Challenge = {
 };
 
 export const FEEDBACK_DELAY = 2500;
+
+export const TUTORIAL_CHALLENGE: Challenge = {
+  phase: 'tutorial-challenge',
+  targets: [3] // Just one simple value to learn validation
+};
 
 export const UNIT_CHALLENGES: Challenge[] = [
   { phase: 'challenge-unit-1', targets: [3, 5, 7] },
@@ -139,6 +145,8 @@ export interface MachineState {
         hundreds: boolean;
         thousands: boolean;
     };
+    tutorialChallengeTargetIndex: number;
+    tutorialChallengeSuccessCount: number;
     unitTargetIndex: number;
     unitSuccessCount: number;
     tensTargetIndex: number;
@@ -238,6 +246,8 @@ export interface MachineState {
     setIntroMaxAttempt: (attempt: number) => void;
     setShowResponseButtons: (show: boolean) => void;
     setSelectedResponse: (response: string | null) => void;
+    setTutorialChallengeTargetIndex: (index: number) => void;
+    setTutorialChallengeSuccessCount: (count: number) => void;
     setUnitTargetIndex: (index: number) => void;
     setUnitSuccessCount: (count: number) => void;
     setTensTargetIndex: (index: number) => void;
@@ -261,6 +271,7 @@ export interface MachineState {
     setTwoThousandToThreeThousandSuccessCount: (count: number) => void;
     setThousandsSimpleCombinationTargetIndex: (index: number) => void;
     setThousandsSimpleCombinationSuccessCount: (count: number) => void;
+    resetTutorialChallenge: () => void;
     resetUnitChallenge: () => void;
     resetTensChallenge: () => void;
     resetHundredsChallenge: () => void;
@@ -297,6 +308,7 @@ export interface MachineState {
     handleIntroMaxSubmit: () => void;
     runIntroMaxGuided: () => void;
     completeIntroMaxGuided: () => void;
+    handleValidateTutorialChallenge: () => void;
     handleValidateLearning: () => void;
     handleValidateTenToTwenty: () => void;
     handleValidateTens: () => void;
