@@ -16,7 +16,6 @@ function MachineANombres() {
     phase,
     instruction,
     feedback,
-    isCountingAutomatically,
     userInput,
     showInputField,
     handleAdd,
@@ -67,10 +66,6 @@ function MachineANombres() {
   const {
     isLoaded: unityLoaded,
     changeCurrentValue,
-    lockThousandRoll,
-    lockHundredRoll,
-    lockTenRoll,
-    lockUnitRoll,
   } = useUnity();
 
   // Local typing animation state
