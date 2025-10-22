@@ -20,6 +20,9 @@
 // ============================================================================
 
 export const PHASE_INSTRUCTIONS = {
+  // Loading phase - preparing voice system
+  'loading': "Préparation de l'assistant vocal... Un instant s'il vous plaît ! 🎙️",
+  
   // Introduction phases
   'intro-welcome-personalized': "Bonjour ! Bienvenue dans mon atelier ! 👋 Comment tu t'appelles ? (Tu peux aussi sauter cette étape)",
   
