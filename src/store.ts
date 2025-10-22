@@ -2844,6 +2844,7 @@ export const useStore = create<MachineState>((set, get) => ({
                         columns: resetCols,
                         unitTargetIndex: unitTargetIndex + 1
                     });
+                    get().updateInstruction();
                     get().setFeedback(`🎯 DÉFI ${challengeIndex + 1} : Affiche le nombre **${challenge.targets[unitTargetIndex + 1]}** puis clique sur VALIDER ! (${newSuccessCount}/${challenge.targets.length})`);
                 }
             });
@@ -2931,6 +2932,7 @@ export const useStore = create<MachineState>((set, get) => ({
                     const nextTarget = challenge.targets[tenToTwentyTargetIndex + 1];
                     const resetCols = initialColumns.map((col, i) => ({ ...col, unlocked: i === 0 || i === 1 }));
                     set({ tenToTwentyTargetIndex: tenToTwentyTargetIndex + 1, columns: resetCols });
+                    get().updateInstruction();
                     sequenceFeedback(`✅ Correct ! ${newSuccessCount}/${challenge.targets.length} réussis !`, `Maintenant affiche **${nextTarget}** !`);
                 }
             });
@@ -3043,6 +3045,7 @@ export const useStore = create<MachineState>((set, get) => ({
                     const nextTarget = challenge.targets[tensTargetIndex + 1];
                     const resetCols = initialColumns.map((col, i) => ({ ...col, unlocked: i === 0 || i === 1 }));
                     set({ tensTargetIndex: tensTargetIndex + 1, columns: resetCols });
+                    get().updateInstruction();
                     sequenceFeedback(`✅ Correct ! ${newSuccessCount}/${challenge.targets.length} réussis !`, `Maintenant affiche **${nextTarget}** !`);
                 }
             });
@@ -3126,6 +3129,7 @@ export const useStore = create<MachineState>((set, get) => ({
                     const nextTarget = challenge.targets[hundredToTwoHundredTargetIndex + 1];
                     const resetCols = initialColumns.map((col, i) => ({ ...col, unlocked: i <= 2 }));
                     set({ hundredToTwoHundredTargetIndex: hundredToTwoHundredTargetIndex + 1, columns: resetCols });
+                    get().updateInstruction();
                     sequenceFeedback(
                         `✅ Correct ! ${newSuccessCount}/${challenge.targets.length} réussis !`,
                         `Maintenant affiche **${nextTarget}** !`
@@ -3208,6 +3212,7 @@ export const useStore = create<MachineState>((set, get) => ({
                     const nextTarget = challenge.targets[twoHundredToThreeHundredTargetIndex + 1];
                     const resetCols = initialColumns.map((col, i) => ({ ...col, unlocked: i <= 2 }));
                     set({ twoHundredToThreeHundredTargetIndex: twoHundredToThreeHundredTargetIndex + 1, columns: resetCols });
+                    get().updateInstruction();
                     sequenceFeedback(
                         `✅ Correct ! ${newSuccessCount}/${challenge.targets.length} réussis !`,
                         `Maintenant affiche **${nextTarget}** !`
@@ -3310,6 +3315,7 @@ export const useStore = create<MachineState>((set, get) => ({
                     const nextTarget = challenge.targets[hundredsTargetIndex + 1];
                     const resetCols = initialColumns.map((col, i) => ({ ...col, unlocked: i === 0 || i === 1 || i === 2 }));
                     set({ hundredsTargetIndex: hundredsTargetIndex + 1, columns: resetCols });
+                    get().updateInstruction();
                     sequenceFeedback(
                         `✅ Correct ! ${newSuccessCount}/${challenge.targets.length} réussis !`,
                         `Maintenant affiche **${nextTarget}** !`
@@ -3394,6 +3400,7 @@ export const useStore = create<MachineState>((set, get) => ({
                     const nextTarget = challenge.targets[thousandToTwoThousandTargetIndex + 1];
                     const resetCols = initialColumns.map((col) => ({ ...col, unlocked: true }));
                     set({ thousandToTwoThousandTargetIndex: thousandToTwoThousandTargetIndex + 1, columns: resetCols });
+                    get().updateInstruction();
                     sequenceFeedback(
                         `✅ Correct ! ${newSuccessCount}/${challenge.targets.length} réussis !`,
                         `Maintenant affiche **${nextTarget}** !`
@@ -3474,6 +3481,7 @@ export const useStore = create<MachineState>((set, get) => ({
                     const nextTarget = challenge.targets[twoThousandToThreeThousandTargetIndex + 1];
                     const resetCols = initialColumns.map((col) => ({ ...col, unlocked: true }));
                     set({ twoThousandToThreeThousandTargetIndex: twoThousandToThreeThousandTargetIndex + 1, columns: resetCols });
+                    get().updateInstruction();
                     sequenceFeedback(
                         `✅ Correct ! ${newSuccessCount}/${challenge.targets.length} réussis !`,
                         `Maintenant affiche **${nextTarget}** !`
@@ -3557,6 +3565,7 @@ export const useStore = create<MachineState>((set, get) => ({
                 const nextTarget = challenge.targets[thousandsSimpleCombinationTargetIndex + 1];
                 const resetCols = initialColumns.map((col) => ({ ...col, unlocked: true }));
                 set({ thousandsSimpleCombinationTargetIndex: thousandsSimpleCombinationTargetIndex + 1, columns: resetCols });
+                get().updateInstruction();
                 sequenceFeedback(`✅ Correct ! ${newSuccessCount}/${challenge.targets.length} réussis !`, `Maintenant affiche **${nextTarget}** !`);
             }
         } else {
@@ -3653,6 +3662,7 @@ export const useStore = create<MachineState>((set, get) => ({
                 const nextTarget = challenge.targets[thousandsTargetIndex + 1];
                 const resetCols = get().columns.map((col: Column) => ({ ...col, unlocked: true }));
                 set({ thousandsTargetIndex: thousandsTargetIndex + 1, columns: resetCols });
+                get().updateInstruction();
                 sequenceFeedback(`✅ Correct ! ${newSuccessCount}/${challenge.targets.length} réussis !`, `Maintenant affiche **${nextTarget}** !`);
             }
         } else {
