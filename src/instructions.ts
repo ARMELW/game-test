@@ -44,6 +44,8 @@ export const PHASE_INSTRUCTIONS = {
   
   'intro-second-column': "Bon, tout ça c'est très bien... Mais j'ai un PROBLÈME ! 🤔 Comment va-t-on faire pour compter plus haut que 9 ? Pour l'instant, la machine BLOQUE à 9 ! Tu vois ? Ça ne bouge plus ! 😅 À ton avis, que peut-on faire ?",
   
+  'delock-dizaines': "Regarde bien ! Je vais débloquer le deuxième rouleau ! 🔧 (Bruits : tic tic tic, bzzzz, clic !) Et voilààààà ! 🎉 Maintenant il y a DEUX rouleaux ! Je vais l'allumer pour que tu la testes !",
+  
   'intro-discover-carry': {
     fillToNine: "Maintenant, on va voir quelque chose de MAGIQUE ! ✨ Amène le premier rouleau à 9 !",
     atNine: "Parfait ! Tout est PLEIN ! 9 lumières allumées ! Maintenant... que va-t-il se passer si tu cliques encore une fois sur △ ? Réfléchis bien... 🤔 Tu ne sais pas ? C'est normal ! Clique et tu verras ! 😊",

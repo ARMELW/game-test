@@ -846,20 +846,9 @@ export const useStore = create<MachineState>((set, get) => ({
         const { sequenceFeedback } = get();
         const afterFirstFeedback = () => {
             get().speakAndThen("Regarde bien, je vais modifier la machine !", () => {
-                const newCols = [...initialColumns];
-                newCols[0].unlocked = true;
-                newCols[1].unlocked = true;
-                set({ columns: newCols });
-                sequenceFeedback(
-                    "(Bruits : tic tic tic, bzzzz, clic !) Et voilààààà ! 🎉",
-                    "Maintenant il y a DEUX rouleaux ! Je vais l'allumer pour que tu la testes !",
-                    () => {
-                        get().speakAndThen("(Bruit d'allumage : bzzzz, ding !)", () => {
-                            set({ phase: 'intro-discover-carry' });
-                            get().updateInstruction();
-                        });
-                    }
-                );
+                // Transition to the delock-dizaines phase
+                set({ phase: 'delock-dizaines' });
+                get().updateInstruction();
             });
         };
         if (choice === 'ajouter-rouleau' || choice === 'plus-grande') {
@@ -3743,6 +3732,9 @@ export const useStore = create<MachineState>((set, get) => ({
             case 'intro-second-column':
                 newInstruction = PHASE_INSTRUCTIONS['intro-second-column'];
                 break;
+            case 'delock-dizaines':
+                newInstruction = PHASE_INSTRUCTIONS['delock-dizaines'];
+                break;
             case 'intro-discover-carry':
                 if (get().columns[0].value < 9) {
                     newInstruction = PHASE_INSTRUCTIONS['intro-discover-carry'].fillToNine;
@@ -3965,6 +3957,21 @@ export const useStore = create<MachineState>((set, get) => ({
                 // Transition to intro-second-column after introduction message
                 console.log('[updateInstruction] intro-challenge-introduction complete, transitioning to intro-second-column');
                 get().setPhase('intro-second-column');
+            });
+        } else if (phase === 'delock-dizaines') {
+            get().speakAndThen(newInstruction, () => {
+                // Unlock the columns during this phase
+                const newCols = [...initialColumns];
+                newCols[0].unlocked = true;
+                newCols[1].unlocked = true;
+                set({ columns: newCols });
+                
+                // Transition to intro-discover-carry after unlocking
+                console.log('[updateInstruction] delock-dizaines complete, transitioning to intro-discover-carry');
+                get().speakAndThen("(Bruit d'allumage : bzzzz, ding !)", () => {
+                    set({ phase: 'intro-discover-carry' });
+                    get().updateInstruction();
+                });
             });
         } else if (phase === 'challenge-unit-intro') {
             get().speakAndThen(newInstruction, () => {
@@ -4426,6 +4433,11 @@ useStore.subscribe(
             }
              if(phase == 'intro-second-column' && isUnit){
                 lockUnits = true;
+            }
+             if(phase == 'delock-dizaines'){
+                // During unlock phase, keep everything locked to show the unlocking animation
+                lockUnits = true;
+                lockTens = true;
             }
 
             else if (phase === "normal") {
