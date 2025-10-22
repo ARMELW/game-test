@@ -56,7 +56,7 @@ function MachineANombres() {
     handleIntroNameSubmit,
     handleIntroMachineResponse,
     handleIntroSecondColumnChoice,
-    introMaxAttempt,
+    introMaxAttempt: _introMaxAttempt,
     // Phase navigation functions
     goToNextPhase,
     goToPreviousPhase,
@@ -262,27 +262,27 @@ function MachineANombres() {
     }
   }, [totalNumber, unityLoaded, changeCurrentValue]);
 
-  // Sync Unity roll locks based on phase and unlocked columns
+  // Sync Unity roll locks based on phase and unlocked columns in store
   useEffect(() => {
-    // Check if Unity instance is available instead of relying on isLoaded flag
-    if (!window.unityInstance && !unityLoaded) return;
+    // Check if Unity is ready to receive commands
+    if (!unityLoaded || !window.unityInstance) return;
 
     // Add a delay to ensure Unity is ready to process lock commands
     // Unity needs time after loading to fully initialize its message handling
     const timeoutId = setTimeout(() => {
+      // Get unlocked state from store columns - this is the source of truth
+      const isUnit = columns[0]?.unlocked || false;
+      const isTen = columns[1]?.unlocked || false;
+      const isHundred = columns[2]?.unlocked || false;
+      const isThousand = columns[3]?.unlocked || false;
+
       // Lock all rolls initially
       let lockUnits = true;
       let lockTens = true;
       let lockHundreds = true;
       let lockThousands = true;
 
-      // Unlock based on unlocked columns and phase
-      const isUnit = columns[0]?.unlocked || false;
-      const isTen = columns[1]?.unlocked || false;
-      const isHundred = columns[2]?.unlocked || false;
-      const isThousand = columns[3]?.unlocked || false;
-
-      // Determine which rolls should be unlocked based on phase
+      // Determine which rolls should be unlocked based on phase and column unlock state
       if (phase === "intro-welcome" && isUnit) {
         lockUnits = false;
       } else if (phase === "intro-discover" && isUnit) {
@@ -290,6 +290,7 @@ function MachineANombres() {
       } else if (phase === "intro-add-roll" && isUnit) {
         lockUnits = false;
       } else if (phase === "normal") {
+        // In normal mode, directly use store unlock state
         lockUnits = !isUnit;
         lockTens = !isTen;
         lockHundreds = !isHundred;
@@ -307,6 +308,7 @@ function MachineANombres() {
       } else if (phase === "learn-carry" && isUnit) {
         lockUnits = false;
       } else if (phase === "practice-ten" && (isUnit || isTen)) {
+        // Use store unlock state for practice
         lockUnits = !isUnit;
         lockTens = !isTen;
       } else if (
@@ -319,6 +321,7 @@ function MachineANombres() {
         phase === "practice-hundred" &&
         (isUnit || isTen || isHundred)
       ) {
+        // Use store unlock state for practice
         lockUnits = !isUnit;
         lockTens = !isTen;
         lockHundreds = !isHundred;
@@ -336,6 +339,7 @@ function MachineANombres() {
           phase === "learn-tens-combination") &&
         (isUnit || isTen)
       ) {
+        // Use store unlock state
         lockUnits = !isUnit;
         lockTens = !isTen;
       } else if (
@@ -344,6 +348,7 @@ function MachineANombres() {
           phase === "learn-hundreds-simple-combination") &&
         (isUnit || isTen || isHundred)
       ) {
+        // Use store unlock state
         lockUnits = !isUnit;
         lockTens = !isTen;
         lockHundreds = !isHundred;
@@ -351,6 +356,7 @@ function MachineANombres() {
         phase === "practice-thousand" &&
         (isUnit || isTen || isHundred || isThousand)
       ) {
+        // Use store unlock state for practice
         lockUnits = !isUnit;
         lockTens = !isTen;
         lockHundreds = !isHundred;
@@ -373,6 +379,7 @@ function MachineANombres() {
           phase === "learn-thousands-full-combination") &&
         (isUnit || isTen || isHundred || isThousand)
       ) {
+        // Use store unlock state
         lockUnits = !isUnit;
         lockTens = !isTen;
         lockHundreds = !isHundred;
@@ -387,7 +394,7 @@ function MachineANombres() {
         lockThousands = true;
       }
 
-      // Apply locks to Unity
+      // Apply locks to Unity based on computed state
       lockUnitRoll(lockUnits);
       lockTenRoll(lockTens);
       lockHundredRoll(lockHundreds);
@@ -404,7 +411,6 @@ function MachineANombres() {
     lockTenRoll,
     lockHundredRoll,
     lockThousandRoll,
-    introMaxAttempt,
   ]);
 
 
