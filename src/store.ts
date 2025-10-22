@@ -2,6 +2,7 @@ import { create } from 'zustand';
 import type {
     MachineState,
     Column,
+    PhaseStatusMap,
 } from './types.ts';
 import {
     FEEDBACK_DELAY,
@@ -46,6 +47,15 @@ export const initialColumns: Column[] = [
     { name: 'Centaines', value: 0, unlocked: false, color: 'bg-yellow-500' },
     { name: 'Milliers', value: 0, unlocked: false, color: 'bg-red-500' },
 ];
+
+// Initialize phase status map with all phases as 'not-started'
+function createInitialPhaseStatusMap(): PhaseStatusMap {
+    const map: Partial<PhaseStatusMap> = {};
+    ALL_PHASES.forEach(phase => {
+        map[phase] = 'not-started';
+    });
+    return map as PhaseStatusMap;
+}
 
 // Helper function to send challenge targets to Unity based on phase
 function sendChallengeToUnity(phase: string) {
@@ -222,6 +232,10 @@ export const useStore = create<MachineState>((set, get) => ({
     showValidateHundredsButton: false,
     showValidateThousandsButton: false,
 
+    // Phase status tracking
+    phaseStatusMap: createInitialPhaseStatusMap(),
+    autoTransitionEnabled: false,
+
     // Actions
     setColumns: (updater) => {
         const newColumns = typeof updater === 'function' ? updater(get().columns) : updater;
@@ -231,6 +245,22 @@ export const useStore = create<MachineState>((set, get) => ({
     setPhase: (phase) => {
         const currentPhase = get().phase;
         console.log(`[setPhase] Transitioning from "${currentPhase}" to "${phase}"`);
+        
+        // Mark previous phase as completed if transitioning to a new phase
+        if (currentPhase !== phase && currentPhase !== 'loading') {
+            get().markPhaseComplete(currentPhase);
+        }
+        
+        // Mark new phase as in-progress
+        const { phaseStatusMap } = get();
+        if (phaseStatusMap[phase] === 'not-started') {
+            set({
+                phaseStatusMap: {
+                    ...phaseStatusMap,
+                    [phase]: 'in-progress'
+                }
+            });
+        }
         
         // Nettoyage du timer existant
         const { timer } = get();
@@ -4280,6 +4310,89 @@ Tu veux :
         });
         
         get().setPhase(previousPhase);
+    },
+
+    // Phase status tracking functions
+    getPhaseStatus: (phase) => {
+        const { phaseStatusMap } = get();
+        return {
+            phase,
+            status: phaseStatusMap[phase] || 'not-started'
+        };
+    },
+
+    markPhaseComplete: (phase) => {
+        const { phaseStatusMap } = get();
+        console.log(`[markPhaseComplete] Marking phase "${phase}" as completed`);
+        
+        set({
+            phaseStatusMap: {
+                ...phaseStatusMap,
+                [phase]: 'completed'
+            }
+        });
+
+        // Check if auto-transition is enabled and trigger transition
+        if (get().autoTransitionEnabled) {
+            console.log('[markPhaseComplete] Auto-transition enabled, checking for next phase');
+            setTimeout(() => {
+                get().checkAndTransitionToNextPhase();
+            }, 1000); // Small delay to allow UI updates
+        }
+    },
+
+    isPhaseComplete: (phase) => {
+        const { phaseStatusMap } = get();
+        return phaseStatusMap[phase] === 'completed';
+    },
+
+    setAutoTransitionEnabled: (enabled) => {
+        console.log(`[setAutoTransitionEnabled] Setting auto-transition to ${enabled}`);
+        set({ autoTransitionEnabled: enabled });
+    },
+
+    checkAndTransitionToNextPhase: () => {
+        const currentPhase = get().phase;
+        const currentIndex = get().getCurrentPhaseIndex();
+        
+        if (currentIndex === -1) {
+            console.warn('[checkAndTransitionToNextPhase] Current phase not found in ALL_PHASES');
+            return;
+        }
+        
+        if (currentIndex >= ALL_PHASES.length - 1) {
+            console.log('[checkAndTransitionToNextPhase] Already at the last phase, no auto-transition');
+            return;
+        }
+
+        // Check if current phase is completed
+        if (!get().isPhaseComplete(currentPhase)) {
+            console.log(`[checkAndTransitionToNextPhase] Current phase "${currentPhase}" not completed yet`);
+            return;
+        }
+
+        // Don't auto-transition from certain phases that have explicit next phase logic
+        const manualTransitionPhases = [
+            'normal', 'done', 
+            'celebration-before-thousands', 
+            'celebration-thousands-complete',
+            'intro-discover-machine', // Has user choice
+            'intro-count-digits', // Has user input
+            'intro-max-value-question', // Has user input
+        ];
+
+        if (manualTransitionPhases.includes(currentPhase)) {
+            console.log(`[checkAndTransitionToNextPhase] Phase "${currentPhase}" requires manual transition`);
+            return;
+        }
+
+        const nextPhase = ALL_PHASES[currentIndex + 1];
+        console.log(`[checkAndTransitionToNextPhase] Auto-transitioning from "${currentPhase}" to "${nextPhase}"`);
+        
+        set({ feedback: `Transition automatique vers: ${nextPhase}` });
+        setTimeout(() => {
+            get().goToNextPhase();
+        }, 500);
     },
 }));
 
