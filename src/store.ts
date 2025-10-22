@@ -228,6 +228,9 @@ export const useStore = create<MachineState>((set, get) => ({
         get().updateButtonVisibility();
     },
     setPhase: (phase) => {
+        const currentPhase = get().phase;
+        console.log(`[setPhase] Transitioning from "${currentPhase}" to "${phase}"`);
+        
         // Nettoyage du timer existant
         const { timer } = get();
         if (timer) {
@@ -236,7 +239,6 @@ export const useStore = create<MachineState>((set, get) => ({
         }
 
         set({ phase });
-        console.log('set phase', phase);
 
         // Send challenge list to Unity when entering a challenge phase
         if (phase.startsWith('challenge-')) {
@@ -302,23 +304,6 @@ export const useStore = create<MachineState>((set, get) => ({
                 }
             }, 10000);
             set({ timer: newTimer as unknown as number });
-        } else if (phase === 'intro-welcome') {
-            // Remplacer le setTimeout par une transition pilotée par la voix
-            console.log('[setPhase] intro-welcome: lancement de speakAndThen avec callback');
-            get().speakAndThen(
-                "Bienvenue dans la machine à compter ! Prends le temps de regarder l'écran...",
-                () => {
-                    console.log('[setPhase callback] Fin de la voix intro-welcome, transition vers intro-discover');
-                    // Petit délai pour s'assurer que la voix est bien terminée
-                    setTimeout(() => {
-                        set({ phase: 'intro-discover', timer: null });
-                        console.log('[setPhase callback] Phase changée en intro-discover');
-                        get().updateButtonVisibility();
-                        get().updateInstruction();
-                    }, 500);
-                }
-            );
-            // return;
         }
 
         get().updateButtonVisibility();
@@ -1059,7 +1044,7 @@ export const useStore = create<MachineState>((set, get) => ({
     },
 
     runAutoCount: () => {
-        const { phase, isCountingAutomatically, columns, nextPhaseAfterAuto, timer } = get();
+        const { phase, isCountingAutomatically, columns, timer } = get();
         
         if (timer) {
             clearTimeout(timer);
@@ -2743,7 +2728,7 @@ export const useStore = create<MachineState>((set, get) => ({
 
     handleValidateTutorialChallenge: () => {
         console.log('[DEBUG] handleValidateTutorialChallenge appelée');
-        const { phase, columns, tutorialChallengeTargetIndex, sequenceFeedback, speakAndThen, resetAttempts, setCurrentTarget } = get();
+        const { phase, columns, tutorialChallengeTargetIndex, speakAndThen, resetAttempts, setCurrentTarget } = get();
 
         if (phase !== 'tutorial-challenge') return;
 
@@ -3959,28 +3944,35 @@ export const useStore = create<MachineState>((set, get) => ({
             default:
                 newInstruction = PHASE_INSTRUCTIONS['default'];
         }
-        if (phase == 'intro-welcome') {
-            get().speakAndThen(newInstruction, () => {
-                get().setPhase('intro-discover');
-            })
-        }
-        else if (phase == 'intro-discover') {
-            get().speakAndThen(newInstruction, () => {
-                get().setPhase('tutorial');
-            })
-        } else if(phase == 'learn-units'){
-            get().setIsCountingAutomatically(true);
-            get().speakAndThen(newInstruction,
-                () => {
-                    get().runAutoCount(); 
-                }
-            );
-        }
-         else {
-            get().speakAndThen(newInstruction)
-        }
 
+        // Set the instruction text
         set({ instruction: newInstruction });
+        
+        // Speak the instruction, but handle automatic transitions in phase-specific logic
+        // Only phases with automatic transitions after speaking should be handled here
+        if (phase === 'intro-welcome') {
+            get().speakAndThen(newInstruction, () => {
+                // Transition to intro-discover after welcome message
+                console.log('[updateInstruction] intro-welcome complete, transitioning to intro-discover');
+                get().setPhase('intro-discover');
+            });
+        } else if (phase === 'intro-discover') {
+            get().speakAndThen(newInstruction, () => {
+                // Transition to tutorial after discover message
+                console.log('[updateInstruction] intro-discover complete, transitioning to tutorial');
+                get().setPhase('tutorial');
+            });
+        } else if (phase === 'learn-units') {
+            // For learn-units, start auto-counting after speaking
+            get().setIsCountingAutomatically(true);
+            get().speakAndThen(newInstruction, () => {
+                console.log('[updateInstruction] learn-units instruction spoken, starting auto-count');
+                get().runAutoCount();
+            });
+        } else {
+            // For all other phases, just speak without automatic transition
+            get().speakAndThen(newInstruction);
+        }
 
 
     },

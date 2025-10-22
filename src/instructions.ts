@@ -27,7 +27,7 @@ export const PHASE_INSTRUCTIONS = {
   // Introduction phases
   'intro-welcome-personalized': "Bonjour ! Bienvenue dans mon atelier ! 👋 Comment tu t'appelles ? (Tu peux aussi sauter cette étape)",
   
-  'intro-discover-machine': (userName: string) => 
+  'intro-discover-machine': (_userName: string) => 
     `Tadaaaaa ! Comment tu la trouves ? `,
   
   'intro-first-interaction': {
