@@ -239,16 +239,16 @@ export const useStore = create<MachineState>((set, get) => ({
         if (phase === 'loading') {
             set({ feedback: "", instruction: "" });
             console.log('[setPhase] loading: checking TTS readiness');
-            
+
             let checkCount = 0;
             const MAX_CHECKS = 25; // Max 5 seconds (25 * 200ms)
-            
+
             // Function to check if voices are loaded
             const checkVoicesLoaded = () => {
                 const voices = textToSpeechService.getVoices();
                 checkCount++;
                 console.log('[setPhase] Check #' + checkCount + ', Voices loaded:', voices.length);
-                
+
                 if (voices.length > 0) {
                     // Voices are ready, transition to intro
                     console.log('[setPhase] TTS ready, transitioning to intro-welcome');
@@ -272,7 +272,7 @@ export const useStore = create<MachineState>((set, get) => ({
                     set({ timer: newTimer as unknown as number });
                 }
             };
-            
+
             // Start checking after a small delay
             const newTimer = setTimeout(checkVoicesLoaded, 100);
             set({ timer: newTimer as unknown as number });
@@ -310,7 +310,7 @@ export const useStore = create<MachineState>((set, get) => ({
                     }, 500);
                 }
             );
-           // return;
+            // return;
         }
 
         get().updateButtonVisibility();
@@ -558,14 +558,14 @@ export const useStore = create<MachineState>((set, get) => ({
             () => {
                 // After both messages are spoken, show the next message
                 set({ feedback: "Voilà, j'ai terminé ma nouvelle machine !" });
-                
+
                 textToSpeechService.setCallbacks({
                     onEnd: () => {
                         set({ phase: 'intro-discover-machine' });
                         get().updateInstruction();
                     }
                 });
-                
+
                 textToSpeechService.speak("Voilà, j'ai terminé ma nouvelle machine !");
             }
         );
@@ -579,7 +579,7 @@ export const useStore = create<MachineState>((set, get) => ({
 
         const continueToNextPhase = () => {
             set({ feedback: "Prêt(e) à découvrir ses secrets ?" });
-            
+
             textToSpeechService.setCallbacks({
                 onEnd: () => {
                     // Unlock units column when starting interaction
@@ -589,7 +589,7 @@ export const useStore = create<MachineState>((set, get) => ({
                     get().updateInstruction();
                 }
             });
-            
+
             textToSpeechService.speak("Prêt(e) à découvrir ses secrets ?");
         };
 
@@ -627,7 +627,7 @@ export const useStore = create<MachineState>((set, get) => ({
     },
 
     handleIntroFirstClick: () => {
-    const { introClickCount, columns, sequenceFeedback } = get();
+        const { introClickCount, columns, sequenceFeedback } = get();
         const newCols = [...columns];
 
         if (introClickCount === 0) {
@@ -674,7 +674,7 @@ export const useStore = create<MachineState>((set, get) => ({
     },
 
     handleIntroDigitsSubmit: () => {
-    const { userInput, introDigitsAttempt, sequenceFeedback } = get();
+        const { userInput, introDigitsAttempt, sequenceFeedback } = get();
         const answer = parseInt(userInput.trim());
         const newAttempt = introDigitsAttempt + 1;
 
@@ -777,7 +777,7 @@ export const useStore = create<MachineState>((set, get) => ({
     },
 
     runIntroDigitsGuided: () => {
-    const { columns } = get();
+        const { columns } = get();
         const steps = [
             { value: 0, text: "ZÉRO ! C'est le premier ! Lève 1 doigt ! ☝️" },
             { value: 1, text: "UN ! Maintenant 2 doigts ! ✌️" },
@@ -818,7 +818,7 @@ export const useStore = create<MachineState>((set, get) => ({
     },
 
     handleIntroSecondColumnChoice: (choice: string) => {
-    const { sequenceFeedback } = get();
+        const { sequenceFeedback } = get();
         const afterFirstFeedback = () => {
             get().speakAndThen("Regarde bien, je vais modifier la machine !", () => {
                 const newCols = [...initialColumns];
@@ -853,7 +853,7 @@ export const useStore = create<MachineState>((set, get) => ({
     },
 
     handleIntroMaxSubmit: () => {
-    const { userInput, introMaxAttempt, sequenceFeedback } = get();
+        const { userInput, introMaxAttempt, sequenceFeedback } = get();
         const answer = parseInt(userInput.trim());
         const newAttempt = introMaxAttempt + 1;
 
@@ -935,7 +935,7 @@ export const useStore = create<MachineState>((set, get) => ({
     },
 
     completeIntroMaxGuided: () => {
-    const { sequenceFeedback } = get();
+        const { sequenceFeedback } = get();
         sequenceFeedback(
             "STOP ! Regarde l'écran ! Quel nombre tu vois ? 👀",
             "C'est 99 ! QUATRE-VINGT-DIX-NEUF ! C'est le MAXIMUM que peut afficher la machine !",
@@ -1675,7 +1675,7 @@ export const useStore = create<MachineState>((set, get) => ({
     // Helper function to speak a message and execute callback when done
     speakAndThen: (message: string, onComplete?: () => void) => {
         console.log('ca parle mec')
-      //  get().setFeedback(message);
+        //  get().setFeedback(message);
         textToSpeechService.setCallbacks({
             onEnd: () => {
                 onComplete?.();
@@ -2732,7 +2732,7 @@ export const useStore = create<MachineState>((set, get) => ({
         }
         set({ columns: newCols });
     },
-    
+
 
     handleValidateLearning: () => {
         const { phase, columns, unitTargetIndex, unitSuccessCount, sequenceFeedback, resetUnitChallenge, attemptCount, consecutiveFailures, resetAttempts, setAttemptCount, setConsecutiveFailures, setShowHelpOptions, totalChallengesCompleted, setTotalChallengesCompleted, setCurrentTarget } = get();
@@ -2810,7 +2810,7 @@ export const useStore = create<MachineState>((set, get) => ({
             // FAILURE - Generate progressive feedback
             // Send wrong value message to Unity
             sendWrongValue();
-            
+
             const newAttemptCount = attemptCount + 1;
             setAttemptCount(newAttemptCount);
 
@@ -2845,7 +2845,7 @@ export const useStore = create<MachineState>((set, get) => ({
     },
 
     handleValidateTenToTwenty: () => {
-    const { phase, columns, tenToTwentyTargetIndex, tenToTwentySuccessCount, sequenceFeedback, attemptCount, consecutiveFailures, resetAttempts, setAttemptCount, setConsecutiveFailures, setShowHelpOptions, totalChallengesCompleted, setTotalChallengesCompleted, setCurrentTarget } = get();
+        const { phase, columns, tenToTwentyTargetIndex, tenToTwentySuccessCount, sequenceFeedback, attemptCount, consecutiveFailures, resetAttempts, setAttemptCount, setConsecutiveFailures, setShowHelpOptions, totalChallengesCompleted, setTotalChallengesCompleted, setCurrentTarget } = get();
         const totalNumber = columns.reduce((acc: number, col: Column, idx: number) => acc + col.value * Math.pow(10, idx), 0);
 
         if (phase !== 'challenge-ten-to-twenty') return;
@@ -2897,7 +2897,7 @@ export const useStore = create<MachineState>((set, get) => ({
             // FAILURE - Generate progressive feedback
             // Send wrong value message to Unity
             sendWrongValue();
-            
+
             const newAttemptCount = attemptCount + 1;
             setAttemptCount(newAttemptCount);
 
@@ -2932,112 +2932,112 @@ export const useStore = create<MachineState>((set, get) => ({
     },
 
     handleValidateTens: () => {
-    const { phase, columns, tensTargetIndex, tensSuccessCount, sequenceFeedback, resetTensChallenge, attemptCount, consecutiveFailures, resetAttempts, setAttemptCount, setConsecutiveFailures, setShowHelpOptions, totalChallengesCompleted, setTotalChallengesCompleted, setCurrentTarget } = get();
-    
-    const totalNumber = columns.reduce((acc: number, col: Column, idx: number) => {
-        return acc + (col.value * Math.pow(10, idx));
-    }, 0);
-    
-    const challengePhases = ['challenge-tens-1', 'challenge-tens-2', 'challenge-tens-3'] as const;
-    const challengeIndex = challengePhases.indexOf(phase as typeof challengePhases[number]);
-    if (challengeIndex === -1) return;
+        const { phase, columns, tensTargetIndex, tensSuccessCount, sequenceFeedback, resetTensChallenge, attemptCount, consecutiveFailures, resetAttempts, setAttemptCount, setConsecutiveFailures, setShowHelpOptions, totalChallengesCompleted, setTotalChallengesCompleted, setCurrentTarget } = get();
 
-    const challenge = TENS_CHALLENGES[challengeIndex];
-    const targetNumber = challenge.targets[tensTargetIndex];
-    
+        const totalNumber = columns.reduce((acc: number, col: Column, idx: number) => {
+            return acc + (col.value * Math.pow(10, idx));
+        }, 0);
 
-    console.log('Colonnes:', columns.map((c, i) => `[${i}] value:${c.value} unlocked:${c.unlocked}`));
-    console.log('Target:', targetNumber, 'Calculé:', totalNumber);
-    
-    // Set current target for help system
-    setCurrentTarget(targetNumber);
+        const challengePhases = ['challenge-tens-1', 'challenge-tens-2', 'challenge-tens-3'] as const;
+        const challengeIndex = challengePhases.indexOf(phase as typeof challengePhases[number]);
+        if (challengeIndex === -1) return;
 
-    if (totalNumber === targetNumber) {
-        // SUCCESS!
-        sendCorrectValue();
+        const challenge = TENS_CHALLENGES[challengeIndex];
+        const targetNumber = challenge.targets[tensTargetIndex];
 
-        const successMsg = getSuccessMessage(attemptCount + 1, false);
-        const { speakAndThen } = get();
-        speakAndThen(successMsg, () => {
-            // Reset attempts and update stats
-            resetAttempts();
-            setConsecutiveFailures(0);
-            setTotalChallengesCompleted(totalChallengesCompleted + 1);
 
-            const newSuccessCount = tensSuccessCount + 1;
-            set({ tensSuccessCount: newSuccessCount });
+        console.log('Colonnes:', columns.map((c, i) => `[${i}] value:${c.value} unlocked:${c.unlocked}`));
+        console.log('Target:', targetNumber, 'Calculé:', totalNumber);
 
-            if (tensTargetIndex + 1 >= challenge.targets.length) {
-                if (challengeIndex === TENS_CHALLENGES.length - 1) {
-                    set((state: MachineState) => ({ completedChallenges: { ...state.completedChallenges, tens: true } }));
-                    const newCols = [...get().columns];
-                    if (!newCols[2].unlocked) {
-                        newCols[2].unlocked = true;
-                        set({ columns: newCols });
+        // Set current target for help system
+        setCurrentTarget(targetNumber);
+
+        if (totalNumber === targetNumber) {
+            // SUCCESS!
+            sendCorrectValue();
+
+            const successMsg = getSuccessMessage(attemptCount + 1, false);
+            const { speakAndThen } = get();
+            speakAndThen(successMsg, () => {
+                // Reset attempts and update stats
+                resetAttempts();
+                setConsecutiveFailures(0);
+                setTotalChallengesCompleted(totalChallengesCompleted + 1);
+
+                const newSuccessCount = tensSuccessCount + 1;
+                set({ tensSuccessCount: newSuccessCount });
+
+                if (tensTargetIndex + 1 >= challenge.targets.length) {
+                    if (challengeIndex === TENS_CHALLENGES.length - 1) {
+                        set((state: MachineState) => ({ completedChallenges: { ...state.completedChallenges, tens: true } }));
+                        const newCols = [...get().columns];
+                        if (!newCols[2].unlocked) {
+                            newCols[2].unlocked = true;
+                            set({ columns: newCols });
+                        }
+                        // Set up for practice-hundred: start at 99
+                        const resetCols = initialColumns.map((col, i) => ({ ...col, unlocked: i === 0 || i === 1 || i === 2 }));
+                        resetCols[1].value = 9;
+                        resetCols[0].value = 9;
+                        set({
+                            columns: resetCols,
+                            phase: 'practice-hundred',
+                            practiceHundredCount: 0
+                        });
+                        get().updateButtonVisibility();
+                        sequenceFeedback("APPRENTISSAGE DES DIZAINES TERMINÉ ! Bravo ! 🎉", "NIVEAU DÉBLOQUÉ : Les CENTAINES ! 💯 STOP ! Regarde bien : TOUT est plein ! 9 paquets de 10 + 9 billes. Clique sur △ pour voir une GRANDE MAGIE ! ✨");
+                    } else {
+                        const nextChallenge = TENS_CHALLENGES[challengeIndex + 1];
+                        sendNextGoal();
+                        resetTensChallenge();
+                        const resetCols = initialColumns.map((col, i) => ({ ...col, unlocked: i === 0 || i === 1 }));
+                        set({
+                            columns: resetCols
+                        });
+                        get().setPhase(nextChallenge.phase);
+                        get().setFeedback(`🎯 DÉFI ${challengeIndex + 2} : Affiche le nombre **${nextChallenge.targets[0]}** !`);
                     }
-                    // Set up for practice-hundred: start at 99
-                    const resetCols = initialColumns.map((col, i) => ({ ...col, unlocked: i === 0 || i === 1 || i === 2 }));
-                    resetCols[1].value = 9;
-                    resetCols[0].value = 9;
-                    set({
-                        columns: resetCols,
-                        phase: 'practice-hundred',
-                        practiceHundredCount: 0
-                    });
-                    get().updateButtonVisibility();
-                    sequenceFeedback("APPRENTISSAGE DES DIZAINES TERMINÉ ! Bravo ! 🎉", "NIVEAU DÉBLOQUÉ : Les CENTAINES ! 💯 STOP ! Regarde bien : TOUT est plein ! 9 paquets de 10 + 9 billes. Clique sur △ pour voir une GRANDE MAGIE ! ✨");
                 } else {
-                    const nextChallenge = TENS_CHALLENGES[challengeIndex + 1];
                     sendNextGoal();
-                    resetTensChallenge();
+                    const nextTarget = challenge.targets[tensTargetIndex + 1];
                     const resetCols = initialColumns.map((col, i) => ({ ...col, unlocked: i === 0 || i === 1 }));
-                    set({
-                        columns: resetCols
-                    });
-                    get().setPhase(nextChallenge.phase);
-                    get().setFeedback(`🎯 DÉFI ${challengeIndex + 2} : Affiche le nombre **${nextChallenge.targets[0]}** !`);
+                    set({ tensTargetIndex: tensTargetIndex + 1, columns: resetCols });
+                    sequenceFeedback(`✅ Correct ! ${newSuccessCount}/${challenge.targets.length} réussis !`, `Maintenant affiche **${nextTarget}** !`);
                 }
-            } else {
-                sendNextGoal();
-                const nextTarget = challenge.targets[tensTargetIndex + 1];
-                const resetCols = initialColumns.map((col, i) => ({ ...col, unlocked: i === 0 || i === 1 }));
-                set({ tensTargetIndex: tensTargetIndex + 1, columns: resetCols });
-                sequenceFeedback(`✅ Correct ! ${newSuccessCount}/${challenge.targets.length} réussis !`, `Maintenant affiche **${nextTarget}** !`);
+            });
+        } else {
+            // FAILURE
+            sendWrongValue();
+
+            const newAttemptCount = attemptCount + 1;
+            setAttemptCount(newAttemptCount);
+
+            const feedbackMsg = generateFeedback({
+                attemptCount: newAttemptCount,
+                consecutiveFailures,
+                frustrationLevel: detectFrustration(consecutiveFailures),
+                currentTarget: targetNumber,
+                lastUserAnswer: totalNumber
+            });
+
+            get().setFeedback(feedbackMsg.message);
+
+            if (feedbackMsg.showHelp) {
+                setShowHelpOptions(true);
             }
-        });
-    } else {
-        // FAILURE
-        sendWrongValue();
-        
-        const newAttemptCount = attemptCount + 1;
-        setAttemptCount(newAttemptCount);
 
-        const feedbackMsg = generateFeedback({
-            attemptCount: newAttemptCount,
-            consecutiveFailures,
-            frustrationLevel: detectFrustration(consecutiveFailures),
-            currentTarget: targetNumber,
-            lastUserAnswer: totalNumber
-        });
+            if (newAttemptCount >= 4) {
+                const newConsecutiveFailures = consecutiveFailures + 1;
+                setConsecutiveFailures(newConsecutiveFailures);
 
-        get().setFeedback(feedbackMsg.message);
-
-        if (feedbackMsg.showHelp) {
-            setShowHelpOptions(true);
-        }
-
-        if (newAttemptCount >= 4) {
-            const newConsecutiveFailures = consecutiveFailures + 1;
-            setConsecutiveFailures(newConsecutiveFailures);
-
-            if (newConsecutiveFailures >= 3) {
-                setTimeout(() => {
-                    get().setFeedback(getFrustrationInterventionMessage());
-                }, FEEDBACK_DELAY * 2);
+                if (newConsecutiveFailures >= 3) {
+                    setTimeout(() => {
+                        get().setFeedback(getFrustrationInterventionMessage());
+                    }, FEEDBACK_DELAY * 2);
+                }
             }
         }
-    }
-},
+    },
 
     handleValidateHundredToTwoHundred: () => {
         const { phase, columns, hundredToTwoHundredTargetIndex, hundredToTwoHundredSuccessCount, sequenceFeedback, speakAndThen, attemptCount, consecutiveFailures, resetAttempts, setAttemptCount, setConsecutiveFailures, setShowHelpOptions, totalChallengesCompleted, setTotalChallengesCompleted, setCurrentTarget } = get();
@@ -3123,7 +3123,7 @@ export const useStore = create<MachineState>((set, get) => ({
     },
 
     handleValidateTwoHundredToThreeHundred: () => {
-    const { phase, columns, twoHundredToThreeHundredTargetIndex, twoHundredToThreeHundredSuccessCount, sequenceFeedback, attemptCount, consecutiveFailures, resetAttempts, setAttemptCount, setConsecutiveFailures, setShowHelpOptions, totalChallengesCompleted, setTotalChallengesCompleted, setCurrentTarget } = get();
+        const { phase, columns, twoHundredToThreeHundredTargetIndex, twoHundredToThreeHundredSuccessCount, sequenceFeedback, attemptCount, consecutiveFailures, resetAttempts, setAttemptCount, setConsecutiveFailures, setShowHelpOptions, totalChallengesCompleted, setTotalChallengesCompleted, setCurrentTarget } = get();
         const totalNumber = columns.reduce((acc: number, col: Column, idx: number) => acc + col.value * Math.pow(10, idx), 0);
 
         if (phase !== 'challenge-two-hundred-to-three-hundred') return;
@@ -3484,7 +3484,7 @@ export const useStore = create<MachineState>((set, get) => ({
             // SUCCESS!
             // Send correct value message to Unity
             sendCorrectValue();
-            
+
             const successMsg = getSuccessMessage(attemptCount + 1, false);
             get().setFeedback(successMsg);
 
@@ -3512,7 +3512,7 @@ export const useStore = create<MachineState>((set, get) => ({
             } else {
                 // Send next goal message to Unity
                 sendNextGoal();
-                
+
                 const nextTarget = challenge.targets[thousandsSimpleCombinationTargetIndex + 1];
                 const resetCols = initialColumns.map((col) => ({ ...col, unlocked: true }));
                 set({ thousandsSimpleCombinationTargetIndex: thousandsSimpleCombinationTargetIndex + 1, columns: resetCols });
@@ -3522,7 +3522,7 @@ export const useStore = create<MachineState>((set, get) => ({
             // FAILURE - Generate progressive feedback
             // Send wrong value message to Unity
             sendWrongValue();
-            
+
             const newAttemptCount = attemptCount + 1;
             setAttemptCount(newAttemptCount);
 
@@ -3573,7 +3573,7 @@ export const useStore = create<MachineState>((set, get) => ({
             // SUCCESS!
             // Send correct value message to Unity
             sendCorrectValue();
-            
+
             const successMsg = getSuccessMessage(attemptCount + 1, false);
             get().setFeedback(successMsg);
 
@@ -3608,7 +3608,7 @@ export const useStore = create<MachineState>((set, get) => ({
             } else {
                 // Send next goal message to Unity
                 sendNextGoal();
-                
+
                 const nextTarget = challenge.targets[thousandsTargetIndex + 1];
                 const resetCols = get().columns.map((col: Column) => ({ ...col, unlocked: true }));
                 set({ thousandsTargetIndex: thousandsTargetIndex + 1, columns: resetCols });
@@ -3618,7 +3618,7 @@ export const useStore = create<MachineState>((set, get) => ({
             // FAILURE - Generate progressive feedback
             // Send wrong value message to Unity
             sendWrongValue();
-            
+
             const newAttemptCount = attemptCount + 1;
             setAttemptCount(newAttemptCount);
 
@@ -3667,8 +3667,8 @@ export const useStore = create<MachineState>((set, get) => ({
                 newInstruction = PHASE_INSTRUCTIONS['intro-welcome-personalized'];
                 break;
             case 'intro-discover-machine':
-                newInstruction = typeof PHASE_INSTRUCTIONS['intro-discover-machine'] === 'function' 
-                    ? PHASE_INSTRUCTIONS['intro-discover-machine'](get().userName) 
+                newInstruction = typeof PHASE_INSTRUCTIONS['intro-discover-machine'] === 'function'
+                    ? PHASE_INSTRUCTIONS['intro-discover-machine'](get().userName)
                     : PHASE_INSTRUCTIONS['intro-discover-machine'];
                 break;
             case 'intro-first-interaction':
@@ -3892,10 +3892,12 @@ export const useStore = create<MachineState>((set, get) => ({
             default:
                 newInstruction = PHASE_INSTRUCTIONS['default'];
         }
-  get().speakAndThen(newInstruction)
-       set({ instruction: newInstruction });
-      
-       
+        get().speakAndThen(newInstruction, ()=> {
+            get().setPhase('intro-discover');
+        })
+        set({ instruction: newInstruction });
+
+
     },
 
     startLearningPhase: () => {
@@ -4119,7 +4121,7 @@ Tu veux :
     init: () => {
         const { phase } = get();
         console.log('[init] Starting initialization with phase:', phase);
-        
+
         // If we're in loading phase, trigger the phase logic
         if (phase === 'loading') {
             // Force a call to setPhase to trigger the loading logic
