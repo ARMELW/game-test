@@ -23,7 +23,9 @@ export type Phase =
     | 'challenge-ten-to-twenty'
     | 'learn-twenty-to-thirty'
     | 'learn-tens'
-    | 'learn-tens-combination'
+    | 'challenge-tens-1'
+    | 'challenge-tens-2'
+    | 'challenge-tens-3'
     | 'learn-hundred-to-hundred-ten'
     | 'learn-hundred-ten-to-two-hundred'
     | 'challenge-hundred-to-two-hundred'
@@ -88,11 +90,9 @@ export const ALL_PHASES: readonly Phase[] = [
   'challenge-ten-to-twenty',
   'learn-twenty-to-thirty',
   'learn-tens',
-  'learn-tens-combination',
   'challenge-tens-1',
   'challenge-tens-2',
   'challenge-tens-3',
-  'practice-hundred',
   'learn-hundred-to-hundred-ten',
   'learn-hundred-ten-to-two-hundred',
   'challenge-hundred-to-two-hundred',
@@ -100,7 +100,6 @@ export const ALL_PHASES: readonly Phase[] = [
   'challenge-two-hundred-to-three-hundred',
   'learn-hundreds',
   'learn-hundreds-simple-combination',
-  'learn-hundreds-combination',
   'challenge-hundreds-1',
   'challenge-hundreds-2',
   'challenge-hundreds-3',

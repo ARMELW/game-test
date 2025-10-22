@@ -1118,7 +1118,7 @@ export const useStore = create<MachineState>((set, get) => ({
                     get().setIsCountingAutomatically(false);
                     get().setNextPhaseAfterAuto(null);
                     get().resetUnitChallenge();
-                    get().setPhase('explore-units');
+                  //  get().setPhase('explore-units');
                 });
             }
         }
@@ -1187,8 +1187,8 @@ export const useStore = create<MachineState>((set, get) => ({
                     get().setColumns(initialColumns);
                     get().setIsCountingAutomatically(false);
                     get().speakAndThen("Retour à zéro ! 🔄 Maintenant on va apprendre à combiner les dizaines et les unités !", () => {
-                        get().setPhase('learn-tens-combination');
-                        get().setPendingAutoCount(true);
+                  //      get().setPhase('learn-tens-combination');
+                  //      get().setPendingAutoCount(true);
                     });
                 });
             }
@@ -1240,7 +1240,7 @@ export const useStore = create<MachineState>((set, get) => ({
                     get().setIsCountingAutomatically(false);
                     get().resetTensChallenge();
                     get().speakAndThen("Retour à zéro ! 🔄 À toi de jouer maintenant !", () => {
-                        get().setPhase('challenge-tens-1');
+                   //     get().setPhase('challenge-tens-1');
                     });
                 });
             }
@@ -1296,8 +1296,8 @@ export const useStore = create<MachineState>((set, get) => ({
                     get().setColumns(initialColumns);
                     get().setIsCountingAutomatically(false);
                     get().speakAndThen("Retour à zéro ! 🔄 Maintenant on va apprendre à combiner les centaines avec des exemples simples !", () => {
-                        get().setPhase('learn-hundreds-simple-combination');
-                        get().setPendingAutoCount(true);
+                        //get().setPhase('learn-hundreds-simple-combination');
+                        //get().setPendingAutoCount(true);
                     });
                 });
             }
@@ -1362,8 +1362,8 @@ export const useStore = create<MachineState>((set, get) => ({
                     get().setColumns(initialColumns.map(c => ({ ...c, unlocked: ['Unités', 'Dizaines', 'Centaines'].includes(c.name) })));
                     get().setIsCountingAutomatically(false);
                     get().speakAndThen("Observe maintenant des combinaisons avec centaines, dizaines ET unités !", () => {
-                        get().setPhase('learn-hundreds-combination');
-                        get().setPendingAutoCount(true);
+                        //get().setPhase('learn-hundreds-combination');
+                        //get().setPendingAutoCount(true);
                     });
                 });
             }
@@ -1417,7 +1417,7 @@ export const useStore = create<MachineState>((set, get) => ({
                     get().setIsCountingAutomatically(false);
                     get().resetHundredsChallenge();
                     get().speakAndThen("Retour à zéro ! 🔄 À toi de jouer maintenant !", () => {
-                        get().setPhase('challenge-hundreds-1');
+                       // get().setPhase('challenge-hundreds-1');
                     });
                 });
             }
@@ -1464,7 +1464,7 @@ export const useStore = create<MachineState>((set, get) => ({
                     get().setColumns(initialColumns);
                     get().setIsCountingAutomatically(false);
                     get().speakAndThen("Retour à zéro ! 🔄 Apprenons les combinaisons SIMPLES !", () => {
-                        get().setPhase('learn-thousands-very-simple-combination');
+                       // get().setPhase('learn-thousands-very-simple-combination');
                         get().setPendingAutoCount(true);
                     });
                 });
@@ -1524,7 +1524,7 @@ export const useStore = create<MachineState>((set, get) => ({
                     get().setIsCountingAutomatically(false);
                     get().resetThousandsSimpleCombinationChallenge();
                     get().speakAndThen("Retour à zéro ! 🔄 À toi de jouer avec des nombres RONDS !", () => {
-                        get().setPhase('challenge-thousands-simple-combination');
+                        //get().setPhase('challenge-thousands-simple-combination');
                     });
                 });
             }
@@ -1579,7 +1579,7 @@ export const useStore = create<MachineState>((set, get) => ({
                     get().setIsCountingAutomatically(false);
                     get().resetThousandsChallenge();
                     get().speakAndThen("Retour à zéro ! 🔄 Maintenant les VRAIS défis !", () => {
-                        get().setPhase('challenge-thousands-1');
+                        //get().setPhase('challenge-thousands-1');
                     });
                 });
             }
@@ -1629,7 +1629,7 @@ export const useStore = create<MachineState>((set, get) => ({
                     get().setIsCountingAutomatically(false);
                     get().resetThousandsChallenge();
                     get().speakAndThen("Retour à zéro ! 🔄 À toi de jouer maintenant !", () => {
-                        get().setPhase('challenge-thousands-1');
+                        //get().setPhase('challenge-thousands-1');
                     });
                 });
             }
@@ -1961,7 +1961,7 @@ export const useStore = create<MachineState>((set, get) => ({
                         addClicks: 0,
                         isTransitioningToChallenge: false
                     });
-                    get().setPhase('challenge-unit-1');
+                    //get().setPhase('challenge-unit-1');
                     get().setFeedback(`🎯 DÉFI 1 : Affiche le nombre **${UNIT_CHALLENGES[0].targets[0]}** avec les boutons, puis clique sur VALIDER !`);
                 });
                 return;
@@ -2053,7 +2053,7 @@ export const useStore = create<MachineState>((set, get) => ({
                         columns: resetCols
                     });
                     get().resetTenToTwentyChallenge();
-                    get().setPhase('challenge-ten-to-twenty');
+                    //get().setPhase('challenge-ten-to-twenty');
                     get().setFeedback(`🎯 Mini-défi ! Montre-moi **DOUZE** (12) avec les boutons !`);
                 }, FEEDBACK_DELAY * 2);
             } else if (unitsValue === 1 && tensValue === 1) {
@@ -2205,7 +2205,7 @@ export const useStore = create<MachineState>((set, get) => ({
                         columns: resetCols
                     });
                     get().resetHundredToTwoHundredChallenge();
-                    get().setPhase('challenge-hundred-to-two-hundred');
+                    //get().setPhase('challenge-hundred-to-two-hundred');
                     get().setFeedback(`🎯 Mini-défi ! Montre-moi **${HUNDRED_TO_TWO_HUNDRED_CHALLENGES[0].targets[0]}** (CENT-DIX) !`);
                 }, FEEDBACK_DELAY * 2);
             } else if (tensValue === 2 && unitsValue === 0) {
@@ -2258,7 +2258,7 @@ export const useStore = create<MachineState>((set, get) => ({
                         columns: resetCols
                     });
                     get().resetTwoHundredToThreeHundredChallenge();
-                    get().setPhase('challenge-two-hundred-to-three-hundred');
+                   // get().setPhase('challenge-two-hundred-to-three-hundred');
                     get().setFeedback(`🎯 Mini-défi ! Montre-moi **${TWO_HUNDRED_TO_THREE_HUNDRED_CHALLENGES[0].targets[0]}** (DEUX-CENT-DIX) !`);
                 }, FEEDBACK_DELAY * 2);
             } else if (number === 299) {
@@ -2410,7 +2410,7 @@ export const useStore = create<MachineState>((set, get) => ({
                         columns: resetCols
                     });
                     get().resetThousandToTwoThousandChallenge();
-                    get().setPhase('challenge-thousand-to-two-thousand');
+                    //get().setPhase('challenge-thousand-to-two-thousand');
                     get().setFeedback(`🎯 Mini-défis 1000-2000 ! Montre-moi **${THOUSAND_TO_TWO_THOUSAND_CHALLENGES[0].targets[0]}** (MILLE-UN) !`);
                 }, FEEDBACK_DELAY * 2);
             } else if (number === 1999) {
@@ -2453,7 +2453,7 @@ export const useStore = create<MachineState>((set, get) => ({
                         columns: resetCols
                     });
                     get().resetTwoThousandToThreeThousandChallenge();
-                    get().setPhase('challenge-two-thousand-to-three-thousand');
+                    //get().setPhase('challenge-two-thousand-to-three-thousand');
                     get().setFeedback(`🎯 Mini-défi ! Montre-moi **${TWO_THOUSAND_TO_THREE_THOUSAND_CHALLENGES[0].targets[0]}** (DEUX-MILLE) !`);
                 }, FEEDBACK_DELAY * 2);
             } else if (number === 2999) {
@@ -2668,7 +2668,7 @@ export const useStore = create<MachineState>((set, get) => ({
                     const newCols = initialColumns.map(col => ({ ...col }));
                     newCols[0].unlocked = true;
 
-                    get().setPhase('tutorial-challenge');
+                   // get().setPhase('tutorial-challenge');
                     set({
                         columns: newCols,
                         tutorialChallengeTargetIndex: 0,
@@ -2699,7 +2699,7 @@ export const useStore = create<MachineState>((set, get) => ({
                     set({
                         columns: newCols
                     });
-                    get().setPhase('challenge-unit-intro');
+                  //  get().setPhase('challenge-unit-intro');
                 }, FEEDBACK_DELAY);
             } else if (unitsValue > 0) {
                 sequenceFeedback(`**${unitsValue}** ! Baisse un doigt !`, `${unitsValue} doigts levés. Continue avec ∇ !`);
@@ -2751,7 +2751,7 @@ export const useStore = create<MachineState>((set, get) => ({
                             pendingAutoCount: true,
                             isCountingAutomatically: false
                         });
-                        get().setPhase('learn-units');
+                       // get().setPhase('learn-units');
                         get().updateInstruction();
                     });
                 });
@@ -3956,7 +3956,7 @@ export const useStore = create<MachineState>((set, get) => ({
             get().speakAndThen(newInstruction, () => {
                 // Transition to intro-second-column after introduction message
                 console.log('[updateInstruction] intro-challenge-introduction complete, transitioning to intro-second-column');
-                get().setPhase('intro-second-column');
+               // get().setPhase('intro-second-column');
             });
         } else if (phase === 'delock-dizaines') {
             get().speakAndThen(newInstruction, () => {
@@ -3978,7 +3978,7 @@ export const useStore = create<MachineState>((set, get) => ({
                 // Transition to challenge-unit-1 after introduction message
                 console.log('[updateInstruction] challenge-unit-intro complete, transitioning to challenge-unit-1');
                 get().resetUnitChallenge();
-                get().setPhase('challenge-unit-1');
+                //get().setPhase('challenge-unit-1');
             });
         } else {
             // For all other phases, just speak without automatic transition
@@ -4408,7 +4408,7 @@ Tu veux :
     },
 }));
 useStore.subscribe(
-    (state) => {
+    (state,previousState) => {
         const phase = state.phase;
         const columns = state.columns;
         const isCountingAutomatically = state.isCountingAutomatically;
@@ -4452,16 +4452,16 @@ useStore.subscribe(
                 lockHundreds = !isHundred;
                 lockThousands = !isThousand;
             } else if (
-                (phase === "tutorial" ||
-                    phase === "explore-units" ||
-                    phase === "click-add" ||
-                    phase === "click-remove" ||
-                    phase.startsWith("challenge-unit-") ||
-                    phase === "challenge-ten-to-twenty") &&
+                
+                    phase.startsWith("challenge-unit-") &&
                 isUnit
             ) {
                 lockUnits = false;
-            } else if (phase === "learn-carry" && isUnit) {
+            } else if(phase === "challenge-ten-to-twenty"){
+                lockUnits = false;
+                lockTens = false;
+            }
+            else if (phase === "learn-carry" && isUnit) {
                 lockUnits = false;
             } else if (phase === "practice-ten" && (isUnit || isTen)) {
                 // Use store unlock state for practice
@@ -4473,6 +4473,7 @@ useStore.subscribe(
                 isUnit
             ) {
                 lockUnits = false;
+                lockTens = false;
             } else if (
                 phase === "practice-hundred" &&
                 (isUnit || isTen || isHundred)
@@ -4554,5 +4555,30 @@ useStore.subscribe(
             LockTenRoll(lockTens);
             LockHundredRoll(lockHundreds);
             LockThousandRoll(lockThousands);
+        }
+
+
+         if (
+            state.phase.startsWith('learn-') &&
+            state.pendingAutoCount &&
+            !state.isCountingAutomatically &&
+            // Only trigger when pendingAutoCount changed to true or phase changed
+            (state.pendingAutoCount !== previousState.pendingAutoCount ||
+                state.phase !== previousState.phase)
+        ) {
+            // Use a small delay to ensure state updates are processed
+            setTimeout(() => {
+                const currentState = useStore.getState();
+                // Re-verify conditions before executing
+                if (
+                    currentState.phase.startsWith('learn-') &&
+                    currentState.pendingAutoCount &&
+                    !currentState.isCountingAutomatically
+                ) {
+                    currentState.setIsCountingAutomatically(true);
+                    currentState.setPendingAutoCount(false);
+                    currentState.runAutoCount();
+                }
+            }, 100);
         }
     });
