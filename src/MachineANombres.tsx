@@ -9,6 +9,7 @@ function formatNumber(num: number, length = 4) {
   return num.toString().padStart(length, "0");
 }
 function MachineANombres() {
+  const [audioUnlocked, setAudioUnlocked] = useState(false);
   const {
     init,
     columns,
@@ -67,91 +68,28 @@ function MachineANombres() {
     lockUnitRoll,
   } = useUnity();
 
-  // Handle messages from Unity (button clicks)
-  const handleUnityMessage = useCallback(
-    (message: string) => {
-      const data = parse(message);
-      console.log("data", data);
-
-      // Check if data is valid and has the expected structure
-      if (!data || typeof data !== "object" || !("type" in data)) {
-        return;
-      }
-
-      const parsedData = data as { type: string; numericValue?: number };
-
-      // Map numeric value to column index
-      // 1 = units (index 0), 10 = tens (index 1), 100 = hundreds (index 2), 1000 = thousands (index 3)
-      const getColumnIndex = (value?: number): number => {
-        if (!value) return 0;
-        if (value === 1) return 0; // units
-        if (value === 10) return 1; // tens
-        if (value === 100) return 2; // hundreds
-        if (value === 1000) return 3; // thousands
-        return 0;
-      };
-
-      const columnIndex = getColumnIndex(parsedData.numericValue);
-      console.log("parsedData.numericValue", parsedData.numericValue);
-      // Handle increase and decrease actions
-      if (parsedData.type === "increaseValue") {
-        handleAdd(columnIndex);
-      } else if (parsedData.type === "decreaseValue") {
-        handleSubtract(columnIndex);
-      } else if (parsedData.type == "setValue") {
-
-        handleSetValue(formatNumber(parsedData.numericValue || 0));
-      } else if (parsedData.type === "addGoal") {
-        // Note: This message type is no longer used for automatic validation.
-        // Validation is now triggered manually by the user clicking the "Valider" button.
-        console.log(
-          "addGoal message received but ignored - manual validation required"
-        );
-      } else if (parsedData.type == "validButton") {
-        handleManualValidation();
-      } else if (parsedData.type == "wrongValue") {
-        // Handle wrong value event from Unity
-        // When Unity signals the value is incorrect, trigger validation
-        // This ensures game logic stays synchronized with Unity's assessment
-        console.log(
-          "Wrong value event received from Unity - triggering validation"
-        );
-
-      //  handleManualValidation();
-      } else if (parsedData.type == "nextGoal") {
-        // Handle next goal event from Unity
-        // When Unity signals to move to next challenge, trigger validation
-        // This ensures proper progression when Unity determines it's time to advance
-        console.log(
-          "Next goal event received from Unity - triggering validation"
-        );
-       // handleManualValidation();
-      }
-     
-    },
-    [handleAdd, handleSubtract, phase, handleSetValue]
-  );
+  // Local typing animation state
+  const [typedInstruction, setTypedInstruction] = useState("");
+  const [typedFeedback, setTypedFeedback] = useState("");
+  const [isTypingInstruction, setIsTypingInstruction] = useState(false);
+  const [isTypingFeedback, setIsTypingFeedback] = useState(false);
+  const typingTimeoutRef = useRef<number | null>(null);
+  // Validation lock to prevent duplicate validations
+  const validationInProgressRef = useRef(false);
+  const lastValidationTimeRef = useRef(0);
 
   // Handle manual validation button click
   const handleManualValidation = useCallback(() => {
     // Prevent duplicate validations within 500ms window
-    console.log('handleManualValidation');
     const now = Date.now();
     if (validationInProgressRef.current || (now - lastValidationTimeRef.current) < 500) {
-      console.log("Validation skipped - too soon after previous validation");
       return;
     }
-    
-    // Set validation lock
     validationInProgressRef.current = true;
     lastValidationTimeRef.current = now;
-    
-    // Release lock after a short delay to allow validation to complete
     setTimeout(() => {
       validationInProgressRef.current = false;
     }, 100);
-    
-    // Trigger appropriate validation based on current phase
     if (phase === "challenge-ten-to-twenty") {
       handleValidateTenToTwenty();
     } else if (
@@ -189,7 +127,40 @@ function MachineANombres() {
     ) {
       handleValidateThousands();
     }
-  }, [phase]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [phase]);
+
+  // Handle messages from Unity (button clicks)
+  const handleUnityMessage = useCallback(
+    (message: string) => {
+      const data = parse(message);
+      if (!data || typeof data !== "object" || !("type" in data)) {
+        return;
+      }
+      const parsedData = data as { type: string; numericValue?: number };
+      const getColumnIndex = (value?: number): number => {
+        if (!value) return 0;
+        if (value === 1) return 0;
+        if (value === 10) return 1;
+        if (value === 100) return 2;
+        if (value === 1000) return 3;
+        return 0;
+      };
+      const columnIndex = getColumnIndex(parsedData.numericValue);
+      if (parsedData.type === "increaseValue") {
+        handleAdd(columnIndex);
+      } else if (parsedData.type === "decreaseValue") {
+        handleSubtract(columnIndex);
+      } else if (parsedData.type == "setValue") {
+        handleSetValue(formatNumber(parsedData.numericValue || 0));
+      } else if (parsedData.type === "addGoal") {
+        // Note: This message type is no longer used for automatic validation.
+      } else if (parsedData.type == "validButton") {
+        handleManualValidation();
+      }
+      // Les autres cas sont ignorés ou loggés
+    },
+    [handleAdd, handleSubtract, handleSetValue, handleManualValidation]
+  );
 
   // Set up Unity message handler
   useEffect(() => {
@@ -199,20 +170,14 @@ function MachineANombres() {
     };
   }, [handleUnityMessage]);
 
-  // Local typing animation state
-  const [typedInstruction, setTypedInstruction] = useState("");
-  const [typedFeedback, setTypedFeedback] = useState("");
-  const [isTypingInstruction, setIsTypingInstruction] = useState(false);
-  const [isTypingFeedback, setIsTypingFeedback] = useState(false);
-  const typingTimeoutRef = useRef<number | null>(null);
-  
-  // Validation lock to prevent duplicate validations
-  const validationInProgressRef = useRef(false);
-  const lastValidationTimeRef = useRef(0);
 
+  // Démarrage du jeu après interaction utilisateur pour déverrouiller l'audio
   useEffect(() => {
-    init();
-  }, [init]);
+    if (audioUnlocked) {
+      init();
+    }
+  }, [audioUnlocked, init]);
+
 
   const totalNumber = useMemo(
     () =>
@@ -435,6 +400,63 @@ function MachineANombres() {
     introMaxAttempt,
   ]);
 
+
+  // Variable pour l'écran de démarrage
+  const showStartScreen = !audioUnlocked;
+
+  // Tous les hooks doivent être appelés avant tout return
+
+  // Rendu conditionnel de l'écran de démarrage
+  if (showStartScreen) {
+    return (
+      <div style={{
+        fontFamily: 'sans-serif',
+        display: 'flex',
+        flexDirection: 'column',
+        justifyContent: 'center',
+        alignItems: 'center',
+        height: '100vh',
+        fontSize: 22,
+        color: '#0ea5e9',
+        background: '#f0f4f8',
+      }}>
+        <div style={{ marginBottom: 32 }}>Bienvenue dans la machine à compter !</div>
+        <button
+          style={{
+            fontSize: 20,
+            padding: '16px 40px',
+            background: 'linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%)',
+            color: '#fff',
+            border: 'none',
+            borderRadius: 12,
+            cursor: 'pointer',
+            fontWeight: 'bold',
+            boxShadow: '0 4px 8px rgba(14, 165, 233, 0.3)',
+            transition: 'all 0.2s ease',
+          }}
+          onClick={async () => {
+            // Débloquer l'AudioContext si besoin (compatibilité Chrome/Safari)
+            const AudioCtx = window.AudioContext || (window as any).webkitAudioContext;
+            if (AudioCtx) {
+              try {
+                const ctx = new AudioCtx();
+                if (ctx.state === 'suspended') {
+                  await ctx.resume();
+                }
+                ctx.close();
+              } catch { /* ignore */ }
+            }
+            setAudioUnlocked(true);
+          }}
+        >
+          Commencer
+        </button>
+        <div style={{ marginTop: 24, fontSize: 16, color: '#64748b' }}>
+          (Clique sur “Commencer” pour activer le son)
+        </div>
+      </div>
+    );
+  }
   return (
     <div
       style={{

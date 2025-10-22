@@ -3892,11 +3892,9 @@ export const useStore = create<MachineState>((set, get) => ({
             default:
                 newInstruction = PHASE_INSTRUCTIONS['default'];
         }
-
+  get().speakAndThen(newInstruction)
        set({ instruction: newInstruction });
-        get().speakAndThen(newInstruction, ()=> {
-            // passe au suivant 
-        })
+      
        
     },
 
