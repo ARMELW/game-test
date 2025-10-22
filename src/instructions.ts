@@ -22,15 +22,16 @@
 export const PHASE_INSTRUCTIONS = {
   // Loading phase - preparing voice system
   'loading': "Préparation de l'assistant vocal... Un instant s'il vous plaît ! 🎙️",
-  
+  'intro-welcome': "Paf, Crac… Bim… Tchac ! Quel vacarme ! Voilà, j'ai terminé ma nouvelle machine !",
+  'intro-discover': "Oh, tu es là ? Je ne t'avais pas entendu arriver avec tout ce bruit ! J'étais justement en train de terminer la nouvelle invention qui va nous permettre de compter toutes sortes de choses.Tu es prêt à la découvrir ?",
   // Introduction phases
   'intro-welcome-personalized': "Bonjour ! Bienvenue dans mon atelier ! 👋 Comment tu t'appelles ? (Tu peux aussi sauter cette étape)",
   
   'intro-discover-machine': (userName: string) => 
-    `Oh, tu es là ${userName || 'l\'enfant'} ? Je ne t'avais pas entendu arriver avec tout ce bruit ! J'étais justement en train de terminer cette invention... qui va nous permettre de compter toutes sortes de choses ! Tu es prêt(e) à la découvrir ? Tadaaaaa ! 🎉 Comment tu la trouves ?`,
+    `Tadaaaaa ! Comment tu la trouves ? `,
   
   'intro-first-interaction': {
-    initial: "Bon, elle peut paraître un peu compliquée comme ça... mais elle n'aura bientôt plus de secrets pour toi ! Grâce à cette machine bizarre, nous allons comprendre comment fonctionnent les nombres ! Et hop, je vais la mettre en route ! (Animation + bruit d'allumage : bzzzz, clic, ding !) Maintenant tu peux appuyer sur ses boutons ! Clique sur le bouton △ VERT pour voir ce qu'il se passe !",
+    initial: " Bon, elle peut paraître un peu compliquée comme ça... mais elle n'aura bientôt plus de secrets pour toi ! Grâce à cette machine bizarre, nous allons comprendre comment fonctionnent les nombres ! Et hop, je vais la mettre en route ! Maintenant tu peux appuyer sur ses boutons ! Clique sur le bouton △ VERT pour voir ce qu'il se passe !",
     continuing: "Continue à cliquer sur △ pour remplir la machine !",
     full: "La machine est pleine ! Essaie maintenant le bouton ROUGE ∇ pour voir ce qu'il fait !",
   },
@@ -54,8 +55,6 @@ export const PHASE_INSTRUCTIONS = {
     question: "Maintenant que tu as vu comment ça marche... J'ai une question pour toi ! 🎯 Avec DEUX rouleaux, jusqu'à combien peut-on compter ? Réfléchis bien ! 🤔",
   },
   
-  'intro-welcome': "Paf, Crac… Bim… Tchac ! Quel vacarme ! Voilà, j'ai terminé ma nouvelle machine !",
-  'intro-discover': "Oh, tu es là ? Je ne t'avais pas entendu arriver avec tout ce bruit ! J'étais justement en train de terminer la nouvelle invention qui va nous permettre de compter toutes sortes de choses.",
   'intro-question-digits': "Te rappelles-tu combien de chiffres différents tu as vu ? (Saisis ta réponse)",
   'intro-add-roll': "Bon, tout ça c'est très bien, mais comment va-t-on faire pour utiliser cette machine lorsque je veux compter plus haut que 9 ? Pour l'instant elle bloque !",
   'intro-question-max': "Jusqu'à combien peut-on compter maintenant ? (Saisis ta réponse)",

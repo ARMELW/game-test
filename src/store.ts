@@ -658,7 +658,7 @@ export const useStore = create<MachineState>((set, get) => ({
                 "6 ! Continue jusqu'au bout !",
                 "7 !",
                 "8 ! Presque plein !",
-                "9 ! STOP ! C'est PLEIN ! 🎯"
+                "9 ! Et voilà, on a rempli la machine ! 🎯"
             ];
 
             if (messages[introClickCount + 1]) {
@@ -1933,7 +1933,7 @@ export const useStore = create<MachineState>((set, get) => ({
         }
         if (currentPhase === 'tutorial') {
             const unitsValue = newCols[0].value;
-            if (unitsValue === 1) sequenceFeedback("Bravo ! 🎉 Tu as cliqué sur le bouton VERT ! Un joli rond bleu est apparu !", "Ce rond bleu, c'est comme une bille. Clique encore sur △ pour en ajouter !");
+            if (unitsValue === 1) sequenceFeedback("Bravo ! 🎉 Tu as cliqué sur le bouton VERT !  Tu as vu comme les lumière s’allument en même temps que les chiffres changent!");
             else if (unitsValue === 2) sequenceFeedback("Super ! 🎉 Maintenant il y a DEUX ronds bleus !", "Deux belles billes ! Continue à cliquer sur △ !");
             else if (unitsValue === 3) sequenceFeedback("Magnifique ! 🎉 Essaie le bouton ROUGE (∇) maintenant !", "Le bouton ROUGE fait l'inverse du VERT ! Essaie-le !");
             else if (unitsValue > 3) {
@@ -1944,10 +1944,10 @@ export const useStore = create<MachineState>((set, get) => ({
             }
         } else if (phase === 'explore-units') {
             const unitsValue = newCols[0].value;
-            if (unitsValue === 1) sequenceFeedback("HOURRA ! 🎉 **Dis à haute voix : UN !** Lève UN doigt ! 👆", `UN c'est une seule chose ! Clique sur △ pour continuer !`);
-            else if (unitsValue === 2) sequenceFeedback("Fantastique ! 🎉 **Dis : DEUX !** Lève DEUX doigts ! ✌️", `DEUX, c'est une paire ! Clique sur △ !`);
+            if (unitsValue === 1) sequenceFeedback("UN");
+            else if (unitsValue === 2) sequenceFeedback("DEUX,Clique sur le bouton vert !");
             else if (unitsValue === 3) {
-                sequenceFeedback("Merveilleux ! 🎉 **Dis : TROIS !** Trois doigts !", `Clique sur △ pour continuer !`, () => {
+                sequenceFeedback("TROIS !", `Clique sur △ pour continuer !`, () => {
                     set({ phase: 'click-add', feedback: "Bravo ! Continuons jusqu'à 9 ! Clique sur △ !" });
                     get().updateButtonVisibility();
                 });
@@ -2770,12 +2770,11 @@ export const useStore = create<MachineState>((set, get) => ({
                         set({
                             columns: newCols,
                             nextPhaseAfterAuto: 'click-add',
-                            phase: 'explore-units',
                             pendingAutoCount: true,
                             isCountingAutomatically: false
                         });
-                        get().updateButtonVisibility();
-                        sequenceFeedback("Maintenant que tu sais comment fonctionnent les défis, on va apprendre les nombres ! 📚", "Regarde bien la machine compter de 1 à 9 ! 👀");
+                        get().setPhase('learn-units');
+                        get().updateInstruction();
                     });
                 });
             });
