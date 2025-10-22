@@ -18,17 +18,12 @@ export type Phase =
     | 'challenge-unit-3'
     | 'intro-second-column'
     | 'delock-dizaines'
-    | 'learn-carry'
     | 'practice-ten'
     | 'learn-ten-to-twenty'
     | 'challenge-ten-to-twenty'
     | 'learn-twenty-to-thirty'
     | 'learn-tens'
     | 'learn-tens-combination'
-    | 'challenge-tens-1'
-    | 'challenge-tens-2'
-    | 'challenge-tens-3'
-    | 'practice-hundred'
     | 'learn-hundred-to-hundred-ten'
     | 'learn-hundred-ten-to-two-hundred'
     | 'challenge-hundred-to-two-hundred'
@@ -78,30 +73,16 @@ export type PhaseStatusMap = Record<Phase, PhaseCompletionStatus>;
 export const ALL_PHASES: readonly Phase[] = [
   'loading',
   'intro-welcome',
-  'intro-welcome-personalized',
   'intro-discover',
   'intro-discover-machine',
   'intro-first-interaction',
   'intro-count-digits',
-  'intro-challenge-introduction',
-  'intro-second-column',
-  'delock-dizaines',
-  'intro-discover-carry',
-  'intro-max-value-question',
-  'intro-question-digits',
-  'intro-add-roll',
-  'intro-question-max',
-  'tutorial',
-  'tutorial-challenge',
-  'explore-units',
-  'click-add',
-  'click-remove',
   'challenge-unit-intro',
   'challenge-unit-1',
   'challenge-unit-2',
   'challenge-unit-3',
-  'learn-units',
-  'learn-carry',
+  'intro-second-column',
+  'delock-dizaines',
   'practice-ten',
   'learn-ten-to-twenty',
   'challenge-ten-to-twenty',

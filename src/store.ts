@@ -4439,6 +4439,11 @@ useStore.subscribe(
                 lockUnits = false;
                 lockTens = false;
             }
+            if(phase == 'practice-ten'){
+                // During unlock phase, keep everything locked to show the unlocking animation
+                lockUnits = false;
+                lockTens = false;
+            }
 
             else if (phase === "normal") {
                 // In normal mode, directly use store unlock state
