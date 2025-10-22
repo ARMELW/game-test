@@ -28,7 +28,7 @@ export const PHASE_INSTRUCTIONS = {
   'intro-welcome-personalized': "Bonjour ! Bienvenue dans mon atelier ! 👋 Comment tu t'appelles ? (Tu peux aussi sauter cette étape)",
   
   'intro-discover-machine': (_userName: string) => 
-    `Tadaaaaa ! Comment tu la trouves ? `,
+    `Tadaaaaa ! Comment tu la trouves ? `,
   
   'intro-first-interaction': {
     initial: " Bon, elle peut paraître un peu compliquée comme ça... mais elle n'aura bientôt plus de secrets pour toi ! Grâce à cette machine bizarre, nous allons comprendre comment fonctionnent les nombres ! Et hop, je vais la mettre en route ! Maintenant tu peux appuyer sur ses boutons ! Clique sur le bouton △ VERT pour voir ce qu'il se passe !",
