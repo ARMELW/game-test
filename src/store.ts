@@ -245,12 +245,12 @@ export const useStore = create<MachineState>((set, get) => ({
     setPhase: (phase) => {
         const currentPhase = get().phase;
         console.log(`[setPhase] Transitioning from "${currentPhase}" to "${phase}"`);
-        
+
         // Mark previous phase as completed if transitioning to a new phase
         if (currentPhase !== phase && currentPhase !== 'loading') {
             get().markPhaseComplete(currentPhase);
         }
-        
+
         // Mark new phase as in-progress
         const { phaseStatusMap } = get();
         if (phaseStatusMap[phase] === 'not-started') {
@@ -261,7 +261,7 @@ export const useStore = create<MachineState>((set, get) => ({
                 }
             });
         }
-        
+
         // Nettoyage du timer existant
         const { timer } = get();
         if (timer) {
@@ -269,9 +269,9 @@ export const useStore = create<MachineState>((set, get) => ({
             set({ timer: null });
         }
 
-    // Afficher le champ de saisie uniquement pour la phase 'intro-count-digits'
-    set({ showInputField: phase === 'intro-count-digits' });
-    set({ phase });
+        // Afficher le champ de saisie uniquement pour la phase 'intro-count-digits'
+        set({ showInputField: phase === 'intro-count-digits' });
+        set({ phase });
 
         // Send challenge list to Unity when entering a challenge phase
         if (phase.startsWith('challenge-')) {
@@ -629,7 +629,7 @@ export const useStore = create<MachineState>((set, get) => ({
                     // Unlock units column when starting interaction
                     const newCols = [...get().columns];
                     newCols[0].unlocked = true;
-                   // set({ columns: newCols, phase: 'intro-first-interaction' });
+                    // set({ columns: newCols, phase: 'intro-first-interaction' });
                     get().updateInstruction();
                 }
             });
@@ -1082,7 +1082,7 @@ export const useStore = create<MachineState>((set, get) => ({
 
     runAutoCount: () => {
         const { phase, isCountingAutomatically, columns, timer } = get();
-        
+
         if (timer) {
             clearTimeout(timer);
             set({ timer: null });
@@ -1121,7 +1121,7 @@ export const useStore = create<MachineState>((set, get) => ({
                 });
             } else { // unitsValue is 9
                 get().speakAndThen("STOP ! Le compteur est à 9.Retour à zéro ! Maintenant, c'est à toi de jouer !", () => {
-                 
+
                     // Reset columns and keep units unlocked
                     const newCols = initialColumns.map(col => ({ ...col }));
                     newCols[0].unlocked = true;
@@ -2677,17 +2677,17 @@ export const useStore = create<MachineState>((set, get) => ({
                 console.log('[DEBUG] (TUTORIAL) unitsValue:', unitsValue, 'tempTotalBefore:', tempTotalBefore, 'phase:', phase);
                 if (unitsValue === 0 && tempTotalBefore === 1) {
                     const newCols = initialColumns.map(col => ({ ...col }));
-                        newCols[0].unlocked = true;
+                    newCols[0].unlocked = true;
 
-                        get().setPhase('tutorial-challenge');
-                        set({
-                            columns: newCols,
-                            tutorialChallengeTargetIndex: 0,
-                            tutorialChallengeSuccessCount: 0
-                        });
-                        get().resetTutorialChallenge();
-                        get().updateInstruction();
-                        //sequenceFeedback("Maintenant, un petit défi pour apprendre comment ça marche ! 🎯", "Tu vas voir ce qui se passe quand tu gagnes et quand tu perds !");
+                    get().setPhase('tutorial-challenge');
+                    set({
+                        columns: newCols,
+                        tutorialChallengeTargetIndex: 0,
+                        tutorialChallengeSuccessCount: 0
+                    });
+                    get().resetTutorialChallenge();
+                    get().updateInstruction();
+                    //sequenceFeedback("Maintenant, un petit défi pour apprendre comment ça marche ! 🎯", "Tu vas voir ce qui se passe quand tu gagnes et quand tu perds !");
 
                 } else if (unitsValue > 0) {
                     sequenceFeedback(`Bien joué ! Continue à cliquer sur ROUGE !`, "Le bouton ROUGE retire une bille à chaque fois !");
@@ -3708,7 +3708,7 @@ export const useStore = create<MachineState>((set, get) => ({
 
     updateInstruction: () => {
         const { phase, unitTargetIndex, unitSuccessCount, tensTargetIndex, tensSuccessCount, hundredsTargetIndex, hundredsSuccessCount, thousandsTargetIndex, thousandsSuccessCount } = get();
-     
+
         let newInstruction = "";
 
         switch (phase) {
@@ -3953,7 +3953,7 @@ export const useStore = create<MachineState>((set, get) => ({
 
         // Set the instruction text
         set({ instruction: newInstruction });
-        
+
         // Speak the instruction, but handle automatic transitions in phase-specific logic
         // Only phases with automatic transitions after speaking should be handled here
         /**if (phase === 'intro-welcome') {
@@ -4226,7 +4226,7 @@ Tu veux :
             console.warn('[goToNextPhase] Current phase not found in ALL_PHASES');
             return;
         }
-        
+
         if (currentIndex >= ALL_PHASES.length - 1) {
             console.log('[goToNextPhase] Already at the last phase');
             set({ feedback: "Vous êtes déjà à la dernière phase !" });
@@ -4235,10 +4235,10 @@ Tu veux :
 
         const nextPhase = ALL_PHASES[currentIndex + 1];
         console.log(`[goToNextPhase] Moving from "${get().phase}" to "${nextPhase}"`);
-        
+
         // Reset relevant state when moving to next phase
         const newCols = initialColumns.map(col => ({ ...col }));
-        
+
         // Determine which columns should be unlocked based on the next phase
         if (nextPhase.includes('unit') || nextPhase.includes('tutorial') || nextPhase.includes('explore')) {
             newCols[0].unlocked = true;
@@ -4258,7 +4258,7 @@ Tu veux :
 
 
 
-        set({ 
+        set({
             columns: newCols,
             feedback: `Passage à la phase suivante : ${nextPhase}`,
             attemptCount: 0,
@@ -4267,7 +4267,7 @@ Tu veux :
             guidedMode: false,
             showSolutionAnimation: false,
         });
-        
+
         get().setPhase(nextPhase);
     },
 
@@ -4277,7 +4277,7 @@ Tu veux :
             console.warn('[goToPreviousPhase] Current phase not found in ALL_PHASES');
             return;
         }
-        
+
         if (currentIndex <= 0) {
             console.log('[goToPreviousPhase] Already at the first phase');
             set({ feedback: "Vous êtes déjà à la première phase !" });
@@ -4286,10 +4286,10 @@ Tu veux :
 
         const previousPhase = ALL_PHASES[currentIndex - 1];
         console.log(`[goToPreviousPhase] Moving from "${get().phase}" to "${previousPhase}"`);
-        
+
         // Reset relevant state when moving to previous phase
         const newCols = initialColumns.map(col => ({ ...col }));
-        
+
         // Determine which columns should be unlocked based on the previous phase
         if (previousPhase.includes('unit') || previousPhase.includes('tutorial') || previousPhase.includes('explore')) {
             newCols[0].unlocked = true;
@@ -4307,7 +4307,7 @@ Tu veux :
             newCols[3].unlocked = true;
         }
 
-        set({ 
+        set({
             columns: newCols,
             feedback: `Retour à la phase précédente : ${previousPhase}`,
             attemptCount: 0,
@@ -4316,7 +4316,7 @@ Tu veux :
             guidedMode: false,
             showSolutionAnimation: false,
         });
-        
+
         get().setPhase(previousPhase);
     },
 
@@ -4332,7 +4332,7 @@ Tu veux :
     markPhaseComplete: (phase) => {
         const { phaseStatusMap } = get();
         console.log(`[markPhaseComplete] Marking phase "${phase}" as completed`);
-        
+
         set({
             phaseStatusMap: {
                 ...phaseStatusMap,
@@ -4362,12 +4362,12 @@ Tu veux :
     checkAndTransitionToNextPhase: () => {
         const currentPhase = get().phase;
         const currentIndex = get().getCurrentPhaseIndex();
-        
+
         if (currentIndex === -1) {
             console.warn('[checkAndTransitionToNextPhase] Current phase not found in ALL_PHASES');
             return;
         }
-        
+
         if (currentIndex >= ALL_PHASES.length - 1) {
             console.log('[checkAndTransitionToNextPhase] Already at the last phase, no auto-transition');
             return;
@@ -4381,8 +4381,8 @@ Tu veux :
 
         // Don't auto-transition from certain phases that have explicit next phase logic
         const manualTransitionPhases = [
-            'normal', 'done', 
-            'celebration-before-thousands', 
+            'normal', 'done',
+            'celebration-before-thousands',
             'celebration-thousands-complete',
             'intro-discover-machine', // Has user choice
             'intro-count-digits', // Has user input
@@ -4396,7 +4396,7 @@ Tu veux :
 
         const nextPhase = ALL_PHASES[currentIndex + 1];
         console.log(`[checkAndTransitionToNextPhase] Auto-transitioning from "${currentPhase}" to "${nextPhase}"`);
-        
+
         set({ feedback: `Transition automatique vers: ${nextPhase}` });
         setTimeout(() => {
             get().goToNextPhase();
@@ -4408,136 +4408,134 @@ useStore.subscribe(
         const phase = state.phase;
         const columns = state.columns;
         const isCountingAutomatically = state.isCountingAutomatically;
-        if(phase != 'loading'){
-      // Get unlocked state from store columns - this is the source of truth
-      const isUnit = columns[0]?.unlocked || false;
-      const isTen = columns[1]?.unlocked || false;
-      const isHundred = columns[2]?.unlocked || false;
-      const isThousand = columns[3]?.unlocked || false;
+        if (phase != 'loading') {
+            // Get unlocked state from store columns - this is the source of truth
+            const isUnit = columns[0]?.unlocked || false;
+            const isTen = columns[1]?.unlocked || false;
+            const isHundred = columns[2]?.unlocked || false;
+            const isThousand = columns[3]?.unlocked || false;
 
-      console.log('isUnit:', isUnit);
+            console.log('isUnit:', isUnit);
 
-      // Lock all rolls initially
-      let lockUnits = true;
-      let lockTens = true;
-      let lockHundreds = true;
-      let lockThousands = true;
+            // Lock all rolls initially
+            let lockUnits = true;
+            let lockTens = true;
+            let lockHundreds = true;
+            let lockThousands = true;
 
-      // Determine which rolls should be unlocked based on phase and column unlock state
-      if (phase === "intro-welcome" && isUnit) {
-        lockUnits = false;
-      } else if (phase === "intro-discover" && isUnit) {
-        lockUnits = false;
-      } else if (phase === "intro-add-roll" && isUnit) {
-        lockUnits = false;
-      } else if (phase === "normal") {
-        // In normal mode, directly use store unlock state
-        lockUnits = !isUnit;
-        lockTens = !isTen;
-        lockHundreds = !isHundred;
-        lockThousands = !isThousand;
-      } else if (
-        (phase === "tutorial" ||
-          phase === "explore-units" ||
-          phase === "click-add" ||
-          phase === "click-remove" ||
-          phase.startsWith("challenge-unit-") ||
-          phase === "challenge-ten-to-twenty") &&
-        isUnit
-      ) {
-        lockUnits = false;
-      } else if (phase === "learn-carry" && isUnit) {
-        lockUnits = false;
-      } else if (phase === "practice-ten" && (isUnit || isTen)) {
-        // Use store unlock state for practice
-        lockUnits = !isUnit;
-        lockTens = !isTen;
-      } else if (
-        (phase === "learn-ten-to-twenty" ||
-          phase === "learn-twenty-to-thirty") &&
-        isUnit
-      ) {
-        lockUnits = false;
-      } else if (
-        phase === "practice-hundred" &&
-        (isUnit || isTen || isHundred)
-      ) {
-        // Use store unlock state for practice
-        lockUnits = !isUnit;
-        lockTens = !isTen;
-        lockHundreds = !isHundred;
-      } else if (
-        (phase === "learn-hundred-to-hundred-ten" ||
-          phase === "learn-hundred-ten-to-two-hundred" ||
-          phase === "challenge-hundred-to-two-hundred" ||
-          phase === "learn-two-hundred-to-three-hundred" ||
-          phase === "challenge-two-hundred-to-three-hundred") &&
-        isUnit
-      ) {
-        lockUnits = false;
-      } else if (
-        (phase.startsWith("challenge-tens-") ||
-          phase === "learn-tens-combination") &&
-        (isUnit || isTen)
-      ) {
-        // Use store unlock state
-        lockUnits = !isUnit;
-        lockTens = !isTen;
-      } else if (
-        (phase.startsWith("challenge-hundreds-") ||
-          phase === "learn-hundreds-combination" ||
-          phase === "learn-hundreds-simple-combination") &&
-        (isUnit || isTen || isHundred)
-      ) {
-        // Use store unlock state
-        lockUnits = !isUnit;
-        lockTens = !isTen;
-        lockHundreds = !isHundred;
-      } else if (
-        phase === "practice-thousand" &&
-        (isUnit || isTen || isHundred || isThousand)
-      ) {
-        // Use store unlock state for practice
-        lockUnits = !isUnit;
-        lockTens = !isTen;
-        lockHundreds = !isHundred;
-        lockThousands = !isThousand;
-      } else if (
-        (phase === "learn-thousand-to-thousand-ten" ||
-          phase === "learn-thousand-to-thousand-hundred" ||
-          phase === "learn-thousand-hundred-to-two-thousand" ||
-          phase === "challenge-thousand-to-two-thousand" ||
-          phase === "learn-two-thousand-to-three-thousand" ||
-          phase === "challenge-two-thousand-to-three-thousand") &&
-        isUnit
-      ) {
-        lockUnits = false;
-      } else if (
-        (phase.startsWith("challenge-thousands-") ||
-          phase === "learn-thousands-combination" ||
-          phase === "challenge-thousands-simple-combination" ||
-          phase === "learn-thousands-very-simple-combination" ||
-          phase === "learn-thousands-full-combination") &&
-        (isUnit || isTen || isHundred || isThousand)
-      ) {
-        // Use store unlock state
-        lockUnits = !isUnit;
-        lockTens = !isTen;
-        lockHundreds = !isHundred;
-        lockThousands = !isThousand;
-      }
+            // Determine which rolls should be unlocked based on phase and column unlock state
+            if (phase == 'intro-first-interaction' && isUnit) {
+                lockUnits = false;
+            }
 
-      // During auto-counting, lock everything
-      if (isCountingAutomatically) {
-        lockUnits = true;
-        lockTens = true;
-        lockHundreds = true;
-        lockThousands = true;
-      }
-      
-      LockUnitRoll(lockUnits);
-      LockTenRoll(lockTens);
-      LockHundredRoll(lockHundreds);
-      LockThousandRoll(lockThousands);
-    }
+            else if (phase === "normal") {
+                // In normal mode, directly use store unlock state
+                lockUnits = !isUnit;
+                lockTens = !isTen;
+                lockHundreds = !isHundred;
+                lockThousands = !isThousand;
+            } else if (
+                (phase === "tutorial" ||
+                    phase === "explore-units" ||
+                    phase === "click-add" ||
+                    phase === "click-remove" ||
+                    phase.startsWith("challenge-unit-") ||
+                    phase === "challenge-ten-to-twenty") &&
+                isUnit
+            ) {
+                lockUnits = false;
+            } else if (phase === "learn-carry" && isUnit) {
+                lockUnits = false;
+            } else if (phase === "practice-ten" && (isUnit || isTen)) {
+                // Use store unlock state for practice
+                lockUnits = !isUnit;
+                lockTens = !isTen;
+            } else if (
+                (phase === "learn-ten-to-twenty" ||
+                    phase === "learn-twenty-to-thirty") &&
+                isUnit
+            ) {
+                lockUnits = false;
+            } else if (
+                phase === "practice-hundred" &&
+                (isUnit || isTen || isHundred)
+            ) {
+                // Use store unlock state for practice
+                lockUnits = !isUnit;
+                lockTens = !isTen;
+                lockHundreds = !isHundred;
+            } else if (
+                (phase === "learn-hundred-to-hundred-ten" ||
+                    phase === "learn-hundred-ten-to-two-hundred" ||
+                    phase === "challenge-hundred-to-two-hundred" ||
+                    phase === "learn-two-hundred-to-three-hundred" ||
+                    phase === "challenge-two-hundred-to-three-hundred") &&
+                isUnit
+            ) {
+                lockUnits = false;
+            } else if (
+                (phase.startsWith("challenge-tens-") ||
+                    phase === "learn-tens-combination") &&
+                (isUnit || isTen)
+            ) {
+                // Use store unlock state
+                lockUnits = !isUnit;
+                lockTens = !isTen;
+            } else if (
+                (phase.startsWith("challenge-hundreds-") ||
+                    phase === "learn-hundreds-combination" ||
+                    phase === "learn-hundreds-simple-combination") &&
+                (isUnit || isTen || isHundred)
+            ) {
+                // Use store unlock state
+                lockUnits = !isUnit;
+                lockTens = !isTen;
+                lockHundreds = !isHundred;
+            } else if (
+                phase === "practice-thousand" &&
+                (isUnit || isTen || isHundred || isThousand)
+            ) {
+                // Use store unlock state for practice
+                lockUnits = !isUnit;
+                lockTens = !isTen;
+                lockHundreds = !isHundred;
+                lockThousands = !isThousand;
+            } else if (
+                (phase === "learn-thousand-to-thousand-ten" ||
+                    phase === "learn-thousand-to-thousand-hundred" ||
+                    phase === "learn-thousand-hundred-to-two-thousand" ||
+                    phase === "challenge-thousand-to-two-thousand" ||
+                    phase === "learn-two-thousand-to-three-thousand" ||
+                    phase === "challenge-two-thousand-to-three-thousand") &&
+                isUnit
+            ) {
+                lockUnits = false;
+            } else if (
+                (phase.startsWith("challenge-thousands-") ||
+                    phase === "learn-thousands-combination" ||
+                    phase === "challenge-thousands-simple-combination" ||
+                    phase === "learn-thousands-very-simple-combination" ||
+                    phase === "learn-thousands-full-combination") &&
+                (isUnit || isTen || isHundred || isThousand)
+            ) {
+                // Use store unlock state
+                lockUnits = !isUnit;
+                lockTens = !isTen;
+                lockHundreds = !isHundred;
+                lockThousands = !isThousand;
+            }
+
+            // During auto-counting, lock everything
+            if (isCountingAutomatically) {
+                lockUnits = true;
+                lockTens = true;
+                lockHundreds = true;
+                lockThousands = true;
+            }
+
+            LockUnitRoll(lockUnits);
+            LockTenRoll(lockTens);
+            LockHundredRoll(lockHundreds);
+            LockThousandRoll(lockThousands);
+        }
     });
