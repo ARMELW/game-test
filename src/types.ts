@@ -164,6 +164,11 @@ export interface MachineState {
     thousandsSimpleCombinationSuccessCount: number;
     timer: number | null;
 
+  // Feedback sequence state
+  feedbackSequence: string[];
+  feedbackSequenceStep: number;
+  feedbackSequenceCallback: (() => void) | null;
+
   userInput: string;
   showInputField: boolean;
 
@@ -275,6 +280,8 @@ export interface MachineState {
     setTimer: (timer: number | null) => void;
 
     // Business logic
+    setFeedbackSequence: (sequence: string[], callback?: () => void) => void;
+    advanceFeedbackSequence: () => void;
     sequenceFeedback: (first: string, second?: string, onComplete?: () => void) => void;
     speakAndThen: (message: string, onComplete?: () => void) => void;
     handleAdd: (idx: number) => void;

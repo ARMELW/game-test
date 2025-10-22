@@ -154,6 +154,9 @@ export const useStore = create<MachineState>((set, get) => ({
         hundreds: false,
         thousands: false,
     },
+    feedbackSequence: [],
+    feedbackSequenceStep: 0,
+    feedbackSequenceCallback: null,
     unitTargetIndex: 0,
     unitSuccessCount: 0,
     tenToTwentyTargetIndex: 0,
@@ -594,29 +597,13 @@ export const useStore = create<MachineState>((set, get) => ({
         };
 
         if (selectedResponse === 'belle') {
-            sequenceFeedback(
-                "Merci ! J'ai passé beaucoup de temps dessus ! 😊",
-                "Tu vas voir, elle est aussi MAGIQUE que belle !",
-                continueToNextPhase
-            );
+            sequenceFeedback("Merci ! J'ai passé beaucoup de temps dessus ! 😊", "Tu vas voir, elle est aussi MAGIQUE que belle !", continueToNextPhase);
         } else if (selectedResponse === 'bof') {
-            sequenceFeedback(
-                "Haha ! Je comprends, elle n'a pas l'air très impressionnante comme ça ! 😅",
-                "Mais attends de voir ce qu'elle peut faire !",
-                continueToNextPhase
-            );
+            sequenceFeedback("Haha ! Je comprends, elle n'a pas l'air très impressionnante comme ça ! 😅", "Mais attends de voir ce qu'elle peut faire !", continueToNextPhase);
         } else if (selectedResponse === 'comprends-rien') {
-            sequenceFeedback(
-                "C'est NORMAL ! Même moi j'avais du mal au début ! 😄",
-                "C'est justement pour ça qu'on va l'explorer ENSEMBLE !",
-                continueToNextPhase
-            );
+            sequenceFeedback("C'est NORMAL ! Même moi j'avais du mal au début ! 😄", "C'est justement pour ça qu'on va l'explorer ENSEMBLE !", continueToNextPhase);
         } else if (selectedResponse === 'cest-quoi') {
-            sequenceFeedback(
-                "Excellente question ! 🎓 C'est une MACHINE À COMPTER !",
-                "Elle va nous apprendre comment fonctionnent les nombres !",
-                continueToNextPhase
-            );
+            sequenceFeedback("Excellente question ! 🎓 C'est une MACHINE À COMPTER !", "Elle va nous apprendre comment fonctionnent les nombres !", continueToNextPhase);
         } else { // timeout
             sequenceFeedback(
                 `Tu es peut-être un peu timide ${name} ? Pas de problème ! 😊`,
@@ -633,10 +620,7 @@ export const useStore = create<MachineState>((set, get) => ({
         if (introClickCount === 0) {
             newCols[0].value = 1;
             set({ columns: newCols, introClickCount: 1 });
-            sequenceFeedback(
-                "SUPER ! Tu as vu ? Une lumière s'est allumée ! 💡",
-                "Et le chiffre est passé de 0 à 1 ! Continue ! Clique encore sur △ !"
-            );
+            sequenceFeedback("SUPER ! Tu as vu ? Une lumière s'est allumée ! 💡", "Et le chiffre est passé de 0 à 1 ! Continue ! Clique encore sur △ !");
         } else if (introClickCount < 9) {
             newCols[0].value = introClickCount + 1;
             set({ columns: newCols, introClickCount: introClickCount + 1 });
@@ -1650,26 +1634,56 @@ export const useStore = create<MachineState>((set, get) => ({
     },
 
 
-    sequenceFeedback: (first: string, second?: string, onComplete?: () => void) => {
-        // Affiche le premier message et lance la voix
-        get().setFeedback(first);
-        textToSpeechService.setCallbacks({
-            onEnd: () => {
-                if (second) {
-                    // Quand la voix du premier est finie, affiche le second et lance la voix
-                    get().setFeedback(second);
-                    textToSpeechService.setCallbacks({
-                        onEnd: () => {
-                            onComplete?.();
-                        }
-                    });
-                    textToSpeechService.speak(second);
-                } else {
-                    onComplete?.();
-                }
-            }
+    setFeedbackSequence: (sequence: string[], callback?: () => void) => {
+        // Start a new feedback sequence
+        set({ 
+            feedbackSequence: sequence, 
+            feedbackSequenceStep: 0,
+            feedbackSequenceCallback: callback || null
         });
-        textToSpeechService.speak(first);
+        // Trigger the first message
+        get().advanceFeedbackSequence();
+    },
+
+    advanceFeedbackSequence: () => {
+        const { feedbackSequence, feedbackSequenceStep, feedbackSequenceCallback } = get();
+        
+        if (feedbackSequenceStep < feedbackSequence.length) {
+            const currentMessage = feedbackSequence[feedbackSequenceStep];
+            get().setFeedback(currentMessage);
+            
+            textToSpeechService.setCallbacks({
+                onEnd: () => {
+                    const newStep = feedbackSequenceStep + 1;
+                    set({ feedbackSequenceStep: newStep });
+                    
+                    if (newStep < feedbackSequence.length) {
+                        // More messages to speak
+                        get().advanceFeedbackSequence();
+                    } else {
+                        // Sequence complete, execute callback
+                        if (feedbackSequenceCallback) {
+                            feedbackSequenceCallback();
+                        }
+                        // Clear the sequence
+                        set({ 
+                            feedbackSequence: [], 
+                            feedbackSequenceStep: 0,
+                            feedbackSequenceCallback: null
+                        });
+                    }
+                }
+            });
+            
+            textToSpeechService.speak(currentMessage);
+        }
+    },
+
+    // Helper wrapper to maintain compatibility with old sequenceFeedback interface
+    // This will be removed after all calls are updated
+    sequenceFeedback: (first: string, second?: string, onComplete?: () => void) => {
+        const messages = second ? [first, second] : [first];
+        get().setFeedbackSequence(messages, onComplete);
     },
 
     // Helper function to speak a message and execute callback when done
