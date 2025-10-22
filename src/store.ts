@@ -2819,8 +2819,8 @@ export const useStore = create<MachineState>((set, get) => ({
                         get().updateButtonVisibility();
                         sequenceFeedback("Prêt pour la magie ? 🎩 Tu vas voir l'échange 10 pour 1 !", "D'abord, compte jusqu'à 9 en cliquant sur △. Ensuite, la magie va opérer ! ✨");
                     } else {
-                        // Send next goal message to Unity
-                        sendNextGoal();
+                        // Moving to next challenge phase - do NOT call sendNextGoal() 
+                        // because setPhase will send a new challenge list to Unity
 
                         // Keep units unlocked for challenges
                         const resetCols = initialColumns.map(col => ({ ...col }));
@@ -3030,8 +3030,9 @@ export const useStore = create<MachineState>((set, get) => ({
                         get().updateButtonVisibility();
                         sequenceFeedback("APPRENTISSAGE DES DIZAINES TERMINÉ ! Bravo ! 🎉", "NIVEAU DÉBLOQUÉ : Les CENTAINES ! 💯 STOP ! Regarde bien : TOUT est plein ! 9 paquets de 10 + 9 billes. Clique sur △ pour voir une GRANDE MAGIE ! ✨");
                     } else {
+                        // Moving to next challenge phase - do NOT call sendNextGoal()
+                        // because setPhase will send a new challenge list to Unity
                         const nextChallenge = TENS_CHALLENGES[challengeIndex + 1];
-                        sendNextGoal();
                         resetTensChallenge();
                         const resetCols = initialColumns.map((col, i) => ({ ...col, unlocked: i === 0 || i === 1 }));
                         set({
@@ -4449,7 +4450,7 @@ useStore.subscribe(
                 lockUnits = false;
                 lockTens = false;
             }
-            if(phase == 'practice-ten'){
+            else if(phase == 'practice-ten'){
                 // During unlock phase, keep everything locked to show the unlocking animation
                 lockUnits = false;
                 lockTens = false;
@@ -4473,10 +4474,6 @@ useStore.subscribe(
             }
             else if (phase === "learn-carry" && isUnit) {
                 lockUnits = false;
-            } else if (phase === "practice-ten" && (isUnit || isTen)) {
-                // Use store unlock state for practice
-                lockUnits = !isUnit;
-                lockTens = !isTen;
             } else if (
                 (phase === "learn-ten-to-twenty" ||
                     phase === "learn-twenty-to-thirty") &&
