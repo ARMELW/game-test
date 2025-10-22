@@ -743,12 +743,12 @@ export const useStore = create<MachineState>((set, get) => ({
         if (choice === 'ajouter-rouleau' || choice === 'plus-grande') {
             sequenceFeedback(
                 "EXACTEMENT ! Quelle bonne idée ! 💡",
-                "On va ajouter un DEUXIÈME ROULEAU ! Comme ça on aura plus de place pour compter !"
+                "Je sais, nous allons devoir la modifier pour qu'elle ait une place de plus. Rajoutons un rouleau !"
             );
         } else {
             sequenceFeedback(
                 "Pas de souci ! Je vais te montrer MON idée ! 😊",
-                "On va ajouter un DEUXIÈME ROULEAU !"
+                "Je sais, nous allons devoir la modifier pour qu'elle ait une place de plus. Rajoutons un rouleau !"
             );
         }
 
@@ -761,12 +761,15 @@ export const useStore = create<MachineState>((set, get) => ({
                 set({ columns: newCols });
                 sequenceFeedback(
                     "(Bruits : tic tic tic, bzzzz, clic !) Et voilààààà ! 🎉",
-                    "Maintenant il y a DEUX rouleaux ! Je vais l'allumer pour que tu la testes !"
+                    "Maintenant il y a DEUX rouleaux !"
                 );
                 setTimeout(() => {
-                    set({ feedback: "(Bruit d'allumage : bzzzz, ding !)" });
+                    set({ feedback: "Je vais l'allumer pour que tu puisses la tester." });
                     setTimeout(() => {
-                        get().setPhase('intro-discover-carry');
+                        set({ feedback: "(Bruit d'allumage : bzzzz, ding !)" });
+                        setTimeout(() => {
+                            get().setPhase('intro-discover-carry');
+                        }, FEEDBACK_DELAY);
                     }, FEEDBACK_DELAY);
                 }, FEEDBACK_DELAY * 2);
             }, FEEDBACK_DELAY);
