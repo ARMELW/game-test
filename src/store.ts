@@ -251,9 +251,9 @@ export const useStore = create<MachineState>((set, get) => ({
                 
                 if (voices.length > 0) {
                     // Voices are ready, transition to intro
-                    console.log('[setPhase] TTS ready, transitioning to intro-welcome-personalized');
+                    console.log('[setPhase] TTS ready, transitioning to intro-welcome');
                     setTimeout(() => {
-                        set({ phase: 'intro-welcome-personalized', timer: null });
+                        set({ phase: 'intro-welcome', timer: null });
                         get().updateButtonVisibility();
                         get().updateInstruction();
                     }, 500); // Small delay to ensure everything is ready
@@ -261,7 +261,7 @@ export const useStore = create<MachineState>((set, get) => ({
                     // Timeout after max checks - proceed anyway
                     console.log('[setPhase] TTS initialization timeout, proceeding to intro anyway');
                     setTimeout(() => {
-                        set({ phase: 'intro-welcome-personalized', timer: null });
+                        set({ phase: 'intro-welcome', timer: null });
                         get().updateButtonVisibility();
                         get().updateInstruction();
                     }, 500);
@@ -310,7 +310,7 @@ export const useStore = create<MachineState>((set, get) => ({
                     }, 500);
                 }
             );
-            return;
+           // return;
         }
 
         get().updateButtonVisibility();
@@ -1674,7 +1674,8 @@ export const useStore = create<MachineState>((set, get) => ({
 
     // Helper function to speak a message and execute callback when done
     speakAndThen: (message: string, onComplete?: () => void) => {
-        get().setFeedback(message);
+        console.log('ca parle mec')
+      //  get().setFeedback(message);
         textToSpeechService.setCallbacks({
             onEnd: () => {
                 onComplete?.();
@@ -3892,12 +3893,11 @@ export const useStore = create<MachineState>((set, get) => ({
                 newInstruction = PHASE_INSTRUCTIONS['default'];
         }
 
-        console.log('newInstruction', newInstruction);
-        set({ instruction: newInstruction });
-
-        // NOTE: Do NOT call textToSpeechService.speak() here!
-        // Let speakAndThen() and sequenceFeedback() be the only ones controlling speech
-        // This prevents callback conflicts and ensures TTS-driven transitions work correctly
+       set({ instruction: newInstruction });
+        get().speakAndThen(newInstruction, ()=> {
+            // passe au suivant 
+        })
+       
     },
 
     startLearningPhase: () => {
