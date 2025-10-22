@@ -70,6 +70,19 @@ export type Phase =
     | 'done'
     | 'learn-units';
 
+// Phase completion status
+export type PhaseCompletionStatus = 'not-started' | 'in-progress' | 'completed';
+
+// Phase status information
+export interface PhaseStatus {
+  phase: Phase;
+  status: PhaseCompletionStatus;
+  completedAt?: number; // timestamp when completed
+}
+
+// Map of phase completion statuses
+export type PhaseStatusMap = Record<Phase, PhaseCompletionStatus>;
+
 // Ordered array of all phases in the application flow
 export const ALL_PHASES: readonly Phase[] = [
   'loading',
@@ -239,6 +252,10 @@ export interface MachineState {
     thousandsSimpleCombinationSuccessCount: number;
     timer: number | null;
 
+  // Phase completion tracking
+  phaseStatusMap: PhaseStatusMap;
+  autoTransitionEnabled: boolean;
+
   // Feedback sequence state
   feedbackSequence: string[];
   feedbackSequenceStep: number;
@@ -394,4 +411,11 @@ export interface MachineState {
     goToNextPhase: () => void;
     goToPreviousPhase: () => void;
     getCurrentPhaseIndex: () => number;
+    
+    // Phase status tracking functions
+    getPhaseStatus: (phase: Phase) => PhaseStatus;
+    markPhaseComplete: (phase: Phase) => void;
+    isPhaseComplete: (phase: Phase) => boolean;
+    setAutoTransitionEnabled: (enabled: boolean) => void;
+    checkAndTransitionToNextPhase: () => void;
 }
