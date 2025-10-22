@@ -4,8 +4,6 @@ import { UnityGame } from "./components/UnityGame";
 import { parse, useUnity } from "./hooks/useUnity";
 import { UI_MESSAGES } from "./instructions.ts";
 
-const store = useStore.getState();
-store.setPhase("challenge-tens-1");
 
 function formatNumber(num: number, length = 4) {
   return num.toString().padStart(length, "0");

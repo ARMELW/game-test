@@ -6,6 +6,7 @@ export type Column = {
 };
 
 export type Phase =
+  | 'loading'
     | 'intro-welcome'
     | 'intro-welcome-personalized'
     | 'intro-discover'
