@@ -1037,7 +1037,6 @@ export const useStore = create<MachineState>((set, get) => ({
 
     runAutoCount: () => {
         const { phase, isCountingAutomatically, columns, nextPhaseAfterAuto, timer } = get();
-        const COUNT_SPEED = 2000; // Vitesse de l'auto-incrémentation ralentie pour le commentaire
 
         if (timer) {
             clearTimeout(timer);
