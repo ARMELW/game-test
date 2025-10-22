@@ -1792,40 +1792,9 @@ export const useStore = create<MachineState>((set, get) => ({
             return;
         }
 
-        // Handle intro phases
-        if (phase === 'intro-welcome') {
-            const { sequenceFeedback, speakAndThen } = get();
-            sequenceFeedback(
-                "Bienvenue sur la machine à nombres !",
-                "Découvrons ensemble comment elle fonctionne.",
-                () => {
-                    speakAndThen("Prêt ? C'est parti !", () => {
-                        set({ phase: 'intro-discover' });
-                        get().updateInstruction();
-                    });
-                }
-            );
-            return;
-        } else if (phase === 'intro-discover') {
-            const { sequenceFeedback, speakAndThen } = get();
-            sequenceFeedback(
-                "Bon, elle peut paraître un peu compliquée comme ça, mais elle n'aura bientôt plus de secrets pour toi !",
-                "Grâce à cette machine bizarre, nous allons comprendre comment fonctionnent les nombres.",
-                () => {
-                    sequenceFeedback(
-                        "Et hop, je vais la mettre en route pour que tu puisses appuyer sur ses boutons.",
-                        "Vas-y clique sur les boutons + et – pour voir ce qu'il se passe.",
-                        () => {
-                            const newCols = [...columns];
-                            newCols[0].value = 0;
-                            set({ columns: newCols });
-                            speakAndThen("Essaie d'afficher le chiffre le plus grand possible en cliquant sur △ !");
-                        }
-                    );
-                }
-            );
-            return;
-        }
+        // Note: intro-welcome and intro-discover transitions are now handled automatically
+        // in updateInstruction() after the instruction is spoken. User clicks during these
+        // phases should not trigger transitions.
 
         const currentPhaseForCheck = get().phase;
         const isAllowedColumn = () => {
