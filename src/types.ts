@@ -25,6 +25,7 @@ export type Phase =
     | 'explore-units'
     | 'click-add'
     | 'click-remove'
+    | 'challenge-unit-intro'
     | 'challenge-unit-1'
     | 'challenge-unit-2'
     | 'challenge-unit-3'
@@ -88,20 +89,28 @@ export type PhaseStatusMap = Record<Phase, PhaseCompletionStatus>;
 export const ALL_PHASES: readonly Phase[] = [
   'loading',
   'intro-welcome',
+  'intro-welcome-personalized',
   'intro-discover',
   'intro-discover-machine',
   'intro-first-interaction',
   'intro-count-digits',
   'intro-challenge-introduction',
-  'challenge-unit-1',
-  'challenge-unit-2',
-  'challenge-unit-3',
   'intro-second-column',
   'intro-discover-carry',
   'intro-max-value-question',
   'intro-question-digits',
   'intro-add-roll',
   'intro-question-max',
+  'tutorial',
+  'tutorial-challenge',
+  'explore-units',
+  'click-add',
+  'click-remove',
+  'challenge-unit-intro',
+  'challenge-unit-1',
+  'challenge-unit-2',
+  'challenge-unit-3',
+  'learn-units',
   'learn-carry',
   'practice-ten',
   'learn-ten-to-twenty',

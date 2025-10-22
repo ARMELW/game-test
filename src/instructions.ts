@@ -40,6 +40,8 @@ export const PHASE_INSTRUCTIONS = {
   
   'intro-challenge-introduction': "Parfait ! Tu as bien compris ! 🎉 Maintenant que tu connais les 10 chiffres (0, 1, 2, 3, 4, 5, 6, 7, 8, 9), il est temps de passer aux DÉFIS ! 🎯 Dans les défis, je vais te demander d'afficher des nombres précis sur la machine. Es-tu prêt(e) ? C'est parti pour ton premier challenge ! 💪",
   
+  'challenge-unit-intro': "Excellent travail ! 🎉 Tu as bien pratiqué avec les boutons △ et ∇, et tu maîtrises maintenant les chiffres de 0 à 9 ! 👏 Maintenant, il est temps de passer aux VRAIS DÉFIS ! 🎯 Dans ces défis, je vais te demander d'afficher des nombres précis, puis tu devras cliquer sur VALIDER pour vérifier. Es-tu prêt(e) ? Allons-y ! 💪",
+  
   'intro-second-column': "Bon, tout ça c'est très bien... Mais j'ai un PROBLÈME ! 🤔 Comment va-t-on faire pour compter plus haut que 9 ? Pour l'instant, la machine BLOQUE à 9 ! Tu vois ? Ça ne bouge plus ! 😅 À ton avis, que peut-on faire ?",
   
   'intro-discover-carry': {

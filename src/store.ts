@@ -2504,7 +2504,7 @@ export const useStore = create<MachineState>((set, get) => ({
     handleSubtract: (idx: number) => {
         const { isCountingAutomatically, phase, columns, guidedMode, currentTarget } = get();
         const totalNumber = columns.reduce((acc: number, col: Column, idx: number) => acc + col.value * Math.pow(10, idx), 0);
-        const { sequenceFeedback, resetUnitChallenge } = get();
+        const { sequenceFeedback } = get();
 
         if (isCountingAutomatically) return;
 
@@ -2707,12 +2707,10 @@ export const useStore = create<MachineState>((set, get) => ({
                     // Keep units unlocked for challenges
                     const newCols = initialColumns.map(col => ({ ...col }));
                     newCols[0].unlocked = true;
-                    resetUnitChallenge();
                     set({
                         columns: newCols
                     });
-                    get().setPhase('challenge-unit-1');
-                    get().setFeedback(`Bravo ! 🎉 Maintenant, DÉFI 1 : Affiche le nombre **${UNIT_CHALLENGES[0].targets[0]}** avec les boutons, puis clique sur VALIDER !`);
+                    get().setPhase('challenge-unit-intro');
                 }, FEEDBACK_DELAY);
             } else if (unitsValue > 0) {
                 sequenceFeedback(`**${unitsValue}** ! Baisse un doigt !`, `${unitsValue} doigts levés. Continue avec ∇ !`);
@@ -3739,6 +3737,9 @@ export const useStore = create<MachineState>((set, get) => ({
             case 'intro-challenge-introduction':
                 newInstruction = PHASE_INSTRUCTIONS['intro-challenge-introduction'];
                 break;
+            case 'challenge-unit-intro':
+                newInstruction = PHASE_INSTRUCTIONS['challenge-unit-intro'];
+                break;
             case 'intro-second-column':
                 newInstruction = PHASE_INSTRUCTIONS['intro-second-column'];
                 break;
@@ -3961,8 +3962,15 @@ export const useStore = create<MachineState>((set, get) => ({
         // Only phases with automatic transitions after speaking should be handled here
         if (phase === 'intro-challenge-introduction') {
             get().speakAndThen(newInstruction, () => {
+                // Transition to intro-second-column after introduction message
+                console.log('[updateInstruction] intro-challenge-introduction complete, transitioning to intro-second-column');
+                get().setPhase('intro-second-column');
+            });
+        } else if (phase === 'challenge-unit-intro') {
+            get().speakAndThen(newInstruction, () => {
                 // Transition to challenge-unit-1 after introduction message
-                console.log('[updateInstruction] intro-challenge-introduction complete, transitioning to challenge-unit-1');
+                console.log('[updateInstruction] challenge-unit-intro complete, transitioning to challenge-unit-1');
+                get().resetUnitChallenge();
                 get().setPhase('challenge-unit-1');
             });
         } else {
