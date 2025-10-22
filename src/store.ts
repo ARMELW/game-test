@@ -240,10 +240,14 @@ export const useStore = create<MachineState>((set, get) => ({
             set({ feedback: "", instruction: "" });
             console.log('[setPhase] loading: checking TTS readiness');
             
+            let checkCount = 0;
+            const MAX_CHECKS = 25; // Max 5 seconds (25 * 200ms)
+            
             // Function to check if voices are loaded
             const checkVoicesLoaded = () => {
                 const voices = textToSpeechService.getVoices();
-                console.log('[setPhase] Voices loaded:', voices.length);
+                checkCount++;
+                console.log('[setPhase] Check #' + checkCount + ', Voices loaded:', voices.length);
                 
                 if (voices.length > 0) {
                     // Voices are ready, transition to intro
@@ -253,6 +257,14 @@ export const useStore = create<MachineState>((set, get) => ({
                         get().updateButtonVisibility();
                         get().updateInstruction();
                     }, 500); // Small delay to ensure everything is ready
+                } else if (checkCount >= MAX_CHECKS) {
+                    // Timeout after max checks - proceed anyway
+                    console.log('[setPhase] TTS initialization timeout, proceeding to intro anyway');
+                    setTimeout(() => {
+                        set({ phase: 'intro-welcome-personalized', timer: null });
+                        get().updateButtonVisibility();
+                        get().updateInstruction();
+                    }, 500);
                 } else {
                     // Voices not ready yet, check again
                     console.log('[setPhase] Voices not ready, checking again in 200ms');
@@ -4107,7 +4119,16 @@ Tu veux :
     },
 
     init: () => {
-        get().updateInstruction();
+        const { phase } = get();
+        console.log('[init] Starting initialization with phase:', phase);
+        
+        // If we're in loading phase, trigger the phase logic
+        if (phase === 'loading') {
+            // Force a call to setPhase to trigger the loading logic
+            get().setPhase('loading');
+        } else {
+            get().updateInstruction();
+        }
     },
 }));
 
