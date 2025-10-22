@@ -551,14 +551,14 @@ export const useStore = create<MachineState>((set, get) => ({
 
     // New intro phase handlers
     handleIntroNameSubmit: () => {
-        const { userInput, sequenceFeedback } = get();
+        const { userInput, setFeedbackSequence } = get();
         const name = userInput.trim() || "l'enfant";
         set({ userName: name, showInputField: false, userInput: "" });
 
-        sequenceFeedback(
+        setFeedbackSequence([
             `Enchanté ${name} ! Moi c'est Professeur Numérix ! 🎩`,
             "(Bruits de marteau sur du métal et de perceuse) Paf, Crac… Bim… Tchac ! Quel vacarme !",
-            () => {
+        ], () => {
                 // After both messages are spoken, show the next message
                 set({ feedback: "Voilà, j'ai terminé ma nouvelle machine !" });
 
@@ -575,7 +575,7 @@ export const useStore = create<MachineState>((set, get) => ({
     },
 
     handleIntroMachineResponse: () => {
-        const { selectedResponse, userName, sequenceFeedback } = get();
+        const { selectedResponse, userName, setFeedbackSequence } = get();
         const name = userName || "l'enfant";
 
         set({ showResponseButtons: false });
@@ -597,30 +597,44 @@ export const useStore = create<MachineState>((set, get) => ({
         };
 
         if (selectedResponse === 'belle') {
-            sequenceFeedback("Merci ! J'ai passé beaucoup de temps dessus ! 😊", "Tu vas voir, elle est aussi MAGIQUE que belle !", continueToNextPhase);
+            setFeedbackSequence([
+                "Merci ! J'ai passé beaucoup de temps dessus ! 😊",
+                "Tu vas voir, elle est aussi MAGIQUE que belle !",
+            ], continueToNextPhase);
         } else if (selectedResponse === 'bof') {
-            sequenceFeedback("Haha ! Je comprends, elle n'a pas l'air très impressionnante comme ça ! 😅", "Mais attends de voir ce qu'elle peut faire !", continueToNextPhase);
+            setFeedbackSequence([
+                "Haha ! Je comprends, elle n'a pas l'air très impressionnante comme ça ! 😅",
+                "Mais attends de voir ce qu'elle peut faire !",
+            ], continueToNextPhase);
         } else if (selectedResponse === 'comprends-rien') {
-            sequenceFeedback("C'est NORMAL ! Même moi j'avais du mal au début ! 😄", "C'est justement pour ça qu'on va l'explorer ENSEMBLE !", continueToNextPhase);
+            setFeedbackSequence([
+                "C'est NORMAL ! Même moi j'avais du mal au début ! 😄",
+                "C'est justement pour ça qu'on va l'explorer ENSEMBLE !",
+            ], continueToNextPhase);
         } else if (selectedResponse === 'cest-quoi') {
-            sequenceFeedback("Excellente question ! 🎓 C'est une MACHINE À COMPTER !", "Elle va nous apprendre comment fonctionnent les nombres !", continueToNextPhase);
+            setFeedbackSequence([
+                "Excellente question ! 🎓 C'est une MACHINE À COMPTER !",
+                "Elle va nous apprendre comment fonctionnent les nombres !",
+            ], continueToNextPhase);
         } else { // timeout
-            sequenceFeedback(
+            setFeedbackSequence([
                 `Tu es peut-être un peu timide ${name} ? Pas de problème ! 😊`,
                 "Laisse-moi te la présenter...",
-                continueToNextPhase
-            );
+            ], continueToNextPhase);
         }
     },
 
     handleIntroFirstClick: () => {
-        const { introClickCount, columns, sequenceFeedback } = get();
+        const { introClickCount, columns, setFeedbackSequence } = get();
         const newCols = [...columns];
 
         if (introClickCount === 0) {
             newCols[0].value = 1;
             set({ columns: newCols, introClickCount: 1 });
-            sequenceFeedback("SUPER ! Tu as vu ? Une lumière s'est allumée ! 💡", "Et le chiffre est passé de 0 à 1 ! Continue ! Clique encore sur △ !");
+            setFeedbackSequence([
+                "SUPER ! Tu as vu ? Une lumière s'est allumée ! 💡",
+                "Et le chiffre est passé de 0 à 1 ! Continue ! Clique encore sur △ !",
+            ]);
         } else if (introClickCount < 9) {
             newCols[0].value = introClickCount + 1;
             set({ columns: newCols, introClickCount: introClickCount + 1 });
@@ -645,20 +659,19 @@ export const useStore = create<MachineState>((set, get) => ({
             if (introClickCount + 1 === 9) {
                 // Use voice callback instead of setTimeout
                 get().speakAndThen(messages[introClickCount + 1], () => {
-                    sequenceFeedback(
+                    setFeedbackSequence([
                         "Et voilà, on a REMPLI la machine ! 🎉",
                         "Tu as vu comme les lumières s'allument en même temps que les chiffres changent ?",
-                        () => {
-                            get().speakAndThen("Maintenant essaie le bouton ROUGE avec la flèche vers le BAS ∇ !");
-                        }
-                    );
+                    ], () => {
+                        get().speakAndThen("Maintenant essaie le bouton ROUGE avec la flèche vers le BAS ∇ !");
+                    });
                 });
             }
         }
     },
 
     handleIntroDigitsSubmit: () => {
-        const { userInput, introDigitsAttempt, sequenceFeedback } = get();
+        const { userInput, introDigitsAttempt, setFeedbackSequence } = get();
         const answer = parseInt(userInput.trim());
         const newAttempt = introDigitsAttempt + 1;
 
@@ -1677,13 +1690,6 @@ export const useStore = create<MachineState>((set, get) => ({
             
             textToSpeechService.speak(currentMessage);
         }
-    },
-
-    // Helper wrapper to maintain compatibility with old sequenceFeedback interface
-    // This will be removed after all calls are updated
-    sequenceFeedback: (first: string, second?: string, onComplete?: () => void) => {
-        const messages = second ? [first, second] : [first];
-        get().setFeedbackSequence(messages, onComplete);
     },
 
     // Helper function to speak a message and execute callback when done
