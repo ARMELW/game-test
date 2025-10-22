@@ -140,7 +140,7 @@ function sendRemainingTargetsToUnity(phase: string, currentIndex: number) {
 export const useStore = create<MachineState>((set, get) => ({
 
     columns: initialColumns,
-    phase: 'intro-welcome-personalized',
+    phase: 'loading',
     addClicks: 0,
     feedback: "",
     instruction: "",
@@ -233,6 +233,38 @@ export const useStore = create<MachineState>((set, get) => ({
         // Send challenge list to Unity when entering a challenge phase
         if (phase.startsWith('challenge-')) {
             sendChallengeToUnity(phase);
+        }
+
+        // Handle loading phase - wait for TTS to be ready
+        if (phase === 'loading') {
+            set({ feedback: "", instruction: "" });
+            console.log('[setPhase] loading: checking TTS readiness');
+            
+            // Function to check if voices are loaded
+            const checkVoicesLoaded = () => {
+                const voices = textToSpeechService.getVoices();
+                console.log('[setPhase] Voices loaded:', voices.length);
+                
+                if (voices.length > 0) {
+                    // Voices are ready, transition to intro
+                    console.log('[setPhase] TTS ready, transitioning to intro-welcome-personalized');
+                    setTimeout(() => {
+                        set({ phase: 'intro-welcome-personalized', timer: null });
+                        get().updateButtonVisibility();
+                        get().updateInstruction();
+                    }, 500); // Small delay to ensure everything is ready
+                } else {
+                    // Voices not ready yet, check again
+                    console.log('[setPhase] Voices not ready, checking again in 200ms');
+                    const newTimer = setTimeout(checkVoicesLoaded, 200);
+                    set({ timer: newTimer as unknown as number });
+                }
+            };
+            
+            // Start checking after a small delay
+            const newTimer = setTimeout(checkVoicesLoaded, 100);
+            set({ timer: newTimer as unknown as number });
+            return;
         }
 
         // Handle auto-transitions for intro phases
@@ -3615,6 +3647,9 @@ export const useStore = create<MachineState>((set, get) => ({
 
         switch (phase) {
             // ... (cases from your existing updateInstruction)
+            case 'loading':
+                newInstruction = PHASE_INSTRUCTIONS['loading'];
+                break;
             case 'intro-welcome-personalized':
                 newInstruction = PHASE_INSTRUCTIONS['intro-welcome-personalized'];
                 break;

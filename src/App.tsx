@@ -1,9 +1,8 @@
 
-import { useStore } from "./store";
 import MachineANombres from "./MachineANombres";
-const store = useStore.getState();
-console.log('[App] Initialisation, déclenchement de setPhase intro-welcome');
-store.setPhase('intro-welcome');
+
+// The initial phase is set in the store
+// No need to set it here, the store will handle the loading phase
 
 function App() {
 
