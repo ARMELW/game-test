@@ -70,6 +70,73 @@ export type Phase =
     | 'done'
     | 'learn-units';
 
+// Ordered array of all phases in the application flow
+export const ALL_PHASES: readonly Phase[] = [
+  'loading',
+  'intro-welcome',
+  'intro-welcome-personalized',
+  'intro-discover',
+  'intro-discover-machine',
+  'intro-first-interaction',
+  'intro-count-digits',
+  'intro-second-column',
+  'intro-discover-carry',
+  'intro-max-value-question',
+  'intro-question-digits',
+  'intro-add-roll',
+  'intro-question-max',
+  'tutorial',
+  'tutorial-challenge',
+  'explore-units',
+  'click-add',
+  'click-remove',
+  'learn-units',
+  'challenge-unit-1',
+  'challenge-unit-2',
+  'challenge-unit-3',
+  'learn-carry',
+  'practice-ten',
+  'learn-ten-to-twenty',
+  'challenge-ten-to-twenty',
+  'learn-twenty-to-thirty',
+  'learn-tens',
+  'learn-tens-combination',
+  'challenge-tens-1',
+  'challenge-tens-2',
+  'challenge-tens-3',
+  'practice-hundred',
+  'learn-hundred-to-hundred-ten',
+  'learn-hundred-ten-to-two-hundred',
+  'challenge-hundred-to-two-hundred',
+  'learn-two-hundred-to-three-hundred',
+  'challenge-two-hundred-to-three-hundred',
+  'learn-hundreds',
+  'learn-hundreds-simple-combination',
+  'learn-hundreds-combination',
+  'challenge-hundreds-1',
+  'challenge-hundreds-2',
+  'challenge-hundreds-3',
+  'celebration-before-thousands',
+  'practice-thousand',
+  'learn-thousand-to-thousand-ten',
+  'learn-thousand-to-thousand-hundred',
+  'learn-thousand-hundred-to-two-thousand',
+  'challenge-thousand-to-two-thousand',
+  'learn-two-thousand-to-three-thousand',
+  'challenge-two-thousand-to-three-thousand',
+  'learn-thousands',
+  'learn-thousands-very-simple-combination',
+  'challenge-thousands-simple-combination',
+  'learn-thousands-full-combination',
+  'learn-thousands-combination',
+  'challenge-thousands-1',
+  'challenge-thousands-2',
+  'challenge-thousands-3',
+  'celebration-thousands-complete',
+  'normal',
+  'done',
+] as const;
+
 export type Challenge = {
     phase: Phase;
     targets: number[];
@@ -322,4 +389,9 @@ export interface MachineState {
     startLearningPhase: () => void;
     unlockNextColumn: () => void;
     init: () => void;
+    
+    // Phase navigation functions
+    goToNextPhase: () => void;
+    goToPreviousPhase: () => void;
+    getCurrentPhaseIndex: () => number;
 }
