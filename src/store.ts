@@ -717,7 +717,7 @@ export const useStore = create<MachineState>((set, get) => ({
                             get().speakAndThen(
                                 "Donc en tout, nous avons bien 10 chiffres différents !",
                                 () => {
-                                    set({ showInputField: false, introDigitsAttempt: 0 });
+                                    set({ showInputField: false, introDigitsAttempt: 0, phase: 'intro-challenge-introduction' });
                                     get().updateInstruction();
                                 }
                             );
@@ -831,7 +831,7 @@ export const useStore = create<MachineState>((set, get) => ({
                 get().speakAndThen("Et voilà ! Compte tes doigts : 10 doigts = 10 chiffres ! Tu as compris maintenant ? 😊", () => {
                     get().speakAndThen("Donc en tout, nous avons bien 10 chiffres différents ! 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 !", () => {
                         get().speakAndThen("Le ZÉRO est un peu particulier... on l'oublie parfois, mais il est AUSSI important que les autres !", () => {
-                            set({ phase: 'intro-second-column', introDigitsAttempt: 0 });
+                            set({ phase: 'intro-challenge-introduction', introDigitsAttempt: 0 });
                             get().updateInstruction();
                         });
                     });
@@ -3736,6 +3736,9 @@ export const useStore = create<MachineState>((set, get) => ({
             case 'intro-count-digits':
                 newInstruction = PHASE_INSTRUCTIONS['intro-count-digits'];
                 break;
+            case 'intro-challenge-introduction':
+                newInstruction = PHASE_INSTRUCTIONS['intro-challenge-introduction'];
+                break;
             case 'intro-second-column':
                 newInstruction = PHASE_INSTRUCTIONS['intro-second-column'];
                 break;
@@ -3956,30 +3959,16 @@ export const useStore = create<MachineState>((set, get) => ({
 
         // Speak the instruction, but handle automatic transitions in phase-specific logic
         // Only phases with automatic transitions after speaking should be handled here
-        /**if (phase === 'intro-welcome') {
+        if (phase === 'intro-challenge-introduction') {
             get().speakAndThen(newInstruction, () => {
-                // Transition to intro-discover after welcome message
-                console.log('[updateInstruction] intro-welcome complete, transitioning to intro-discover');
-                get().setPhase('intro-discover');
-            });
-        } else if (phase === 'intro-discover') {
-            get().speakAndThen(newInstruction, () => {
-                // Transition to tutorial after discover message
-                console.log('[updateInstruction] intro-discover complete, transitioning to tutorial');
-                get().setPhase('tutorial');
-            });
-        } else if (phase === 'learn-units') {
-            // For learn-units, start auto-counting after speaking
-            get().setIsCountingAutomatically(true);
-            get().speakAndThen(newInstruction, () => {
-                console.log('[updateInstruction] learn-units instruction spoken, starting auto-count');
-                get().runAutoCount();
+                // Transition to challenge-unit-1 after introduction message
+                console.log('[updateInstruction] intro-challenge-introduction complete, transitioning to challenge-unit-1');
+                get().setPhase('challenge-unit-1');
             });
         } else {
             // For all other phases, just speak without automatic transition
             get().speakAndThen(newInstruction);
-        }**/
-        get().speakAndThen(newInstruction);
+        }
 
     },
 

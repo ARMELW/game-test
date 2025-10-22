@@ -13,6 +13,7 @@ export type Phase =
     | 'intro-discover-machine'
     | 'intro-first-interaction'
     | 'intro-count-digits'
+    | 'intro-challenge-introduction'
     | 'intro-second-column'
     | 'intro-discover-carry'
     | 'intro-max-value-question'
@@ -91,6 +92,7 @@ export const ALL_PHASES: readonly Phase[] = [
   'intro-discover-machine',
   'intro-first-interaction',
   'intro-count-digits',
+  'intro-challenge-introduction',
   'challenge-unit-1',
   'challenge-unit-2',
   'challenge-unit-3',
