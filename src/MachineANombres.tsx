@@ -64,6 +64,10 @@ function MachineANombres() {
     handleIntroMachineResponse,
     handleIntroSecondColumnChoice,
     introMaxAttempt,
+    // Phase navigation functions
+    goToNextPhase,
+    goToPreviousPhase,
+    getCurrentPhaseIndex,
   } = useStore();
 
   // Unity integration
@@ -507,6 +511,99 @@ function MachineANombres() {
           }}
         >
           <UnityGame />
+        </div>
+
+        {/* Phase Navigation Buttons */}
+        <div style={{ 
+          marginTop: 16, 
+          marginBottom: 16, 
+          display: "flex", 
+          justifyContent: "space-between", 
+          alignItems: "center",
+          gap: 8,
+          padding: "12px",
+          background: "#f8fafc",
+          borderRadius: 8,
+          border: "1px solid #e2e8f0",
+        }}>
+          <button
+            onClick={goToPreviousPhase}
+            disabled={getCurrentPhaseIndex() <= 0}
+            style={{
+              fontSize: 14,
+              padding: "8px 16px",
+              background: getCurrentPhaseIndex() <= 0 
+                ? "#e2e8f0" 
+                : "linear-gradient(135deg, #64748b 0%, #475569 100%)",
+              color: getCurrentPhaseIndex() <= 0 ? "#94a3b8" : "#fff",
+              border: "none",
+              borderRadius: 6,
+              cursor: getCurrentPhaseIndex() <= 0 ? "not-allowed" : "pointer",
+              fontWeight: "bold",
+              boxShadow: getCurrentPhaseIndex() <= 0 
+                ? "none" 
+                : "0 2px 4px rgba(100, 116, 139, 0.3)",
+              transition: "all 0.2s ease",
+            }}
+            onMouseEnter={(e) => {
+              if (getCurrentPhaseIndex() > 0) {
+                e.currentTarget.style.transform = "translateY(-2px)";
+                e.currentTarget.style.boxShadow = "0 4px 8px rgba(100, 116, 139, 0.4)";
+              }
+            }}
+            onMouseLeave={(e) => {
+              if (getCurrentPhaseIndex() > 0) {
+                e.currentTarget.style.transform = "translateY(0)";
+                e.currentTarget.style.boxShadow = "0 2px 4px rgba(100, 116, 139, 0.3)";
+              }
+            }}
+          >
+            ⬅️ Phase précédente
+          </button>
+          
+          <div style={{ 
+            fontSize: 12, 
+            color: "#64748b", 
+            fontWeight: "600",
+            textAlign: "center",
+          }}>
+            Phase {getCurrentPhaseIndex() + 1} / 63
+          </div>
+          
+          <button
+            onClick={goToNextPhase}
+            disabled={getCurrentPhaseIndex() >= 62}
+            style={{
+              fontSize: 14,
+              padding: "8px 16px",
+              background: getCurrentPhaseIndex() >= 62 
+                ? "#e2e8f0" 
+                : "linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%)",
+              color: getCurrentPhaseIndex() >= 62 ? "#94a3b8" : "#fff",
+              border: "none",
+              borderRadius: 6,
+              cursor: getCurrentPhaseIndex() >= 62 ? "not-allowed" : "pointer",
+              fontWeight: "bold",
+              boxShadow: getCurrentPhaseIndex() >= 62 
+                ? "none" 
+                : "0 2px 4px rgba(14, 165, 233, 0.3)",
+              transition: "all 0.2s ease",
+            }}
+            onMouseEnter={(e) => {
+              if (getCurrentPhaseIndex() < 62) {
+                e.currentTarget.style.transform = "translateY(-2px)";
+                e.currentTarget.style.boxShadow = "0 4px 8px rgba(14, 165, 233, 0.4)";
+              }
+            }}
+            onMouseLeave={(e) => {
+              if (getCurrentPhaseIndex() < 62) {
+                e.currentTarget.style.transform = "translateY(0)";
+                e.currentTarget.style.boxShadow = "0 2px 4px rgba(14, 165, 233, 0.3)";
+              }
+            }}
+          >
+            Phase suivante ➡️
+          </button>
         </div>
 
         {/* Boutons de phase (Débloquer / Commencer) */}

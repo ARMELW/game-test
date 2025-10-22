@@ -15,7 +15,8 @@ import {
     THOUSAND_TO_TWO_THOUSAND_CHALLENGES,
     TWO_THOUSAND_TO_THREE_THOUSAND_CHALLENGES,
     THOUSANDS_SIMPLE_COMBINATION_CHALLENGES,
-    THOUSANDS_CHALLENGES
+    THOUSANDS_CHALLENGES,
+    ALL_PHASES
 } from './types.ts';
 import {
     generateFeedback,
@@ -4175,6 +4176,110 @@ Tu veux :
         } else {
             get().updateInstruction();
         }
+    },
+
+    // Phase navigation functions
+    getCurrentPhaseIndex: () => {
+        const { phase } = get();
+        return ALL_PHASES.indexOf(phase);
+    },
+
+    goToNextPhase: () => {
+        const currentIndex = get().getCurrentPhaseIndex();
+        if (currentIndex === -1) {
+            console.warn('[goToNextPhase] Current phase not found in ALL_PHASES');
+            return;
+        }
+        
+        if (currentIndex >= ALL_PHASES.length - 1) {
+            console.log('[goToNextPhase] Already at the last phase');
+            set({ feedback: "Vous êtes déjà à la dernière phase !" });
+            return;
+        }
+
+        const nextPhase = ALL_PHASES[currentIndex + 1];
+        console.log(`[goToNextPhase] Moving from "${get().phase}" to "${nextPhase}"`);
+        
+        // Reset relevant state when moving to next phase
+        const newCols = initialColumns.map(col => ({ ...col }));
+        
+        // Determine which columns should be unlocked based on the next phase
+        if (nextPhase.includes('unit') || nextPhase.includes('tutorial') || nextPhase.includes('explore')) {
+            newCols[0].unlocked = true;
+        } else if (nextPhase.includes('ten') || nextPhase.includes('carry')) {
+            newCols[0].unlocked = true;
+            newCols[1].unlocked = true;
+        } else if (nextPhase.includes('hundred')) {
+            newCols[0].unlocked = true;
+            newCols[1].unlocked = true;
+            newCols[2].unlocked = true;
+        } else if (nextPhase.includes('thousand')) {
+            newCols[0].unlocked = true;
+            newCols[1].unlocked = true;
+            newCols[2].unlocked = true;
+            newCols[3].unlocked = true;
+        }
+
+        set({ 
+            columns: newCols,
+            feedback: `Passage à la phase suivante : ${nextPhase}`,
+            attemptCount: 0,
+            consecutiveFailures: 0,
+            showHelpOptions: false,
+            guidedMode: false,
+            showSolutionAnimation: false,
+        });
+        
+        get().setPhase(nextPhase);
+    },
+
+    goToPreviousPhase: () => {
+        const currentIndex = get().getCurrentPhaseIndex();
+        if (currentIndex === -1) {
+            console.warn('[goToPreviousPhase] Current phase not found in ALL_PHASES');
+            return;
+        }
+        
+        if (currentIndex <= 0) {
+            console.log('[goToPreviousPhase] Already at the first phase');
+            set({ feedback: "Vous êtes déjà à la première phase !" });
+            return;
+        }
+
+        const previousPhase = ALL_PHASES[currentIndex - 1];
+        console.log(`[goToPreviousPhase] Moving from "${get().phase}" to "${previousPhase}"`);
+        
+        // Reset relevant state when moving to previous phase
+        const newCols = initialColumns.map(col => ({ ...col }));
+        
+        // Determine which columns should be unlocked based on the previous phase
+        if (previousPhase.includes('unit') || previousPhase.includes('tutorial') || previousPhase.includes('explore')) {
+            newCols[0].unlocked = true;
+        } else if (previousPhase.includes('ten') || previousPhase.includes('carry')) {
+            newCols[0].unlocked = true;
+            newCols[1].unlocked = true;
+        } else if (previousPhase.includes('hundred')) {
+            newCols[0].unlocked = true;
+            newCols[1].unlocked = true;
+            newCols[2].unlocked = true;
+        } else if (previousPhase.includes('thousand')) {
+            newCols[0].unlocked = true;
+            newCols[1].unlocked = true;
+            newCols[2].unlocked = true;
+            newCols[3].unlocked = true;
+        }
+
+        set({ 
+            columns: newCols,
+            feedback: `Retour à la phase précédente : ${previousPhase}`,
+            attemptCount: 0,
+            consecutiveFailures: 0,
+            showHelpOptions: false,
+            guidedMode: false,
+            showSolutionAnimation: false,
+        });
+        
+        get().setPhase(previousPhase);
     },
 }));
 
