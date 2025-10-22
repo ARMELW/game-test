@@ -1630,21 +1630,13 @@ export const useStore = create<MachineState>((set, get) => ({
 
     // Helper function to speak a message and execute callback when done
     speakAndThen: (message: string, onComplete?: () => void) => {
-        console.log('[Store] speakAndThen appelé avec :', message, 'callback?', !!onComplete);
         get().setFeedback(message);
-        
-        // Test direct de l'API synthèse vocale
-        console.log('[Store] Test direct de synthèse vocale');
-        textToSpeechService.testSpeak();
-        
-        // Fallback temporaire : exécuter le callback après un court délai
-        if (onComplete) {
-            console.log('[Store] Fallback callback dans 3 secondes');
-            setTimeout(() => {
-                console.log('[Store] Exécution du fallback callback');
-                onComplete();
-            }, 3000);
-        }
+        textToSpeechService.setCallbacks({
+            onEnd: () => {
+                onComplete?.();
+            }
+        });
+        textToSpeechService.speak(message);
     },
 
     handleAdd: (idx: number) => {
