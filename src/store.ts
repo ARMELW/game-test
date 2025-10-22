@@ -1060,7 +1060,7 @@ export const useStore = create<MachineState>((set, get) => ({
 
     runAutoCount: () => {
         const { phase, isCountingAutomatically, columns, nextPhaseAfterAuto, timer } = get();
-
+        
         if (timer) {
             clearTimeout(timer);
             set({ timer: null });
@@ -1084,22 +1084,22 @@ export const useStore = create<MachineState>((set, get) => ({
                 const nextValue = unitsValue + 1;
                 setValue(nextValue);
                 let infoMessage = "";
-                if (nextValue === 1) infoMessage = "**1** : une bille. UN doigt ✌️";
-                else if (nextValue === 2) infoMessage = "**2** : deux billes. DEUX doigts ! ✌️";
-                else if (nextValue === 3) infoMessage = "**3** : trois billes. TROIS doigts ! 🎈";
-                else if (nextValue === 4) infoMessage = "**4** : quatre billes. QUATRE doigts !";
-                else if (nextValue === 5) infoMessage = "**5** : cinq billes. CINQ ! Tous les doigts d'une main ! ✋";
-                else if (nextValue === 6) infoMessage = "**6** : six billes. SIX doigts !";
-                else if (nextValue === 7) infoMessage = "**7** : sept billes. SEPT doigts !";
-                else if (nextValue === 8) infoMessage = "**8** : huit billes. HUIT doigts !";
-                else if (nextValue === 9) infoMessage = "**9** : neuf billes. 🎯 La colonne est presque pleine ! Plus qu'un espace libre !";
+                if (nextValue === 1) infoMessage = "UN doigt";
+                else if (nextValue === 2) infoMessage = "DEUX doigts";
+                else if (nextValue === 3) infoMessage = "TROIS doigts !";
+                else if (nextValue === 4) infoMessage = "QUATRE doigts !";
+                else if (nextValue === 5) infoMessage = "CINQ ! Tous les doigts d'une main !";
+                else if (nextValue === 6) infoMessage = "SIX doigts !";
+                else if (nextValue === 7) infoMessage = "SEPT doigts !";
+                else if (nextValue === 8) infoMessage = "HUIT doigts !";
+                else if (nextValue === 9) infoMessage = "NEUF doigts !";
                 get().setFeedback(infoMessage);
                 get().speakAndThen(infoMessage, () => {
                     get().runAutoCount(); // Continue counting
                 });
             } else { // unitsValue is 9
-                get().speakAndThen("STOP ! 🛑 Le compteur est à 9. La colonne est PLEINE ! Attends, la machine va te montrer la suite !", () => {
-                    const targetPhase = nextPhaseAfterAuto ?? 'challenge-unit-1';
+                get().speakAndThen("STOP ! Le compteur est à 9.Retour à zéro ! Maintenant, c'est à toi de jouer !", () => {
+                 
                     // Reset columns and keep units unlocked
                     const newCols = initialColumns.map(col => ({ ...col }));
                     newCols[0].unlocked = true;
@@ -1107,9 +1107,7 @@ export const useStore = create<MachineState>((set, get) => ({
                     get().setIsCountingAutomatically(false);
                     get().setNextPhaseAfterAuto(null);
                     get().resetUnitChallenge();
-                    get().speakAndThen("Retour à zéro ! 🔄 Maintenant, c'est à toi de jouer !", () => {
-                        get().setPhase(targetPhase);
-                    });
+                    get().setPhase('explore-units');
                 });
             }
         }
@@ -1630,8 +1628,9 @@ export const useStore = create<MachineState>((set, get) => ({
 
     setFeedbackSequence: (sequence: string[], callback?: () => void) => {
         // Start a new feedback sequence
-        set({ 
-            feedbackSequence: sequence, 
+        console.log('[DEBUG] setFeedbackSequence appelée', sequence, callback);
+        set({
+            feedbackSequence: sequence,
             feedbackSequenceStep: 0,
             feedbackSequenceCallback: callback || null
         });
@@ -1641,34 +1640,33 @@ export const useStore = create<MachineState>((set, get) => ({
 
     advanceFeedbackSequence: () => {
         const { feedbackSequence, feedbackSequenceStep, feedbackSequenceCallback } = get();
-        
+
         if (feedbackSequenceStep < feedbackSequence.length) {
             const currentMessage = feedbackSequence[feedbackSequenceStep];
             get().setFeedback(currentMessage);
-            
+            console.log('[DEBUG] advanceFeedbackSequence: message', currentMessage, 'step', feedbackSequenceStep, '/', feedbackSequence.length);
             textToSpeechService.setCallbacks({
                 onEnd: () => {
                     const newStep = feedbackSequenceStep + 1;
                     set({ feedbackSequenceStep: newStep });
-                    
                     if (newStep < feedbackSequence.length) {
                         // More messages to speak
                         get().advanceFeedbackSequence();
                     } else {
                         // Sequence complete, execute callback
                         if (feedbackSequenceCallback) {
-                            feedbackSequenceCallback();
+                            console.log('[DEBUG] [advanceFeedbackSequence] Appel de la callback finale de feedbackSequence');
                         }
+                        feedbackSequenceCallback?.();
                         // Clear the sequence
-                        set({ 
-                            feedbackSequence: [], 
+                        set({
+                            feedbackSequence: [],
                             feedbackSequenceStep: 0,
                             feedbackSequenceCallback: null
                         });
                     }
                 }
             });
-            
             textToSpeechService.speak(currentMessage);
         }
     },
@@ -1682,8 +1680,7 @@ export const useStore = create<MachineState>((set, get) => ({
 
     // Helper function to speak a message and execute callback when done
     speakAndThen: (message: string, onComplete?: () => void) => {
-        console.log('ca parle mec')
-        //  get().setFeedback(message);
+        get().setFeedback(message);
         textToSpeechService.setCallbacks({
             onEnd: () => {
                 onComplete?.();
@@ -2685,23 +2682,25 @@ export const useStore = create<MachineState>((set, get) => ({
             const unitsValue = newCols[0].value;
             if (unitsValue === 2) sequenceFeedback("Génial ! 🎈 Le bouton ROUGE enlève une bille ! Il en reste deux !", "VERT ajoute, ROUGE enlève. Facile ! Clique encore sur ∇ !");
             else if (unitsValue === 1) sequenceFeedback("Bravo ! Clique encore sur ROUGE pour tout enlever !", "Plus qu'une bille ! Un dernier clic !");
-            else if (unitsValue === 0 && tempTotalBefore === 1) {
-                sequenceFeedback("Extraordinaire ! 🎉 Tu maîtrises les deux boutons ! Je vais t'apprendre les **NOMBRES** !", "Prépare-toi pour une grande aventure !", () => {
-                    // Transition to tutorial-challenge to teach challenge mechanics
+            else {
+                console.log('[DEBUG] (TUTORIAL) unitsValue:', unitsValue, 'tempTotalBefore:', tempTotalBefore, 'phase:', phase);
+                if (unitsValue === 0 && tempTotalBefore === 1) {
                     const newCols = initialColumns.map(col => ({ ...col }));
-                    newCols[0].unlocked = true;
-                    set({
-                        columns: newCols,
-                        phase: 'tutorial-challenge',
-                        tutorialChallengeTargetIndex: 0,
-                        tutorialChallengeSuccessCount: 0
-                    });
-                    get().updateButtonVisibility();
-                    get().resetTutorialChallenge();
-                    sequenceFeedback("Maintenant, un petit défi pour apprendre comment ça marche ! 🎯", "Tu vas voir ce qui se passe quand tu gagnes et quand tu perds !");
-                });
-            } else if (unitsValue > 0) {
-                sequenceFeedback(`Bien joué ! Continue à cliquer sur ROUGE !`, "Le bouton ROUGE retire une bille à chaque fois !");
+                        newCols[0].unlocked = true;
+
+                        get().setPhase('tutorial-challenge');
+                        set({
+                            columns: newCols,
+                            tutorialChallengeTargetIndex: 0,
+                            tutorialChallengeSuccessCount: 0
+                        });
+                        get().resetTutorialChallenge();
+                        get().updateInstruction();
+                        //sequenceFeedback("Maintenant, un petit défi pour apprendre comment ça marche ! 🎯", "Tu vas voir ce qui se passe quand tu gagnes et quand tu perds !");
+
+                } else if (unitsValue > 0) {
+                    sequenceFeedback(`Bien joué ! Continue à cliquer sur ROUGE !`, "Le bouton ROUGE retire une bille à chaque fois !");
+                }
             }
         } else if (phase === 'explore-units' && newCols[0].value < columns[0].value) {
             get().setFeedback("On n'enlève pas encore ! Clique sur △ pour ajouter !");
@@ -2743,8 +2742,9 @@ export const useStore = create<MachineState>((set, get) => ({
     },
 
     handleValidateTutorialChallenge: () => {
+        console.log('[DEBUG] handleValidateTutorialChallenge appelée');
         const { phase, columns, tutorialChallengeTargetIndex, sequenceFeedback, speakAndThen, resetAttempts, setCurrentTarget } = get();
-        
+
         if (phase !== 'tutorial-challenge') return;
 
         const totalNumber = columns.reduce((acc: number, col: Column, idx: number) => {
@@ -2759,18 +2759,18 @@ export const useStore = create<MachineState>((set, get) => ({
         if (totalNumber === targetNumber) {
             // SUCCESS! Show what happens when you win
             sendCorrectValue();
-            
+
             speakAndThen("🎉 BRAVO ! TU AS RÉUSSI ! 🎉", () => {
                 speakAndThen("Quand tu GAGNES, tu vois des félicitations ! 🌟", () => {
                     speakAndThen("C'est comme ça que ça marche dans les défis ! Tu affiches le bon nombre, tu cliques sur VALIDER, et si c'est correct, tu passes au suivant ! 🎯", () => {
                         resetAttempts();
-                        
+
                         // Transition to learn-units
                         const newCols = initialColumns.map((col, i) => ({ ...col, unlocked: i === 0 || i === 1 }));
                         set({
                             columns: newCols,
-                            nextPhaseAfterAuto: 'challenge-unit-1',
-                            phase: 'learn-units',
+                            nextPhaseAfterAuto: 'click-add',
+                            phase: 'explore-units',
                             pendingAutoCount: true,
                             isCountingAutomatically: false
                         });
@@ -2782,7 +2782,7 @@ export const useStore = create<MachineState>((set, get) => ({
         } else {
             // FAILURE - Show what happens when you lose (but be encouraging)
             sendWrongValue();
-            
+
             speakAndThen("Ce n'est pas le bon nombre ! 😊", () => {
                 speakAndThen(`Quand tu te TROMPES, on te dit que ce n'est pas correct. 💭 Le nombre demandé était ${targetNumber}, mais tu as affiché ${totalNumber}.`, () => {
                     speakAndThen("Mais pas de panique ! Tu peux RÉESSAYER autant de fois que tu veux ! 🔄", () => {
@@ -3718,8 +3718,7 @@ export const useStore = create<MachineState>((set, get) => ({
 
     updateInstruction: () => {
         const { phase, unitTargetIndex, unitSuccessCount, tensTargetIndex, tensSuccessCount, hundredsTargetIndex, hundredsSuccessCount, thousandsTargetIndex, thousandsSuccessCount } = get();
-        console.log(' gedo phase', phase);
-
+     
         let newInstruction = "";
 
         switch (phase) {
@@ -3970,7 +3969,15 @@ export const useStore = create<MachineState>((set, get) => ({
             get().speakAndThen(newInstruction, () => {
                 get().setPhase('tutorial');
             })
-        } else {
+        } else if(phase == 'learn-units'){
+            get().setIsCountingAutomatically(true);
+            get().speakAndThen(newInstruction,
+                () => {
+                    get().runAutoCount(); 
+                }
+            );
+        }
+         else {
             get().speakAndThen(newInstruction)
         }
 
@@ -3985,10 +3992,10 @@ export const useStore = create<MachineState>((set, get) => ({
             const newCols = initialColumns.map((col, i) => ({ ...col, unlocked: i === 0 || i === 1 }));
             set({
                 columns: newCols,
-                nextPhaseAfterAuto: 'challenge-unit-1',
+                nextPhaseAfterAuto: 'explore-units',
                 phase: 'learn-units',
                 pendingAutoCount: true,
-                isCountingAutomatically: false
+                isCountingAutomatically: true
             });
             get().updateButtonVisibility();
             sequenceFeedback(SEQUENCE_FEEDBACK.learnUnits.part1, SEQUENCE_FEEDBACK.learnUnits.part2);
@@ -4211,37 +4218,3 @@ Tu veux :
     },
 }));
 
-// Subscriber for automatic phase transitions
-useStore.subscribe(
-    (state, previousState) => {
-        // Automatically trigger transitions and auto-counting when conditions are met
-
-        // NOTE: intro-welcome and intro-discover transitions are now handled by speakAndThen in setPhase
-        // Do NOT add setTimeout here as it conflicts with TTS-driven transitions
-
-        // Handle auto-counting trigger for learn phases
-        if (
-            state.phase.startsWith('learn-') &&
-            state.pendingAutoCount &&
-            !state.isCountingAutomatically &&
-            // Only trigger when pendingAutoCount changed to true or phase changed
-            (state.pendingAutoCount !== previousState.pendingAutoCount ||
-                state.phase !== previousState.phase)
-        ) {
-            // Use a small delay to ensure state updates are processed
-            setTimeout(() => {
-                const currentState = useStore.getState();
-                // Re-verify conditions before executing
-                if (
-                    currentState.phase.startsWith('learn-') &&
-                    currentState.pendingAutoCount &&
-                    !currentState.isCountingAutomatically
-                ) {
-                    currentState.setIsCountingAutomatically(true);
-                    currentState.setPendingAutoCount(false);
-                    currentState.runAutoCount();
-                }
-            }, 100);
-        }
-    }
-);
