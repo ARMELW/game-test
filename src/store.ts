@@ -4121,31 +4121,35 @@ useStore.subscribe(
     (state, previousState) => {
         // Automatically trigger transitions and auto-counting when conditions are met
 
-        // Get the appropriate index based on the current phase
-        let currentIndex = 0;
-        if (state.phase.startsWith('challenge-unit-')) {
-            currentIndex = state.unitTargetIndex;
-        } else if (state.phase === 'challenge-ten-to-twenty') {
-            currentIndex = state.tenToTwentyTargetIndex;
-        } else if (state.phase.startsWith('challenge-tens-')) {
-            currentIndex = state.tensTargetIndex;
-        } else if (state.phase === 'challenge-hundred-to-two-hundred') {
-            currentIndex = state.hundredToTwoHundredTargetIndex;
-        } else if (state.phase === 'challenge-two-hundred-to-three-hundred') {
-            currentIndex = state.twoHundredToThreeHundredTargetIndex;
-        } else if (state.phase.startsWith('challenge-hundreds-')) {
-            currentIndex = state.hundredsTargetIndex;
-        } else if (state.phase === 'challenge-thousand-to-two-thousand') {
-            currentIndex = state.thousandToTwoThousandTargetIndex;
-        } else if (state.phase === 'challenge-two-thousand-to-three-thousand') {
-            currentIndex = state.twoThousandToThreeThousandTargetIndex;
-        } else if (state.phase === 'challenge-thousands-simple-combination') {
-            currentIndex = state.thousandsSimpleCombinationTargetIndex;
-        } else if (state.phase.startsWith('challenge-thousands-')) {
-            currentIndex = state.thousandsTargetIndex;
+        // Only send remaining targets to Unity when phase changes, not on every state update
+        // This prevents race conditions where Unity receives conflicting goal updates
+        if (state.phase !== previousState.phase && state.phase.startsWith('challenge-')) {
+            // Get the appropriate index based on the current phase
+            let currentIndex = 0;
+            if (state.phase.startsWith('challenge-unit-')) {
+                currentIndex = state.unitTargetIndex;
+            } else if (state.phase === 'challenge-ten-to-twenty') {
+                currentIndex = state.tenToTwentyTargetIndex;
+            } else if (state.phase.startsWith('challenge-tens-')) {
+                currentIndex = state.tensTargetIndex;
+            } else if (state.phase === 'challenge-hundred-to-two-hundred') {
+                currentIndex = state.hundredToTwoHundredTargetIndex;
+            } else if (state.phase === 'challenge-two-hundred-to-three-hundred') {
+                currentIndex = state.twoHundredToThreeHundredTargetIndex;
+            } else if (state.phase.startsWith('challenge-hundreds-')) {
+                currentIndex = state.hundredsTargetIndex;
+            } else if (state.phase === 'challenge-thousand-to-two-thousand') {
+                currentIndex = state.thousandToTwoThousandTargetIndex;
+            } else if (state.phase === 'challenge-two-thousand-to-three-thousand') {
+                currentIndex = state.twoThousandToThreeThousandTargetIndex;
+            } else if (state.phase === 'challenge-thousands-simple-combination') {
+                currentIndex = state.thousandsSimpleCombinationTargetIndex;
+            } else if (state.phase.startsWith('challenge-thousands-')) {
+                currentIndex = state.thousandsTargetIndex;
+            }
+            
+            sendRemainingTargetsToUnity(state.phase, currentIndex);
         }
-        
-        sendRemainingTargetsToUnity(state.phase, currentIndex);
         // Handle intro-welcome phase transition
         if (state.phase === 'intro-welcome') {
             // Clear any existing timer first
