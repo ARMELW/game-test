@@ -15,6 +15,7 @@ export type Phase =
     | 'intro-count-digits'
     | 'intro-challenge-introduction'
     | 'intro-second-column'
+    | 'delock-dizaines'
     | 'intro-discover-carry'
     | 'intro-max-value-question'
     | 'intro-question-digits'
@@ -96,6 +97,7 @@ export const ALL_PHASES: readonly Phase[] = [
   'intro-count-digits',
   'intro-challenge-introduction',
   'intro-second-column',
+  'delock-dizaines',
   'intro-discover-carry',
   'intro-max-value-question',
   'intro-question-digits',
