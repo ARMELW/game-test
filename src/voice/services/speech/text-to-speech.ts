@@ -33,6 +33,31 @@ class TextToSpeechService {
 
   constructor() {
     this.synthesis = window.speechSynthesis;
+    
+    // Test simple pour voir si les voix se chargent
+    console.log('[TTS] Constructor - Voix disponibles immédiatement :', this.getVoices().length);
+    
+    // Attendre le chargement des voix
+    setTimeout(() => {
+      console.log('[TTS] Après 1s - Voix disponibles :', this.getVoices().length);
+    }, 1000);
+    
+    this.synthesis.onvoiceschanged = () => {
+      console.log('[TTS] onvoiceschanged - Voix disponibles :', this.getVoices().length);
+    };
+  }
+
+  /**
+   * Test simple de synthèse vocale
+   */
+  testSpeak(): void {
+    console.log('[TTS] testSpeak() appelé');
+    const utterance = new SpeechSynthesisUtterance('Bonjour test');
+    utterance.onstart = () => console.log('[TTS] Test onstart');
+    utterance.onend = () => console.log('[TTS] Test onend');
+    utterance.onerror = (e) => console.log('[TTS] Test onerror:', e);
+    this.synthesis.speak(utterance);
+    console.log('[TTS] synthesis.speak() appelé pour test');
   }
 
   private createUtterance(text: string): SpeechSynthesisUtterance {
@@ -111,10 +136,16 @@ class TextToSpeechService {
    */
   speak(text: string): void {
     if (!text.trim()) {
+      console.warn('[TTS] Texte vide, rien à lire.');
       this.callbacks.onError?.('Texte vide');
       return;
     }
-
+    if (!this.isSupported()) {
+      console.error('[TTS] Synthèse vocale non supportée.');
+      this.callbacks.onError?.('Synthèse non supportée');
+      return;
+    }
+    console.log('[TTS] speak() appelé avec :', text);
     // Arrêter la lecture en cours
     this.stop();
 

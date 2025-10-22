@@ -2,6 +2,7 @@
 import { useStore } from "./store";
 import MachineANombres from "./MachineANombres";
 const store = useStore.getState();
+console.log('[App] Initialisation, déclenchement de setPhase intro-welcome');
 store.setPhase('intro-welcome');
 
 function App() {

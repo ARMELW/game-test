@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test TTS Direct</title>
+</head>
+<body>
+    <h1>Test TTS Direct</h1>
+    <button onclick="testBasicTTS()">Test Basic TTS</button>
+    <button onclick="testWithDelay()">Test avec délai</button>
+    <button onclick="checkVoices()">Vérifier voix</button>
+    <div id="output"></div>
+
+    <script>
+        const output = document.getElementById('output');
+        
+        function log(message) {
+            console.log(message);
+            output.innerHTML += '<p>' + message + '</p>';
+        }
+        
+        function testBasicTTS() {
+            log('=== Test Basic TTS ===');
+            log('speechSynthesis supported: ' + ('speechSynthesis' in window));
+            
+            if ('speechSynthesis' in window) {
+                // Stop any existing speech
+                speechSynthesis.cancel();
+                
+                const utterance = new SpeechSynthesisUtterance('Bonjour, test de synthèse vocale');
+                
+                utterance.onstart = () => log('✅ TTS Started');
+                utterance.onend = () => log('✅ TTS Ended');
+                utterance.onerror = (e) => log('❌ TTS Error: ' + e.error);
+                
+                log('État avant speak():');
+                log('- speaking: ' + speechSynthesis.speaking);
+                log('- pending: ' + speechSynthesis.pending);
+                log('- paused: ' + speechSynthesis.paused);
+                
+                log('📢 Calling speechSynthesis.speak()...');
+                speechSynthesis.speak(utterance);
+                
+                setTimeout(() => {
+                    log('État après 100ms:');
+                    log('- speaking: ' + speechSynthesis.speaking);
+                    log('- pending: ' + speechSynthesis.pending);
+                    log('- paused: ' + speechSynthesis.paused);
+                }, 100);
+                
+                setTimeout(() => {
+                    log('État après 2s:');
+                    log('- speaking: ' + speechSynthesis.speaking);
+                    log('- pending: ' + speechSynthesis.pending);
+                    log('- paused: ' + speechSynthesis.paused);
+                }, 2000);
+            }
+        }
+        
+        function testWithDelay() {
+            log('=== Test avec délai ===');
+            setTimeout(() => {
+                speechSynthesis.cancel();
+                const utterance = new SpeechSynthesisUtterance('Test avec délai de 1 seconde');
+                utterance.onstart = () => log('✅ TTS Delayed Started');
+                utterance.onend = () => log('✅ TTS Delayed Ended');
+                utterance.onerror = (e) => log('❌ TTS Delayed Error: ' + e.error);
+                log('📢 Speaking avec délai...');
+                speechSynthesis.speak(utterance);
+            }, 1000);
+        }
+        
+        function checkVoices() {
+            log('=== Vérification des voix ===');
+            const voices = speechSynthesis.getVoices();
+            log('Nombre de voix: ' + voices.length);
+            
+            if (voices.length === 0) {
+                log('❌ Aucune voix trouvée, écoute onvoiceschanged...');
+                speechSynthesis.onvoiceschanged = () => {
+                    const newVoices = speechSynthesis.getVoices();
+                    log('✅ Voix après onvoiceschanged: ' + newVoices.length);
+                    newVoices.slice(0, 5).forEach((voice, i) => {
+                        log(`  Voix ${i}: ${voice.name} (${voice.lang}) ${voice.localService ? '[Local]' : '[Remote]'}`);
+                    });
+                };
+            } else {
+                log('✅ Voix trouvées:');
+                voices.slice(0, 5).forEach((voice, i) => {
+                    log(`  Voix ${i}: ${voice.name} (${voice.lang}) ${voice.localService ? '[Local]' : '[Remote]'}`);
+                });
+            }
+        }
+        
+        // Auto-check voices au chargement
+        window.onload = () => {
+            log('🚀 Page chargée, vérification automatique...');
+            checkVoices();
+            
+            // Test automatique après 2 secondes
+            setTimeout(() => {
+                log('🎯 Test automatique...');
+                testBasicTTS();
+            }, 2000);
+        };
+    </script>
+</body>
+</html>

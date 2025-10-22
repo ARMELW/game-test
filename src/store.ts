@@ -236,11 +236,12 @@ export const useStore = create<MachineState>((set, get) => ({
         }
 
         // Handle auto-transitions for intro phases
+
         if (phase === 'intro-welcome-personalized') {
             set({ showInputField: true, feedback: "", instruction: "" });
         } else if (phase === 'intro-discover-machine') {
             set({ showResponseButtons: true, selectedResponse: null });
-            // Auto-timeout after 10 seconds if no response
+            // Auto-timeout after 10 seconds si pas de réponse (à traiter plus tard)
             const newTimer = setTimeout(() => {
                 const currentState = get();
                 if (currentState.phase === 'intro-discover-machine' && !currentState.selectedResponse) {
@@ -250,12 +251,22 @@ export const useStore = create<MachineState>((set, get) => ({
             }, 10000);
             set({ timer: newTimer as unknown as number });
         } else if (phase === 'intro-welcome') {
-            const newTimer = setTimeout(() => {
-                set({ phase: 'intro-discover', timer: null });
-                get().updateButtonVisibility();
-                get().updateInstruction();
-            }, 3000); // ≈ 3 secondes
-            set({ timer: newTimer as unknown as number });
+            // Remplacer le setTimeout par une transition pilotée par la voix
+            console.log('[setPhase] intro-welcome: lancement de speakAndThen avec callback');
+            get().speakAndThen(
+                "Bienvenue dans la machine à compter ! Prends le temps de regarder l'écran...",
+                () => {
+                    console.log('[setPhase callback] Fin de la voix intro-welcome, transition vers intro-discover');
+                    // Petit délai pour s'assurer que la voix est bien terminée
+                    setTimeout(() => {
+                        set({ phase: 'intro-discover', timer: null });
+                        console.log('[setPhase callback] Phase changée en intro-discover');
+                        get().updateButtonVisibility();
+                        get().updateInstruction();
+                    }, 500);
+                }
+            );
+            return;
         }
 
         get().updateButtonVisibility();
@@ -572,7 +583,7 @@ export const useStore = create<MachineState>((set, get) => ({
     },
 
     handleIntroFirstClick: () => {
-        const { introClickCount, columns, sequenceFeedback, speakAndThen } = get();
+    const { introClickCount, columns, sequenceFeedback } = get();
         const newCols = [...columns];
 
         if (introClickCount === 0) {
@@ -600,17 +611,17 @@ export const useStore = create<MachineState>((set, get) => ({
             ];
 
             if (messages[introClickCount + 1]) {
-                speakAndThen(messages[introClickCount + 1]);
+                get().speakAndThen(messages[introClickCount + 1]);
             }
 
             if (introClickCount + 1 === 9) {
                 // Use voice callback instead of setTimeout
-                speakAndThen(messages[introClickCount + 1], () => {
+                get().speakAndThen(messages[introClickCount + 1], () => {
                     sequenceFeedback(
                         "Et voilà, on a REMPLI la machine ! 🎉",
                         "Tu as vu comme les lumières s'allument en même temps que les chiffres changent ?",
                         () => {
-                            speakAndThen("Maintenant essaie le bouton ROUGE avec la flèche vers le BAS ∇ !");
+                            get().speakAndThen("Maintenant essaie le bouton ROUGE avec la flèche vers le BAS ∇ !");
                         }
                     );
                 });
@@ -619,7 +630,7 @@ export const useStore = create<MachineState>((set, get) => ({
     },
 
     handleIntroDigitsSubmit: () => {
-        const { userInput, introDigitsAttempt, sequenceFeedback, speakAndThen } = get();
+    const { userInput, introDigitsAttempt, sequenceFeedback } = get();
         const answer = parseInt(userInput.trim());
         const newAttempt = introDigitsAttempt + 1;
 
@@ -631,10 +642,10 @@ export const useStore = create<MachineState>((set, get) => ({
                 "BRAVO ! 🎉🎉🎉 C'est EXACT ! Il y a 10 chiffres différents !",
                 "Tu n'as pas oublié le ZÉRO ! 👏",
                 () => {
-                    speakAndThen(
+                    get().speakAndThen(
                         "0, 1, 2, 3, 4, 5, 6, 7, 8, 9 = 10 chiffres ! Le zéro est un peu spécial, mais il est TRÈS important !",
                         () => {
-                            speakAndThen(
+                            get().speakAndThen(
                                 "Donc en tout, nous avons bien 10 chiffres différents !",
                                 () => {
                                     set({ showInputField: false, phase: 'intro-second-column', introDigitsAttempt: 0 });
@@ -651,7 +662,7 @@ export const useStore = create<MachineState>((set, get) => ({
                     "Hmm... pas tout à fait ! 🤔 Je comprends pourquoi tu penses ça !",
                     "Tu as compté : 1, 2, 3, 4, 5, 6, 7, 8, 9... ça fait 9 !",
                     () => {
-                        speakAndThen("Mais... tu n'oublies pas quelque chose ? 😉 Réfléchis bien et réessaie !");
+                        get().speakAndThen("Mais... tu n'oublies pas quelque chose ? 😉 Réfléchis bien et réessaie !");
                     }
                 );
             } else if (newAttempt === 2) {
@@ -722,7 +733,7 @@ export const useStore = create<MachineState>((set, get) => ({
     },
 
     runIntroDigitsGuided: () => {
-        const { setFeedback, columns } = get();
+    const { columns } = get();
         const steps = [
             { value: 0, text: "ZÉRO ! C'est le premier ! Lève 1 doigt ! ☝️" },
             { value: 1, text: "UN ! Maintenant 2 doigts ! ✌️" },
@@ -743,20 +754,19 @@ export const useStore = create<MachineState>((set, get) => ({
             if (index < steps.length) {
                 newCols[0].value = steps[index].value;
                 set({ columns: [...newCols] });
-                setFeedback(steps[index].text);
-                index++;
-                setTimeout(showNextStep, 2000);
+                get().speakAndThen(steps[index].text, () => {
+                    index++;
+                    showNextStep();
+                });
             } else {
-                setTimeout(() => {
-                    get().speakAndThen("Et voilà ! Compte tes doigts : 10 doigts = 10 chiffres ! Tu as compris maintenant ? 😊", () => {
-                        get().speakAndThen("Donc en tout, nous avons bien 10 chiffres différents ! 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 !", () => {
-                            get().speakAndThen("Le ZÉRO est un peu particulier... on l'oublie parfois, mais il est AUSSI important que les autres !", () => {
-                                set({ phase: 'intro-second-column', introDigitsAttempt: 0 });
-                                get().updateInstruction();
-                            });
+                get().speakAndThen("Et voilà ! Compte tes doigts : 10 doigts = 10 chiffres ! Tu as compris maintenant ? 😊", () => {
+                    get().speakAndThen("Donc en tout, nous avons bien 10 chiffres différents ! 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 !", () => {
+                        get().speakAndThen("Le ZÉRO est un peu particulier... on l'oublie parfois, mais il est AUSSI important que les autres !", () => {
+                            set({ phase: 'intro-second-column', introDigitsAttempt: 0 });
+                            get().updateInstruction();
                         });
                     });
-                }, 2000);
+                });
             }
         };
 
@@ -764,44 +774,42 @@ export const useStore = create<MachineState>((set, get) => ({
     },
 
     handleIntroSecondColumnChoice: (choice: string) => {
-        const { sequenceFeedback } = get();
-
-        if (choice === 'ajouter-rouleau' || choice === 'plus-grande') {
-            sequenceFeedback(
-                "EXACTEMENT ! Quelle bonne idée ! 💡",
-                "On va ajouter un DEUXIÈME ROULEAU ! Comme ça on aura plus de place pour compter !"
-            );
-        } else {
-            sequenceFeedback(
-                "Pas de souci ! Je vais te montrer MON idée ! 😊",
-                "On va ajouter un DEUXIÈME ROULEAU !"
-            );
-        }
-
-        setTimeout(() => {
-            set({ feedback: "Regarde bien, je vais modifier la machine !" });
-            setTimeout(() => {
+    const { sequenceFeedback } = get();
+        const afterFirstFeedback = () => {
+            get().speakAndThen("Regarde bien, je vais modifier la machine !", () => {
                 const newCols = [...initialColumns];
                 newCols[0].unlocked = true;
                 newCols[1].unlocked = true;
                 set({ columns: newCols });
                 sequenceFeedback(
                     "(Bruits : tic tic tic, bzzzz, clic !) Et voilààààà ! 🎉",
-                    "Maintenant il y a DEUX rouleaux ! Je vais l'allumer pour que tu la testes !"
+                    "Maintenant il y a DEUX rouleaux ! Je vais l'allumer pour que tu la testes !",
+                    () => {
+                        get().speakAndThen("(Bruit d'allumage : bzzzz, ding !)", () => {
+                            set({ phase: 'intro-discover-carry' });
+                            get().updateInstruction();
+                        });
+                    }
                 );
-                setTimeout(() => {
-                    set({ feedback: "(Bruit d'allumage : bzzzz, ding !)" });
-                    setTimeout(() => {
-                        set({ phase: 'intro-discover-carry' });
-                        get().updateInstruction();
-                    }, FEEDBACK_DELAY);
-                }, FEEDBACK_DELAY * 2);
-            }, FEEDBACK_DELAY);
-        }, FEEDBACK_DELAY * 2);
+            });
+        };
+        if (choice === 'ajouter-rouleau' || choice === 'plus-grande') {
+            sequenceFeedback(
+                "EXACTEMENT ! Quelle bonne idée ! 💡",
+                "On va ajouter un DEUXIÈME ROULEAU ! Comme ça on aura plus de place pour compter !",
+                afterFirstFeedback
+            );
+        } else {
+            sequenceFeedback(
+                "Pas de souci ! Je vais te montrer MON idée ! 😊",
+                "On va ajouter un DEUXIÈME ROULEAU !",
+                afterFirstFeedback
+            );
+        }
     },
 
     handleIntroMaxSubmit: () => {
-        const { userInput, introMaxAttempt, sequenceFeedback } = get();
+    const { userInput, introMaxAttempt, sequenceFeedback } = get();
         const answer = parseInt(userInput.trim());
         const newAttempt = introMaxAttempt + 1;
 
@@ -811,32 +819,32 @@ export const useStore = create<MachineState>((set, get) => ({
             // Correct answer!
             sequenceFeedback(
                 "BRAVO ! 🎉🎉🎉 C'est EXACT ! On peut compter jusqu'à 99 !",
-                "Tu as bien réfléchi ! Chaque rouleau peut afficher 9, donc : 9 et 9 = 99 !"
+                "Tu as bien réfléchi ! Chaque rouleau peut afficher 9, donc : 9 et 9 = 99 !",
+                () => {
+                    // Unlock units when entering tutorial
+                    const newCols = [...get().columns];
+                    newCols[0].unlocked = true;
+                    set({ columns: newCols, showInputField: false, phase: 'tutorial', introMaxAttempt: 0 });
+                    get().updateInstruction();
+                }
             );
-            setTimeout(() => {
-                // Unlock units when entering tutorial
-                const newCols = [...get().columns];
-                newCols[0].unlocked = true;
-                set({ columns: newCols, showInputField: false, phase: 'tutorial', introMaxAttempt: 0 });
-                get().updateInstruction();
-            }, FEEDBACK_DELAY * 2);
         } else if (answer === 100) {
             if (newAttempt === 1) {
                 sequenceFeedback(
                     "Hmm... pas tout à fait ! 🤔",
-                    "100 c'est un très bon nombre, mais... malheureusement la machine ne peut pas y arriver pour l'instant !"
+                    "100 c'est un très bon nombre, mais... malheureusement la machine ne peut pas y arriver pour l'instant !",
+                    () => {
+                        get().speakAndThen("Regarde bien les rouleaux... Quel est le PLUS GRAND chiffre sur chaque rouleau ? 🔍 Réessaie !");
+                    }
                 );
-                setTimeout(() => {
-                    set({ feedback: "Regarde bien les rouleaux... Quel est le PLUS GRAND chiffre sur chaque rouleau ? 🔍 Réessaie !" });
-                }, FEEDBACK_DELAY * 2);
             } else if (newAttempt === 2) {
                 sequenceFeedback(
                     "Tu veux que je t'aide à trouver ? 😊",
-                    "On va le découvrir ENSEMBLE ! 🤝"
+                    "On va le découvrir ENSEMBLE ! 🤝",
+                    () => {
+                        get().runIntroMaxGuided();
+                    }
                 );
-                setTimeout(() => {
-                    get().runIntroMaxGuided();
-                }, FEEDBACK_DELAY * 2);
             } else {
                 get().runIntroMaxGuided();
             }
@@ -849,21 +857,21 @@ export const useStore = create<MachineState>((set, get) => ({
             } else {
                 sequenceFeedback(
                     "Tu veux que je t'aide à trouver ? 😊",
-                    "On va le découvrir ENSEMBLE ! 🤝"
+                    "On va le découvrir ENSEMBLE ! 🤝",
+                    () => {
+                        get().runIntroMaxGuided();
+                    }
                 );
-                setTimeout(() => {
-                    get().runIntroMaxGuided();
-                }, FEEDBACK_DELAY * 2);
             }
         } else {
             if (newAttempt === 1) {
                 sequenceFeedback(
                     "Woaw, c'est beaucoup ! 😄",
-                    "Mais malheureusement la machine ne peut pas compter aussi haut !"
+                    "Mais malheureusement la machine ne peut pas compter aussi haut !",
+                    () => {
+                        get().speakAndThen("Regarde bien : combien de rouleaux il y a ? 👀 Seulement 2 ! Et chaque rouleau va jusqu'à 9 ! Réessaie !");
+                    }
                 );
-                setTimeout(() => {
-                    set({ feedback: "Regarde bien : combien de rouleaux il y a ? 👀 Seulement 2 ! Et chaque rouleau va jusqu'à 9 ! Réessaie !" });
-                }, FEEDBACK_DELAY * 2);
             } else {
                 get().runIntroMaxGuided();
             }
@@ -883,32 +891,28 @@ export const useStore = create<MachineState>((set, get) => ({
     },
 
     completeIntroMaxGuided: () => {
-        const { sequenceFeedback } = get();
-
+    const { sequenceFeedback } = get();
         sequenceFeedback(
             "STOP ! Regarde l'écran ! Quel nombre tu vois ? 👀",
-            "C'est 99 ! QUATRE-VINGT-DIX-NEUF ! C'est le MAXIMUM que peut afficher la machine !"
+            "C'est 99 ! QUATRE-VINGT-DIX-NEUF ! C'est le MAXIMUM que peut afficher la machine !",
+            () => {
+                get().speakAndThen("Maintenant tu sais la réponse ! 😊", () => {
+                    sequenceFeedback(
+                        "Donc, avec DEUX rouleaux, on peut compter jusqu'à 99 !",
+                        "C'est BEAUCOUP plus que 9 ! On est passé de 9... à 99 ! Ça fait 90 nombres de plus ! 🚀",
+                        () => {
+                            get().speakAndThen("Mais... si je veux compter jusqu'à 100 ou plus... il faudra encore modifier la machine ! 🔧 Tu es prêt(e) pour la suite de l'aventure ? 🎉", () => {
+                                // Unlock units when entering tutorial
+                                const newCols = [...get().columns];
+                                newCols[0].unlocked = true;
+                                set({ columns: newCols, phase: 'tutorial', introMaxAttempt: 0 });
+                                get().updateInstruction();
+                            });
+                        }
+                    );
+                });
+            }
         );
-
-        setTimeout(() => {
-            set({ feedback: "Maintenant tu sais la réponse ! 😊" });
-            setTimeout(() => {
-                sequenceFeedback(
-                    "Donc, avec DEUX rouleaux, on peut compter jusqu'à 99 !",
-                    "C'est BEAUCOUP plus que 9 ! On est passé de 9... à 99 ! Ça fait 90 nombres de plus ! 🚀"
-                );
-                setTimeout(() => {
-                    set({ feedback: "Mais... si je veux compter jusqu'à 100 ou plus... il faudra encore modifier la machine ! 🔧 Tu es prêt(e) pour la suite de l'aventure ? 🎉" });
-                    setTimeout(() => {
-                        // Unlock units when entering tutorial
-                        const newCols = [...get().columns];
-                        newCols[0].unlocked = true;
-                        set({ columns: newCols, phase: 'tutorial', introMaxAttempt: 0 });
-                        get().updateInstruction();
-                    }, FEEDBACK_DELAY);
-                }, FEEDBACK_DELAY * 2);
-            }, FEEDBACK_DELAY);
-        }, FEEDBACK_DELAY * 2);
     },
 
     handleUserInputSubmit: () => {
@@ -950,17 +954,17 @@ export const useStore = create<MachineState>((set, get) => ({
             if (answer === 100) {
                 sequenceFeedback(
                     "Malheureusement pas...",
-                    "J'ai bien l'impression qu'il va encore falloir modifier la machine si je veux y arriver !"
+                    "J'ai bien l'impression qu'il va encore falloir modifier la machine si je veux y arriver !",
+                    () => {
+                        get().speakAndThen("Regarde combien chaque rouleau peut afficher de points : 9 et 9, ce qui veut dire qu'on peut compter jusqu'à 99 !", () => {
+                            // Unlock units when entering tutorial
+                            const newCols = [...get().columns];
+                            newCols[0].unlocked = true;
+                            set({ columns: newCols, showInputField: false, userInput: "", phase: 'tutorial' });
+                            get().updateInstruction();
+                        });
+                    }
                 );
-                setTimeout(() => {
-                    get().speakAndThen("Regarde combien chaque rouleau peut afficher de points : 9 et 9, ce qui veut dire qu'on peut compter jusqu'à 99 !", () => {
-                        // Unlock units when entering tutorial
-                        const newCols = [...get().columns];
-                        newCols[0].unlocked = true;
-                        set({ columns: newCols, showInputField: false, userInput: "", phase: 'tutorial' });
-                        get().updateInstruction();
-                    });
-                }, FEEDBACK_DELAY * 2);
             } else if (answer === 99) {
                 sequenceFeedback(
                     "Exactement ! Trop facile comme question !",
@@ -1452,7 +1456,7 @@ export const useStore = create<MachineState>((set, get) => ({
                 ex.units === columns[0].value
             );
 
-            // If we're at [0, 0, 0, 0], set the first example
+            // Si on est à [0, 0, 0, 0], set le premier exemple
             if (currentExampleIndex === -1) {
                 const firstExample = examples[0];
                 get().setColumns(() => {
@@ -1465,39 +1469,32 @@ export const useStore = create<MachineState>((set, get) => ({
                     return newCols;
                 });
                 const total = firstExample.thousands * 1000 + firstExample.hundreds * 100 + firstExample.tens * 10 + firstExample.units;
-                get().setFeedback(`**${total}** (${firstExample.name}) ! C'est des nombres RONDS !`);
-                const newTimer = setTimeout(() => {
+                get().speakAndThen(`**${total}** (${firstExample.name}) ! C'est des nombres RONDS !`, () => {
                     get().runAutoCount();
-                }, COUNT_SPEED);
-                set({ timer: newTimer as unknown as number });
+                });
             } else if (currentExampleIndex < examples.length - 1) {
-                const newTimer = setTimeout(() => {
-                    const nextExample = examples[currentExampleIndex + 1];
-                    get().setColumns(() => {
-                        const newCols = [...initialColumns];
-                        newCols[3].value = nextExample.thousands;
-                        newCols[2].value = nextExample.hundreds;
-                        newCols[1].value = nextExample.tens;
-                        newCols[0].value = nextExample.units;
-                        newCols.forEach(c => c.unlocked = true);
-                        return newCols;
-                    });
-                    const total = nextExample.thousands * 1000 + nextExample.hundreds * 100 + nextExample.tens * 10 + nextExample.units;
-                    get().setFeedback(`**${total}** (${nextExample.name}) ! Facile avec des nombres RONDS !`);
+                const nextExample = examples[currentExampleIndex + 1];
+                get().setColumns(() => {
+                    const newCols = [...initialColumns];
+                    newCols[3].value = nextExample.thousands;
+                    newCols[2].value = nextExample.hundreds;
+                    newCols[1].value = nextExample.tens;
+                    newCols[0].value = nextExample.units;
+                    newCols.forEach(c => c.unlocked = true);
+                    return newCols;
+                });
+                const total = nextExample.thousands * 1000 + nextExample.hundreds * 100 + nextExample.tens * 10 + nextExample.units;
+                get().speakAndThen(`**${total}** (${nextExample.name}) ! Facile avec des nombres RONDS !`, () => {
                     get().runAutoCount();
-                }, COUNT_SPEED);
-                set({ timer: newTimer as unknown as number });
+                });
             } else {
                 get().speakAndThen("Bravo ! 🎉 Tu maîtrises les combinaisons SIMPLES !", () => {
-                    const newTimer = setTimeout(() => {
-                        get().setColumns(initialColumns.map(c => ({ ...c, unlocked: true })));
-                        get().setIsCountingAutomatically(false);
-                        get().resetThousandsSimpleCombinationChallenge();
-                        get().speakAndThen("Retour à zéro ! 🔄 À toi de jouer avec des nombres RONDS !", () => {
-                            get().setPhase('challenge-thousands-simple-combination');
-                        });
-                    }, COUNT_SPEED * 3);
-                    set({ timer: newTimer as unknown as number });
+                    get().setColumns(initialColumns.map(c => ({ ...c, unlocked: true })));
+                    get().setIsCountingAutomatically(false);
+                    get().resetThousandsSimpleCombinationChallenge();
+                    get().speakAndThen("Retour à zéro ! 🔄 À toi de jouer avec des nombres RONDS !", () => {
+                        get().setPhase('challenge-thousands-simple-combination');
+                    });
                 });
             }
         }
@@ -1514,7 +1511,7 @@ export const useStore = create<MachineState>((set, get) => ({
                 ex.units === columns[0].value
             );
 
-            // If we're at [0, 0, 0, 0], set the first example
+            // Si on est à [0, 0, 0, 0], set le premier exemple
             if (currentExampleIndex === -1) {
                 const firstExample = examples[0];
                 get().setColumns(() => {
@@ -1527,39 +1524,32 @@ export const useStore = create<MachineState>((set, get) => ({
                     return newCols;
                 });
                 const total = firstExample.thousands * 1000 + firstExample.hundreds * 100 + firstExample.tens * 10 + firstExample.units;
-                get().setFeedback(`**${total}** (${firstExample.name}) ! C'est ${firstExample.thousands} énorme + ${firstExample.hundreds} grands + ${firstExample.tens} paquets + ${firstExample.units} billes !`);
-                const newTimer = setTimeout(() => {
+                get().speakAndThen(`**${total}** (${firstExample.name}) ! C'est ${firstExample.thousands} énorme + ${firstExample.hundreds} grands + ${firstExample.tens} paquets + ${firstExample.units} billes !`, () => {
                     get().runAutoCount();
-                }, COUNT_SPEED * 2);
-                set({ timer: newTimer as unknown as number });
+                });
             } else if (currentExampleIndex < examples.length - 1) {
-                const newTimer = setTimeout(() => {
-                    const nextExample = examples[currentExampleIndex + 1];
-                    get().setColumns(() => {
-                        const newCols = [...initialColumns];
-                        newCols[3].value = nextExample.thousands;
-                        newCols[2].value = nextExample.hundreds;
-                        newCols[1].value = nextExample.tens;
-                        newCols[0].value = nextExample.units;
-                        newCols.forEach(c => c.unlocked = true);
-                        return newCols;
-                    });
-                    const total = nextExample.thousands * 1000 + nextExample.hundreds * 100 + nextExample.tens * 10 + nextExample.units;
-                    get().setFeedback(`**${total}** (${nextExample.name}) ! Décomposition : ${nextExample.thousands} énorme + ${nextExample.hundreds} grands + ${nextExample.tens} paquets + ${nextExample.units} billes !`);
+                const nextExample = examples[currentExampleIndex + 1];
+                get().setColumns(() => {
+                    const newCols = [...initialColumns];
+                    newCols[3].value = nextExample.thousands;
+                    newCols[2].value = nextExample.hundreds;
+                    newCols[1].value = nextExample.tens;
+                    newCols[0].value = nextExample.units;
+                    newCols.forEach(c => c.unlocked = true);
+                    return newCols;
+                });
+                const total = nextExample.thousands * 1000 + nextExample.hundreds * 100 + nextExample.tens * 10 + nextExample.units;
+                get().speakAndThen(`**${total}** (${nextExample.name}) ! Décomposition : ${nextExample.thousands} énorme + ${nextExample.hundreds} grands + ${nextExample.tens} paquets + ${nextExample.units} billes !`, () => {
                     get().runAutoCount();
-                }, COUNT_SPEED * 2);
-                set({ timer: newTimer as unknown as number });
+                });
             } else {
                 get().speakAndThen("Bravo ! 🎉 Tu comprends les nombres COMPLETS ! C'est long à dire mais tu vois la logique !", () => {
-                    const newTimer = setTimeout(() => {
-                        get().setColumns(initialColumns.map(c => ({ ...c, unlocked: true })));
-                        get().setIsCountingAutomatically(false);
-                        get().resetThousandsChallenge();
-                        get().speakAndThen("Retour à zéro ! 🔄 Maintenant les VRAIS défis !", () => {
-                            get().setPhase('challenge-thousands-1');
-                        });
-                    }, COUNT_SPEED * 3);
-                    set({ timer: newTimer as unknown as number });
+                    get().setColumns(initialColumns.map(c => ({ ...c, unlocked: true })));
+                    get().setIsCountingAutomatically(false);
+                    get().resetThousandsChallenge();
+                    get().speakAndThen("Retour à zéro ! 🔄 Maintenant les VRAIS défis !", () => {
+                        get().setPhase('challenge-thousands-1');
+                    });
                 });
             }
         }
@@ -1571,7 +1561,7 @@ export const useStore = create<MachineState>((set, get) => ({
             ];
             const currentExampleIndex = examples.findIndex(ex => ex.thousands === columns[3].value && ex.hundreds === columns[2].value && ex.tens === columns[1].value && ex.units === columns[0].value);
 
-            // If we're at [0, 0, 0, 0], set the first example
+            // Si on est à [0, 0, 0, 0], set le premier exemple
             if (currentExampleIndex === -1) {
                 const firstExample = examples[0];
                 get().setColumns(() => {
@@ -1584,39 +1574,32 @@ export const useStore = create<MachineState>((set, get) => ({
                     return newCols;
                 });
                 const total = firstExample.thousands * 1000 + firstExample.hundreds * 100 + firstExample.tens * 10 + firstExample.units;
-                get().setFeedback(`**${total}** (${firstExample.name}) !`);
-                const newTimer = setTimeout(() => {
+                get().speakAndThen(`**${total}** (${firstExample.name}) !`, () => {
                     get().runAutoCount();
-                }, COUNT_SPEED);
-                set({ timer: newTimer as unknown as number });
+                });
             } else if (currentExampleIndex < examples.length - 1) {
-                const newTimer = setTimeout(() => {
-                    const nextExample = examples[currentExampleIndex + 1];
-                    get().setColumns(() => {
-                        const newCols = [...initialColumns];
-                        newCols[3].value = nextExample.thousands;
-                        newCols[2].value = nextExample.hundreds;
-                        newCols[1].value = nextExample.tens;
-                        newCols[0].value = nextExample.units;
-                        newCols.forEach(c => c.unlocked = true);
-                        return newCols;
-                    });
-                    const total = nextExample.thousands * 1000 + nextExample.hundreds * 100 + nextExample.tens * 10 + nextExample.units;
-                    get().setFeedback(`**${total}** (${nextExample.name}) !`);
+                const nextExample = examples[currentExampleIndex + 1];
+                get().setColumns(() => {
+                    const newCols = [...initialColumns];
+                    newCols[3].value = nextExample.thousands;
+                    newCols[2].value = nextExample.hundreds;
+                    newCols[1].value = nextExample.tens;
+                    newCols[0].value = nextExample.units;
+                    newCols.forEach(c => c.unlocked = true);
+                    return newCols;
+                });
+                const total = nextExample.thousands * 1000 + nextExample.hundreds * 100 + nextExample.tens * 10 + nextExample.units;
+                get().speakAndThen(`**${total}** (${nextExample.name}) !`, () => {
                     get().runAutoCount();
-                }, COUNT_SPEED);
-                set({ timer: newTimer as unknown as number });
+                });
             } else {
                 get().speakAndThen("Bravo ! 🎉 Tu es un expert des grands nombres !", () => {
-                    const newTimer = setTimeout(() => {
-                        get().setColumns(initialColumns.map(c => ({ ...c, unlocked: true })));
-                        get().setIsCountingAutomatically(false);
-                        get().resetThousandsChallenge();
-                        get().speakAndThen("Retour à zéro ! 🔄 À toi de jouer maintenant !", () => {
-                            get().setPhase('challenge-thousands-1');
-                        });
-                    }, COUNT_SPEED * 3);
-                    set({ timer: newTimer as unknown as number });
+                    get().setColumns(initialColumns.map(c => ({ ...c, unlocked: true })));
+                    get().setIsCountingAutomatically(false);
+                    get().resetThousandsChallenge();
+                    get().speakAndThen("Retour à zéro ! 🔄 À toi de jouer maintenant !", () => {
+                        get().setPhase('challenge-thousands-1');
+                    });
                 });
             }
         }
@@ -1624,46 +1607,44 @@ export const useStore = create<MachineState>((set, get) => ({
 
 
     sequenceFeedback: (first: string, second?: string, onComplete?: () => void) => {
-        // Display the first message immediately
+        // Affiche le premier message et lance la voix
         get().setFeedback(first);
-        
-        // Set up callback for when first message finishes BEFORE speaking
         textToSpeechService.setCallbacks({
             onEnd: () => {
                 if (second) {
-                    // Display the second message
-                    get().setFeedback(`${first} - ${second}`);
-                    
-                    // Set up callback for second message completion BEFORE speaking
+                    // Quand la voix du premier est finie, affiche le second et lance la voix
+                    get().setFeedback(second);
                     textToSpeechService.setCallbacks({
                         onEnd: () => {
                             onComplete?.();
                         }
                     });
-                    
-                    // Speak the second message
                     textToSpeechService.speak(second);
                 } else {
                     onComplete?.();
                 }
             }
         });
-        
-        // Speak the first message (callbacks are already set)
         textToSpeechService.speak(first);
     },
 
     // Helper function to speak a message and execute callback when done
     speakAndThen: (message: string, onComplete?: () => void) => {
+        console.log('[Store] speakAndThen appelé avec :', message, 'callback?', !!onComplete);
         get().setFeedback(message);
         
-        if (onComplete) {
-            textToSpeechService.setCallbacks({
-                onEnd: onComplete
-            });
-        }
+        // Test direct de l'API synthèse vocale
+        console.log('[Store] Test direct de synthèse vocale');
+        textToSpeechService.testSpeak();
         
-        textToSpeechService.speak(message);
+        // Fallback temporaire : exécuter le callback après un court délai
+        if (onComplete) {
+            console.log('[Store] Fallback callback dans 3 secondes');
+            setTimeout(() => {
+                console.log('[Store] Exécution du fallback callback');
+                onComplete();
+            }, 3000);
+        }
     },
 
     handleAdd: (idx: number) => {
@@ -1785,35 +1766,39 @@ export const useStore = create<MachineState>((set, get) => ({
         }
 
         // Handle intro phases
-        /**if (phase === 'intro-welcome') {
-
-            setTimeout(() => {
-
-                setTimeout(() => {
-                    set({ phase: 'intro-discover' });
-                    get().updateInstruction();
-                }, FEEDBACK_DELAY * 2);
-            }, FEEDBACK_DELAY * 2);
+        if (phase === 'intro-welcome') {
+            const { sequenceFeedback, speakAndThen } = get();
+            sequenceFeedback(
+                "Bienvenue sur la machine à nombres !",
+                "Découvrons ensemble comment elle fonctionne.",
+                () => {
+                    speakAndThen("Prêt ? C'est parti !", () => {
+                        set({ phase: 'intro-discover' });
+                        get().updateInstruction();
+                    });
+                }
+            );
             return;
         } else if (phase === 'intro-discover') {
+            const { sequenceFeedback, speakAndThen } = get();
             sequenceFeedback(
                 "Bon, elle peut paraître un peu compliquée comme ça, mais elle n'aura bientôt plus de secrets pour toi !",
-                "Grâce à cette machine bizarre, nous allons comprendre comment fonctionnent les nombres."
+                "Grâce à cette machine bizarre, nous allons comprendre comment fonctionnent les nombres.",
+                () => {
+                    sequenceFeedback(
+                        "Et hop, je vais la mettre en route pour que tu puisses appuyer sur ses boutons.",
+                        "Vas-y clique sur les boutons + et – pour voir ce qu'il se passe.",
+                        () => {
+                            const newCols = [...columns];
+                            newCols[0].value = 0;
+                            set({ columns: newCols });
+                            speakAndThen("Essaie d'afficher le chiffre le plus grand possible en cliquant sur △ !");
+                        }
+                    );
+                }
             );
-            setTimeout(() => {
-                sequenceFeedback(
-                    "Et hop, je vais la mettre en route pour que tu puisses appuyer sur ses boutons.",
-                    "Vas-y clique sur les boutons + et – pour voir ce qu'il se passe."
-                );
-                setTimeout(() => {
-                    const newCols = [...columns];
-                    newCols[0].value = 0;
-                    set({ columns: newCols });
-                    get().setFeedback("Essaie d'afficher le chiffre le plus grand possible en cliquant sur △ !");
-                }, FEEDBACK_DELAY * 2);
-            }, FEEDBACK_DELAY * 2);
             return;
-        }**/
+        }
 
         const currentPhaseForCheck = get().phase;
         const isAllowedColumn = () => {
@@ -1858,46 +1843,52 @@ export const useStore = create<MachineState>((set, get) => ({
         const { resetUnitChallenge } = get();
         const currentPhase = get().phase;
 
-        /**if (currentPhase === 'intro-discover' && isUnitsColumn(idx)) {
+        if (currentPhase === 'intro-discover' && isUnitsColumn(idx)) {
+            const { sequenceFeedback, speakAndThen } = get();
             const unitsValue = newCols[0].value;
             if (unitsValue === 9) {
                 sequenceFeedback(
                     "Et voilà, on a rempli la machine !",
-                    "Tu as vu comme les lumières s'allument en même temps que les chiffres changent ?"
+                    "Tu as vu comme les lumières s'allument en même temps que les chiffres changent ?",
+                    () => {
+                        speakAndThen("Bravo ! Tu peux passer à la suite.", () => {
+                            set({ showInputField: true, phase: 'tutorial' });
+                            get().updateInstruction();
+                        });
+                    }
                 );
-                setTimeout(() => {
-                    set({ showInputField: true, phase: 'tutorial' });
-                    get().updateInstruction();
-                }, FEEDBACK_DELAY * 2);
             } else if (unitsValue > 0) {
                 get().setFeedback(`${unitsValue}... Continue à cliquer sur △ !`);
             }
         } else if (currentPhase === 'intro-add-roll') {
+            const { sequenceFeedback, speakAndThen } = get();
             const unitsValue = newCols[0].value;
             if (unitsValue === 9) {
                 sequenceFeedback(
                     "Je sais, nous allons devoir la modifier pour qu'elle ait une place de plus. Rajoutons un rouleau !",
-                    "Je vais l'allumer pour que tu puisses la tester."
+                    "Je vais l'allumer pour que tu puisses la tester.",
+                    () => {
+                        // Unlock the tens column
+                        const updatedCols = [...newCols];
+                        updatedCols[1].unlocked = true;
+                        updatedCols[0].value = 0;
+                        set({ columns: updatedCols });
+                        sequenceFeedback(
+                            "Et voilà le travail ! Tu as vu comment les lumières ont voyagé ?",
+                            "Elles se regroupent pour n'allumer qu'une autre lumière du rouleau suivant. C'est un peu comme si chaque lumière du nouveau rouleau avait dix petites lumières à l'intérieur.",
+                            () => {
+                                speakAndThen("Essaie maintenant d'afficher le plus grand nombre possible !", () => {
+                                    set({ showInputField: true, phase: 'intro-question-max' });
+                                    get().updateInstruction();
+                                });
+                            }
+                        );
+                    }
                 );
-                setTimeout(() => {
-                    // Unlock the tens column
-                    const updatedCols = [...newCols];
-                    updatedCols[1].unlocked = true;
-                    updatedCols[0].value = 0;
-                    set({ columns: updatedCols });
-                    sequenceFeedback(
-                        "Et voilà le travail ! Tu as vu comment les lumières ont voyagé ?",
-                        "Elles se regroupent pour n'allumer qu'une autre lumière du rouleau suivant. C'est un peu comme si chaque lumière du nouveau rouleau avait dix petites lumières à l'intérieur."
-                    );
-                    setTimeout(() => {
-                        set({ showInputField: true, phase: 'intro-question-max' });
-                        get().updateInstruction();
-                    }, FEEDBACK_DELAY * 2);
-                }, FEEDBACK_DELAY * 2);
             } else if (unitsValue > 0) {
                 get().setFeedback(`${unitsValue}... Continue à cliquer sur △ jusqu'à 9 !`);
             }
-        } else**/
+        }
         if (currentPhase === 'tutorial') {
             const unitsValue = newCols[0].value;
             if (unitsValue === 1) sequenceFeedback("Bravo ! 🎉 Tu as cliqué sur le bouton VERT ! Un joli rond bleu est apparu !", "Ce rond bleu, c'est comme une bille. Clique encore sur △ pour en ajouter !");
@@ -1914,11 +1905,10 @@ export const useStore = create<MachineState>((set, get) => ({
             if (unitsValue === 1) sequenceFeedback("HOURRA ! 🎉 **Dis à haute voix : UN !** Lève UN doigt ! 👆", `UN c'est une seule chose ! Clique sur △ pour continuer !`);
             else if (unitsValue === 2) sequenceFeedback("Fantastique ! 🎉 **Dis : DEUX !** Lève DEUX doigts ! ✌️", `DEUX, c'est une paire ! Clique sur △ !`);
             else if (unitsValue === 3) {
-                sequenceFeedback("Merveilleux ! 🎉 **Dis : TROIS !** Trois doigts !", `Clique sur △ pour continuer !`);
-                setTimeout(() => {
+                sequenceFeedback("Merveilleux ! 🎉 **Dis : TROIS !** Trois doigts !", `Clique sur △ pour continuer !`, () => {
                     set({ phase: 'click-add', feedback: "Bravo ! Continuons jusqu'à 9 ! Clique sur △ !" });
                     get().updateButtonVisibility();
-                }, FEEDBACK_DELAY * 1.5);
+                });
             } else if (unitsValue > 3) {
                 newCols[0].value = 3;
                 set({ columns: newCols });
@@ -1939,8 +1929,7 @@ export const useStore = create<MachineState>((set, get) => ({
             }
             if (nextValue === 9) {
                 set({ isTransitioningToChallenge: true, addClicks: addClicks + 1 });
-                sequenceFeedback("Magnifique ! 🎉 Tu as atteint 9 !", "Tu es prêt pour l'évaluation !");
-                setTimeout(() => {
+                sequenceFeedback("Magnifique ! 🎉 Tu as atteint 9 !", "Tu es prêt pour l'évaluation !", () => {
                     // Keep units unlocked for challenges
                     const resetCols = initialColumns.map(col => ({ ...col }));
                     resetCols[0].unlocked = true;
@@ -1952,7 +1941,7 @@ export const useStore = create<MachineState>((set, get) => ({
                     });
                     get().setPhase('challenge-unit-1');
                     get().setFeedback(`🎯 DÉFI 1 : Affiche le nombre **${UNIT_CHALLENGES[0].targets[0]}** avec les boutons, puis clique sur VALIDER !`);
-                }, FEEDBACK_DELAY * 2);
+                });
                 return;
             }
             set({ addClicks: addClicks + 1 });
@@ -1972,8 +1961,7 @@ export const useStore = create<MachineState>((set, get) => ({
             const currentValue = newCols[0].value;
             if (hasCarry) {
                 // The magic moment when 9+1 becomes 10!
-                sequenceFeedback("INCROYABLE ! 🎆 C'est de la MAGIE ! 10 petites billes sont devenues 1 PAQUET de 10 !", "C'est la RÈGLE D'OR : 10 billes = 1 paquet dans la colonne de gauche !");
-                setTimeout(() => {
+                sequenceFeedback("INCROYABLE ! 🎆 C'est de la MAGIE ! 10 petites billes sont devenues 1 PAQUET de 10 !", "C'est la RÈGLE D'OR : 10 billes = 1 paquet dans la colonne de gauche !", () => {
                     const resetCols = initialColumns.map((col, i) => ({ ...col, unlocked: i === 0 || i === 1 }));
                     // Keep the value at 10 (1 ten, 0 units) instead of resetting to 0
                     resetCols[1].value = 1;
@@ -1985,7 +1973,7 @@ export const useStore = create<MachineState>((set, get) => ({
                     });
                     get().updateButtonVisibility();
                     sequenceFeedback("WOW ! 10 petites billes = 1 PAQUET de 10 !", "Clique sur ∇ pour revenir à 9 !");
-                }, FEEDBACK_DELAY * 2);
+                });
             } else if (currentValue === 9) {
                 // Child is at 9, one more click will trigger the magic!
                 get().setFeedback("Parfait ! Tu es à 9 ! 🎯 Encore UN clic sur △ et... la MAGIE va opérer ! ✨");
@@ -2653,8 +2641,7 @@ export const useStore = create<MachineState>((set, get) => ({
             if (unitsValue === 2) sequenceFeedback("Génial ! 🎈 Le bouton ROUGE enlève une bille ! Il en reste deux !", "VERT ajoute, ROUGE enlève. Facile ! Clique encore sur ∇ !");
             else if (unitsValue === 1) sequenceFeedback("Bravo ! Clique encore sur ROUGE pour tout enlever !", "Plus qu'une bille ! Un dernier clic !");
             else if (unitsValue === 0 && tempTotalBefore === 1) {
-                sequenceFeedback("Extraordinaire ! 🎉 Tu maîtrises les deux boutons ! Je vais t'apprendre les **NOMBRES** !", "Prépare-toi pour une grande aventure !");
-                setTimeout(() => {
+                sequenceFeedback("Extraordinaire ! 🎉 Tu maîtrises les deux boutons ! Je vais t'apprendre les **NOMBRES** !", "Prépare-toi pour une grande aventure !", () => {
                     // Unlock units for learning phase
                     const newCols = initialColumns.map(col => ({ ...col }));
                     newCols[0].unlocked = true;
@@ -2666,7 +2653,7 @@ export const useStore = create<MachineState>((set, get) => ({
                     });
                     get().updateButtonVisibility();
                     sequenceFeedback("Bienvenue dans le monde des NOMBRES ! ✨ Un nombre dit COMBIEN il y a de choses.", "Regarde ! 👀 La machine compte de 1 à 9. Compte avec tes doigts !");
-                }, FEEDBACK_DELAY * 2);
+                });
             } else if (unitsValue > 0) {
                 sequenceFeedback(`Bien joué ! Continue à cliquer sur ROUGE !`, "Le bouton ROUGE retire une bille à chaque fois !");
             }
@@ -2729,21 +2716,20 @@ export const useStore = create<MachineState>((set, get) => ({
             // SUCCESS!
             // Send correct value message to Unity
             sendCorrectValue();
-            
+
             const successMsg = getSuccessMessage(attemptCount + 1, false);
-            get().setFeedback(successMsg);
+            const { speakAndThen } = get();
+            speakAndThen(successMsg, () => {
+                // Reset attempts and update stats
+                resetAttempts();
+                setConsecutiveFailures(0);
+                setTotalChallengesCompleted(totalChallengesCompleted + 1);
 
-            // Reset attempts and update stats
-            resetAttempts();
-            setConsecutiveFailures(0);
-            setTotalChallengesCompleted(totalChallengesCompleted + 1);
+                const newSuccessCount = unitSuccessCount + 1;
+                set({ unitSuccessCount: newSuccessCount });
 
-            const newSuccessCount = unitSuccessCount + 1;
-            set({ unitSuccessCount: newSuccessCount });
-
-            if (unitTargetIndex + 1 >= challenge.targets.length) {
-                if (challengeIndex === UNIT_CHALLENGES.length - 1) {
-                    setTimeout(() => {
+                if (unitTargetIndex + 1 >= challenge.targets.length) {
+                    if (challengeIndex === UNIT_CHALLENGES.length - 1) {
                         // Reset units column to 0 so child can start from the beginning
                         const resetCols = get().columns.map((col, i) =>
                             i === 0 ? { ...col, value: 0 } : col
@@ -2754,12 +2740,10 @@ export const useStore = create<MachineState>((set, get) => ({
                         });
                         get().updateButtonVisibility();
                         sequenceFeedback("Prêt pour la magie ? 🎩 Tu vas voir l'échange 10 pour 1 !", "D'abord, compte jusqu'à 9 en cliquant sur △. Ensuite, la magie va opérer ! ✨");
-                    }, FEEDBACK_DELAY);
-                } else {
-                    setTimeout(() => {
+                    } else {
                         // Send next goal message to Unity
                         sendNextGoal();
-                        
+
                         // Keep units unlocked for challenges
                         const resetCols = initialColumns.map(col => ({ ...col }));
                         resetCols[0].unlocked = true;
@@ -2770,13 +2754,11 @@ export const useStore = create<MachineState>((set, get) => ({
                         });
                         get().setPhase(nextPhase);
                         get().setFeedback(`🎯 DÉFI ${challengeIndex + 2} : Affiche le nombre **${UNIT_CHALLENGES[challengeIndex + 1].targets[0]}** puis clique sur VALIDER !`);
-                    }, FEEDBACK_DELAY);
-                }
-            } else {
-                setTimeout(() => {
+                    }
+                } else {
                     // Send next goal message to Unity
                     sendNextGoal();
-                    
+
                     // Keep units unlocked for challenges
                     const resetCols = initialColumns.map(col => ({ ...col }));
                     resetCols[0].unlocked = true;
@@ -2785,8 +2767,8 @@ export const useStore = create<MachineState>((set, get) => ({
                         unitTargetIndex: unitTargetIndex + 1
                     });
                     get().setFeedback(`🎯 DÉFI ${challengeIndex + 1} : Affiche le nombre **${challenge.targets[unitTargetIndex + 1]}** puis clique sur VALIDER ! (${newSuccessCount}/${challenge.targets.length})`);
-                }, FEEDBACK_DELAY);
-            }
+                }
+            });
         } else {
             // FAILURE - Generate progressive feedback
             // Send wrong value message to Unity
@@ -2826,7 +2808,7 @@ export const useStore = create<MachineState>((set, get) => ({
     },
 
     handleValidateTenToTwenty: () => {
-        const { phase, columns, tenToTwentyTargetIndex, tenToTwentySuccessCount, sequenceFeedback, attemptCount, consecutiveFailures, resetAttempts, setAttemptCount, setConsecutiveFailures, setShowHelpOptions, totalChallengesCompleted, setTotalChallengesCompleted, setCurrentTarget } = get();
+    const { phase, columns, tenToTwentyTargetIndex, tenToTwentySuccessCount, sequenceFeedback, attemptCount, consecutiveFailures, resetAttempts, setAttemptCount, setConsecutiveFailures, setShowHelpOptions, totalChallengesCompleted, setTotalChallengesCompleted, setCurrentTarget } = get();
         const totalNumber = columns.reduce((acc: number, col: Column, idx: number) => acc + col.value * Math.pow(10, idx), 0);
 
         if (phase !== 'challenge-ten-to-twenty') return;
@@ -2841,21 +2823,19 @@ export const useStore = create<MachineState>((set, get) => ({
             // SUCCESS!
             // Send correct value message to Unity
             sendCorrectValue();
-            
+
             const successMsg = getSuccessMessage(attemptCount + 1, false);
-            get().setFeedback(successMsg);
+            get().speakAndThen(successMsg, () => {
+                // Reset attempts and update stats
+                resetAttempts();
+                setConsecutiveFailures(0);
+                setTotalChallengesCompleted(totalChallengesCompleted + 1);
 
-            // Reset attempts and update stats
-            resetAttempts();
-            setConsecutiveFailures(0);
-            setTotalChallengesCompleted(totalChallengesCompleted + 1);
+                const newSuccessCount = tenToTwentySuccessCount + 1;
+                set({ tenToTwentySuccessCount: newSuccessCount });
 
-            const newSuccessCount = tenToTwentySuccessCount + 1;
-            set({ tenToTwentySuccessCount: newSuccessCount });
-
-            if (tenToTwentyTargetIndex + 1 >= challenge.targets.length) {
-                // All challenges completed!
-                setTimeout(() => {
+                if (tenToTwentyTargetIndex + 1 >= challenge.targets.length) {
+                    // All challenges completed!
                     // Start learn-twenty-to-thirty at 20 (2 tens, 0 units)
                     const startCols = initialColumns.map((col, i) => ({ ...col, unlocked: i <= 1 }));
                     startCols[1].value = 2;
@@ -2866,16 +2846,16 @@ export const useStore = create<MachineState>((set, get) => ({
                     });
                     get().updateButtonVisibility();
                     sequenceFeedback("Maintenant, remplis la colonne des unités jusqu'à 9 !", "Clique sur △ pour ajouter des billes !");
-                }, FEEDBACK_DELAY * 2);
-            } else {
-                // Send next goal message to Unity
-                sendNextGoal();
-                
-                const nextTarget = challenge.targets[tenToTwentyTargetIndex + 1];
-                const resetCols = initialColumns.map((col, i) => ({ ...col, unlocked: i === 0 || i === 1 }));
-                set({ tenToTwentyTargetIndex: tenToTwentyTargetIndex + 1, columns: resetCols });
-                sequenceFeedback(`✅ Correct ! ${newSuccessCount}/${challenge.targets.length} réussis !`, `Maintenant affiche **${nextTarget}** !`);
-            }
+                } else {
+                    // Send next goal message to Unity
+                    sendNextGoal();
+
+                    const nextTarget = challenge.targets[tenToTwentyTargetIndex + 1];
+                    const resetCols = initialColumns.map((col, i) => ({ ...col, unlocked: i === 0 || i === 1 }));
+                    set({ tenToTwentyTargetIndex: tenToTwentyTargetIndex + 1, columns: resetCols });
+                    sequenceFeedback(`✅ Correct ! ${newSuccessCount}/${challenge.targets.length} réussis !`, `Maintenant affiche **${nextTarget}** !`);
+                }
+            });
         } else {
             // FAILURE - Generate progressive feedback
             // Send wrong value message to Unity
@@ -2938,22 +2918,21 @@ export const useStore = create<MachineState>((set, get) => ({
     if (totalNumber === targetNumber) {
         // SUCCESS!
         sendCorrectValue();
-        
+
         const successMsg = getSuccessMessage(attemptCount + 1, false);
-        get().setFeedback(successMsg);
+        const { speakAndThen } = get();
+        speakAndThen(successMsg, () => {
+            // Reset attempts and update stats
+            resetAttempts();
+            setConsecutiveFailures(0);
+            setTotalChallengesCompleted(totalChallengesCompleted + 1);
 
-        // Reset attempts and update stats
-        resetAttempts();
-        setConsecutiveFailures(0);
-        setTotalChallengesCompleted(totalChallengesCompleted + 1);
+            const newSuccessCount = tensSuccessCount + 1;
+            set({ tensSuccessCount: newSuccessCount });
 
-        const newSuccessCount = tensSuccessCount + 1;
-        set({ tensSuccessCount: newSuccessCount });
-
-        if (tensTargetIndex + 1 >= challenge.targets.length) {
-            if (challengeIndex === TENS_CHALLENGES.length - 1) {
-                set((state: MachineState) => ({ completedChallenges: { ...state.completedChallenges, tens: true } }));
-                setTimeout(() => {
+            if (tensTargetIndex + 1 >= challenge.targets.length) {
+                if (challengeIndex === TENS_CHALLENGES.length - 1) {
+                    set((state: MachineState) => ({ completedChallenges: { ...state.completedChallenges, tens: true } }));
                     const newCols = [...get().columns];
                     if (!newCols[2].unlocked) {
                         newCols[2].unlocked = true;
@@ -2970,12 +2949,9 @@ export const useStore = create<MachineState>((set, get) => ({
                     });
                     get().updateButtonVisibility();
                     sequenceFeedback("APPRENTISSAGE DES DIZAINES TERMINÉ ! Bravo ! 🎉", "NIVEAU DÉBLOQUÉ : Les CENTAINES ! 💯 STOP ! Regarde bien : TOUT est plein ! 9 paquets de 10 + 9 billes. Clique sur △ pour voir une GRANDE MAGIE ! ✨");
-                }, FEEDBACK_DELAY * 2);
-            } else {
-                const nextChallenge = TENS_CHALLENGES[challengeIndex + 1];
-                setTimeout(() => {
+                } else {
+                    const nextChallenge = TENS_CHALLENGES[challengeIndex + 1];
                     sendNextGoal();
-                    
                     resetTensChallenge();
                     const resetCols = initialColumns.map((col, i) => ({ ...col, unlocked: i === 0 || i === 1 }));
                     set({
@@ -2983,16 +2959,15 @@ export const useStore = create<MachineState>((set, get) => ({
                     });
                     get().setPhase(nextChallenge.phase);
                     get().setFeedback(`🎯 DÉFI ${challengeIndex + 2} : Affiche le nombre **${nextChallenge.targets[0]}** !`);
-                }, FEEDBACK_DELAY * 2);
+                }
+            } else {
+                sendNextGoal();
+                const nextTarget = challenge.targets[tensTargetIndex + 1];
+                const resetCols = initialColumns.map((col, i) => ({ ...col, unlocked: i === 0 || i === 1 }));
+                set({ tensTargetIndex: tensTargetIndex + 1, columns: resetCols });
+                sequenceFeedback(`✅ Correct ! ${newSuccessCount}/${challenge.targets.length} réussis !`, `Maintenant affiche **${nextTarget}** !`);
             }
-        } else {
-            sendNextGoal();
-            
-            const nextTarget = challenge.targets[tensTargetIndex + 1];
-            const resetCols = initialColumns.map((col, i) => ({ ...col, unlocked: i === 0 || i === 1 }));
-            set({ tensTargetIndex: tensTargetIndex + 1, columns: resetCols });
-            sequenceFeedback(`✅ Correct ! ${newSuccessCount}/${challenge.targets.length} réussis !`, `Maintenant affiche **${nextTarget}** !`);
-        }
+        });
     } else {
         // FAILURE
         sendWrongValue();
@@ -3028,7 +3003,7 @@ export const useStore = create<MachineState>((set, get) => ({
 },
 
     handleValidateHundredToTwoHundred: () => {
-        const { phase, columns, hundredToTwoHundredTargetIndex, hundredToTwoHundredSuccessCount, sequenceFeedback, attemptCount, consecutiveFailures, resetAttempts, setAttemptCount, setConsecutiveFailures, setShowHelpOptions, totalChallengesCompleted, setTotalChallengesCompleted, setCurrentTarget } = get();
+        const { phase, columns, hundredToTwoHundredTargetIndex, hundredToTwoHundredSuccessCount, sequenceFeedback, speakAndThen, attemptCount, consecutiveFailures, resetAttempts, setAttemptCount, setConsecutiveFailures, setShowHelpOptions, totalChallengesCompleted, setTotalChallengesCompleted, setCurrentTarget } = get();
         const totalNumber = columns.reduce((acc: number, col: Column, idx: number) => acc + col.value * Math.pow(10, idx), 0);
 
         if (phase !== 'challenge-hundred-to-two-hundred') return;
@@ -3040,50 +3015,48 @@ export const useStore = create<MachineState>((set, get) => ({
         setCurrentTarget(targetNumber);
 
         if (totalNumber === targetNumber) {
-            // SUCCESS!
-            // Send correct value message to Unity
+            // Succès
             sendCorrectValue();
-            
             const successMsg = getSuccessMessage(attemptCount + 1, false);
-            get().setFeedback(successMsg);
+            speakAndThen(successMsg, () => {
+                resetAttempts();
+                setConsecutiveFailures(0);
+                setTotalChallengesCompleted(totalChallengesCompleted + 1);
+                const newSuccessCount = hundredToTwoHundredSuccessCount + 1;
+                set({ hundredToTwoHundredSuccessCount: newSuccessCount });
 
-            // Reset attempts and update stats
-            resetAttempts();
-            setConsecutiveFailures(0);
-            setTotalChallengesCompleted(totalChallengesCompleted + 1);
-
-            const newSuccessCount = hundredToTwoHundredSuccessCount + 1;
-            set({ hundredToTwoHundredSuccessCount: newSuccessCount });
-
-            if (hundredToTwoHundredTargetIndex + 1 >= challenge.targets.length) {
-                // All challenges completed!
-                setTimeout(() => {
-                    // Start learn-two-hundred-to-three-hundred at 200
-                    const startCols = initialColumns.map((col, i) => ({ ...col, unlocked: i <= 2 }));
-                    startCols[2].value = 2;
-                    startCols[1].value = 0;
-                    startCols[0].value = 0;
-                    set({
-                        columns: startCols,
-                        phase: 'learn-two-hundred-to-three-hundred'
-                    });
-                    get().updateButtonVisibility();
-                    sequenceFeedback("Maintenant, remplis tout jusqu'à 299 !", "Clique sur △ pour ajouter des billes !");
-                }, FEEDBACK_DELAY * 2);
-            } else {
-                // Send next goal message to Unity
-                sendNextGoal();
-                
-                const nextTarget = challenge.targets[hundredToTwoHundredTargetIndex + 1];
-                const resetCols = initialColumns.map((col, i) => ({ ...col, unlocked: i <= 2 }));
-                set({ hundredToTwoHundredTargetIndex: hundredToTwoHundredTargetIndex + 1, columns: resetCols });
-                sequenceFeedback(`✅ Correct ! ${newSuccessCount}/${challenge.targets.length} réussis !`, `Maintenant affiche **${nextTarget}** !`);
-            }
+                if (hundredToTwoHundredTargetIndex + 1 >= challenge.targets.length) {
+                    // Tous les challenges terminés !
+                    sequenceFeedback(
+                        "Maintenant, remplis tout jusqu'à 299 !",
+                        "Clique sur △ pour ajouter des billes !",
+                        () => {
+                            const startCols = initialColumns.map((col, i) => ({ ...col, unlocked: i <= 2 }));
+                            startCols[2].value = 2;
+                            startCols[1].value = 0;
+                            startCols[0].value = 0;
+                            set({
+                                columns: startCols,
+                                phase: 'learn-two-hundred-to-three-hundred'
+                            });
+                            get().updateButtonVisibility();
+                        }
+                    );
+                } else {
+                    // Prochain objectif
+                    sendNextGoal();
+                    const nextTarget = challenge.targets[hundredToTwoHundredTargetIndex + 1];
+                    const resetCols = initialColumns.map((col, i) => ({ ...col, unlocked: i <= 2 }));
+                    set({ hundredToTwoHundredTargetIndex: hundredToTwoHundredTargetIndex + 1, columns: resetCols });
+                    sequenceFeedback(
+                        `✅ Correct ! ${newSuccessCount}/${challenge.targets.length} réussis !`,
+                        `Maintenant affiche **${nextTarget}** !`
+                    );
+                }
+            });
         } else {
-            // FAILURE - Generate progressive feedback
-            // Send wrong value message to Unity
+            // Échec
             sendWrongValue();
-            
             const newAttemptCount = attemptCount + 1;
             setAttemptCount(newAttemptCount);
 
@@ -3095,30 +3068,25 @@ export const useStore = create<MachineState>((set, get) => ({
                 lastUserAnswer: totalNumber
             });
 
-            get().setFeedback(feedbackMsg.message);
-
-            // Show help options on 4th attempt
-            if (feedbackMsg.showHelp) {
-                setShowHelpOptions(true);
-            }
-
-            // If too many attempts, increase consecutive failures
-            if (newAttemptCount >= 4) {
-                const newConsecutiveFailures = consecutiveFailures + 1;
-                setConsecutiveFailures(newConsecutiveFailures);
-
-                // Check for high frustration
-                if (newConsecutiveFailures >= 3) {
-                    setTimeout(() => {
-                        get().setFeedback(getFrustrationInterventionMessage());
-                    }, FEEDBACK_DELAY * 2);
+            get().speakAndThen(feedbackMsg.message, () => {
+                // Affiche les options d'aide si besoin
+                if (feedbackMsg.showHelp) {
+                    setShowHelpOptions(true);
                 }
-            }
+                // Si trop d'échecs, augmente la frustration et propose une intervention
+                if (newAttemptCount >= 4) {
+                    const newConsecutiveFailures = consecutiveFailures + 1;
+                    setConsecutiveFailures(newConsecutiveFailures);
+                    if (newConsecutiveFailures >= 3) {
+                        get().speakAndThen(getFrustrationInterventionMessage());
+                    }
+                }
+            });
         }
     },
 
     handleValidateTwoHundredToThreeHundred: () => {
-        const { phase, columns, twoHundredToThreeHundredTargetIndex, twoHundredToThreeHundredSuccessCount, sequenceFeedback, attemptCount, consecutiveFailures, resetAttempts, setAttemptCount, setConsecutiveFailures, setShowHelpOptions, totalChallengesCompleted, setTotalChallengesCompleted, setCurrentTarget } = get();
+    const { phase, columns, twoHundredToThreeHundredTargetIndex, twoHundredToThreeHundredSuccessCount, sequenceFeedback, attemptCount, consecutiveFailures, resetAttempts, setAttemptCount, setConsecutiveFailures, setShowHelpOptions, totalChallengesCompleted, setTotalChallengesCompleted, setCurrentTarget } = get();
         const totalNumber = columns.reduce((acc: number, col: Column, idx: number) => acc + col.value * Math.pow(10, idx), 0);
 
         if (phase !== 'challenge-two-hundred-to-three-hundred') return;
@@ -3130,48 +3098,47 @@ export const useStore = create<MachineState>((set, get) => ({
         setCurrentTarget(targetNumber);
 
         if (totalNumber === targetNumber) {
-            // SUCCESS!
-            // Send correct value message to Unity
+            // Succès
             sendCorrectValue();
-            
             const successMsg = getSuccessMessage(attemptCount + 1, false);
-            get().setFeedback(successMsg);
+            get().speakAndThen(successMsg, () => {
+                resetAttempts();
+                setConsecutiveFailures(0);
+                setTotalChallengesCompleted(totalChallengesCompleted + 1);
+                const newSuccessCount = twoHundredToThreeHundredSuccessCount + 1;
+                set({ twoHundredToThreeHundredSuccessCount: newSuccessCount });
 
-            // Reset attempts and update stats
-            resetAttempts();
-            setConsecutiveFailures(0);
-            setTotalChallengesCompleted(totalChallengesCompleted + 1);
-
-            const newSuccessCount = twoHundredToThreeHundredSuccessCount + 1;
-            set({ twoHundredToThreeHundredSuccessCount: newSuccessCount });
-
-            if (twoHundredToThreeHundredTargetIndex + 1 >= challenge.targets.length) {
-                // All challenges completed!
-                setTimeout(() => {
+                if (twoHundredToThreeHundredTargetIndex + 1 >= challenge.targets.length) {
+                    // Tous les challenges terminés !
+                    sequenceFeedback(
+                        "Bravo ! Maintenant regarde la machine compter les centaines rondes !",
+                        "300, 400, 500... Observe bien !",
+                        () => {
+                            const resetCols = initialColumns.map((col, i) => ({ ...col, unlocked: i <= 2 }));
+                            set({
+                                columns: resetCols,
+                                phase: 'learn-hundreds',
+                                pendingAutoCount: true,
+                                isCountingAutomatically: false
+                            });
+                            get().updateButtonVisibility();
+                        }
+                    );
+                } else {
+                    // Prochain objectif
+                    sendNextGoal();
+                    const nextTarget = challenge.targets[twoHundredToThreeHundredTargetIndex + 1];
                     const resetCols = initialColumns.map((col, i) => ({ ...col, unlocked: i <= 2 }));
-                    set({
-                        columns: resetCols,
-                        phase: 'learn-hundreds',
-                        pendingAutoCount: true,
-                        isCountingAutomatically: false
-                    });
-                    get().updateButtonVisibility();
-                    sequenceFeedback("Bravo ! Maintenant regarde la machine compter les centaines rondes !", "300, 400, 500... Observe bien !");
-                }, FEEDBACK_DELAY * 2);
-            } else {
-                // Send next goal message to Unity
-                sendNextGoal();
-                
-                const nextTarget = challenge.targets[twoHundredToThreeHundredTargetIndex + 1];
-                const resetCols = initialColumns.map((col, i) => ({ ...col, unlocked: i <= 2 }));
-                set({ twoHundredToThreeHundredTargetIndex: twoHundredToThreeHundredTargetIndex + 1, columns: resetCols });
-                sequenceFeedback(`✅ Correct ! ${newSuccessCount}/${challenge.targets.length} réussis !`, `Maintenant affiche **${nextTarget}** !`);
-            }
+                    set({ twoHundredToThreeHundredTargetIndex: twoHundredToThreeHundredTargetIndex + 1, columns: resetCols });
+                    sequenceFeedback(
+                        `✅ Correct ! ${newSuccessCount}/${challenge.targets.length} réussis !`,
+                        `Maintenant affiche **${nextTarget}** !`
+                    );
+                }
+            });
         } else {
-            // FAILURE - Generate progressive feedback
-            // Send wrong value message to Unity
+            // Échec
             sendWrongValue();
-            
             const newAttemptCount = attemptCount + 1;
             setAttemptCount(newAttemptCount);
 
@@ -3183,30 +3150,25 @@ export const useStore = create<MachineState>((set, get) => ({
                 lastUserAnswer: totalNumber
             });
 
-            get().setFeedback(feedbackMsg.message);
-
-            // Show help options on 4th attempt
-            if (feedbackMsg.showHelp) {
-                setShowHelpOptions(true);
-            }
-
-            // If too many attempts, increase consecutive failures
-            if (newAttemptCount >= 4) {
-                const newConsecutiveFailures = consecutiveFailures + 1;
-                setConsecutiveFailures(newConsecutiveFailures);
-
-                // Check for high frustration
-                if (newConsecutiveFailures >= 3) {
-                    setTimeout(() => {
-                        get().setFeedback(getFrustrationInterventionMessage());
-                    }, FEEDBACK_DELAY * 2);
+            get().speakAndThen(feedbackMsg.message, () => {
+                // Affiche les options d'aide si besoin
+                if (feedbackMsg.showHelp) {
+                    setShowHelpOptions(true);
                 }
-            }
+                // Si trop d'échecs, augmente la frustration et propose une intervention
+                if (newAttemptCount >= 4) {
+                    const newConsecutiveFailures = consecutiveFailures + 1;
+                    setConsecutiveFailures(newConsecutiveFailures);
+                    if (newConsecutiveFailures >= 3) {
+                        get().speakAndThen(getFrustrationInterventionMessage());
+                    }
+                }
+            });
         }
     },
 
     handleValidateHundreds: () => {
-        const { phase, columns, hundredsTargetIndex, hundredsSuccessCount, sequenceFeedback, resetHundredsChallenge, attemptCount, consecutiveFailures, resetAttempts, setAttemptCount, setConsecutiveFailures, setShowHelpOptions, totalChallengesCompleted, setTotalChallengesCompleted, setCurrentTarget } = get();
+        const { phase, columns, hundredsTargetIndex, hundredsSuccessCount, sequenceFeedback, speakAndThen, resetHundredsChallenge, attemptCount, consecutiveFailures, resetAttempts, setAttemptCount, setConsecutiveFailures, setShowHelpOptions, totalChallengesCompleted, setTotalChallengesCompleted, setCurrentTarget } = get();
         const totalNumber = columns.reduce((acc: number, col: Column, idx: number) => acc + col.value * Math.pow(10, idx), 0);
         const challengePhases = ['challenge-hundreds-1', 'challenge-hundreds-2', 'challenge-hundreds-3'] as const;
         const challengeIndex = challengePhases.indexOf(phase as typeof challengePhases[number]);
@@ -3219,66 +3181,66 @@ export const useStore = create<MachineState>((set, get) => ({
         setCurrentTarget(targetNumber);
 
         if (totalNumber === targetNumber) {
-            // SUCCESS!
-            // Send correct value message to Unity
+            // Succès
             sendCorrectValue();
-            
             const successMsg = getSuccessMessage(attemptCount + 1, false);
-            get().setFeedback(successMsg);
+            speakAndThen(successMsg, () => {
+                resetAttempts();
+                setConsecutiveFailures(0);
+                setTotalChallengesCompleted(totalChallengesCompleted + 1);
+                const newSuccessCount = hundredsSuccessCount + 1;
+                set({ hundredsSuccessCount: newSuccessCount });
 
-            // Reset attempts and update stats
-            resetAttempts();
-            setConsecutiveFailures(0);
-            setTotalChallengesCompleted(totalChallengesCompleted + 1);
-
-            const newSuccessCount = hundredsSuccessCount + 1;
-            set({ hundredsSuccessCount: newSuccessCount });
-
-            if (hundredsTargetIndex + 1 >= challenge.targets.length) {
-                if (challengeIndex === HUNDREDS_CHALLENGES.length - 1) {
-                    set((state: MachineState) => ({ completedChallenges: { ...state.completedChallenges, hundreds: true } }));
-                    setTimeout(() => {
-                        const newCols = [...get().columns];
-                        if (!newCols[3].unlocked) {
-                            newCols[3].unlocked = true;
-                            set({ columns: newCols });
-                        }
-                        const resetCols = columns.map((col: Column) => ({ ...col, unlocked: true }));
-                        set({
-                            columns: resetCols,
-                            phase: 'celebration-before-thousands',
-                            pendingAutoCount: false,
-                            isCountingAutomatically: false
-                        });
-                        get().updateButtonVisibility();
-                        sequenceFeedback("APPRENTISSAGE DES CENTAINES TERMINÉ ! Bravo ! 🎉", "🏆 BRAVO CHAMPION ! Tu maîtrises les centaines ! C'est INCROYABLE !");
-                    }, FEEDBACK_DELAY * 2);
+                if (hundredsTargetIndex + 1 >= challenge.targets.length) {
+                    if (challengeIndex === HUNDREDS_CHALLENGES.length - 1) {
+                        set((state: MachineState) => ({ completedChallenges: { ...state.completedChallenges, hundreds: true } }));
+                        sequenceFeedback(
+                            "APPRENTISSAGE DES CENTAINES TERMINÉ ! Bravo ! 🎉",
+                            "🏆 BRAVO CHAMPION ! Tu maîtrises les centaines ! C'est INCROYABLE !",
+                            () => {
+                                const newCols = [...get().columns];
+                                if (!newCols[3].unlocked) {
+                                    newCols[3].unlocked = true;
+                                    set({ columns: newCols });
+                                }
+                                const resetCols = columns.map((col: Column) => ({ ...col, unlocked: true }));
+                                set({
+                                    columns: resetCols,
+                                    phase: 'celebration-before-thousands',
+                                    pendingAutoCount: false,
+                                    isCountingAutomatically: false
+                                });
+                                get().updateButtonVisibility();
+                            }
+                        );
+                    } else {
+                        const nextChallenge = HUNDREDS_CHALLENGES[challengeIndex + 1];
+                        sequenceFeedback(
+                            `🎯 DÉFI ${challengeIndex + 2} : Affiche le nombre **${nextChallenge.targets[0]}** !`,
+                            undefined,
+                            () => {
+                                resetHundredsChallenge();
+                                const resetCols = initialColumns.map((col, i) => ({ ...col, unlocked: i === 0 || i === 1 || i === 2 }));
+                                set({ columns: resetCols });
+                                get().setPhase(nextChallenge.phase);
+                            }
+                        );
+                    }
                 } else {
-                    const nextChallenge = HUNDREDS_CHALLENGES[challengeIndex + 1];
-                    setTimeout(() => {
-                        resetHundredsChallenge();
-                        const resetCols = initialColumns.map((col, i) => ({ ...col, unlocked: i === 0 || i === 1 || i === 2 }));
-                        set({
-                            columns: resetCols
-                        });
-                        get().setPhase(nextChallenge.phase);
-                        get().setFeedback(`🎯 DÉFI ${challengeIndex + 2} : Affiche le nombre **${nextChallenge.targets[0]}** !`);
-                    }, FEEDBACK_DELAY * 2);
+                    // Prochain objectif
+                    sendNextGoal();
+                    const nextTarget = challenge.targets[hundredsTargetIndex + 1];
+                    const resetCols = initialColumns.map((col, i) => ({ ...col, unlocked: i === 0 || i === 1 || i === 2 }));
+                    set({ hundredsTargetIndex: hundredsTargetIndex + 1, columns: resetCols });
+                    sequenceFeedback(
+                        `✅ Correct ! ${newSuccessCount}/${challenge.targets.length} réussis !`,
+                        `Maintenant affiche **${nextTarget}** !`
+                    );
                 }
-            } else {
-                // Send next goal message to Unity
-                sendNextGoal();
-                
-                const nextTarget = challenge.targets[hundredsTargetIndex + 1];
-                const resetCols = initialColumns.map((col, i) => ({ ...col, unlocked: i === 0 || i === 1 || i === 2 }));
-                set({ hundredsTargetIndex: hundredsTargetIndex + 1, columns: resetCols });
-                sequenceFeedback(`✅ Correct ! ${newSuccessCount}/${challenge.targets.length} réussis !`, `Maintenant affiche **${nextTarget}** !`);
-            }
+            });
         } else {
-            // FAILURE - Generate progressive feedback
-            // Send wrong value message to Unity
+            // Échec
             sendWrongValue();
-            
             const newAttemptCount = attemptCount + 1;
             setAttemptCount(newAttemptCount);
 
@@ -3290,25 +3252,18 @@ export const useStore = create<MachineState>((set, get) => ({
                 lastUserAnswer: totalNumber
             });
 
-            get().setFeedback(feedbackMsg.message);
-
-            // Show help options on 4th attempt
-            if (feedbackMsg.showHelp) {
-                setShowHelpOptions(true);
-            }
-
-            // If too many attempts, increase consecutive failures
-            if (newAttemptCount >= 4) {
-                const newConsecutiveFailures = consecutiveFailures + 1;
-                setConsecutiveFailures(newConsecutiveFailures);
-
-                // Check for high frustration
-                if (newConsecutiveFailures >= 3) {
-                    setTimeout(() => {
-                        get().setFeedback(getFrustrationInterventionMessage());
-                    }, FEEDBACK_DELAY * 2);
+            speakAndThen(feedbackMsg.message, () => {
+                if (feedbackMsg.showHelp) {
+                    setShowHelpOptions(true);
                 }
-            }
+                if (newAttemptCount >= 4) {
+                    const newConsecutiveFailures = consecutiveFailures + 1;
+                    setConsecutiveFailures(newConsecutiveFailures);
+                    if (newConsecutiveFailures >= 3) {
+                        speakAndThen(getFrustrationInterventionMessage());
+                    }
+                }
+            });
         }
     },
 
@@ -3325,52 +3280,51 @@ export const useStore = create<MachineState>((set, get) => ({
         setCurrentTarget(targetNumber);
 
         if (totalNumber === targetNumber) {
-            // SUCCESS!
-            // Send correct value message to Unity
+            // Succès
             sendCorrectValue();
-            
             const successMsg = getSuccessMessage(attemptCount + 1, false);
-            get().setFeedback(successMsg);
+            get().speakAndThen(successMsg, () => {
+                resetAttempts();
+                setConsecutiveFailures(0);
+                setTotalChallengesCompleted(totalChallengesCompleted + 1);
+                const newSuccessCount = thousandToTwoThousandSuccessCount + 1;
+                set({ thousandToTwoThousandSuccessCount: newSuccessCount });
 
-            // Reset attempts and update stats
-            resetAttempts();
-            setConsecutiveFailures(0);
-            setTotalChallengesCompleted(totalChallengesCompleted + 1);
-
-            const newSuccessCount = thousandToTwoThousandSuccessCount + 1;
-            set({ thousandToTwoThousandSuccessCount: newSuccessCount });
-
-            if (thousandToTwoThousandTargetIndex + 1 >= challenge.targets.length) {
-                // All challenges completed!
-                get().speakAndThen("🎉 Tous les mini-défis 1000-2000 réussis ! Tu maîtrises la zone 1000-2000 !", () => {
+                if (thousandToTwoThousandTargetIndex + 1 >= challenge.targets.length) {
+                    sequenceFeedback(
+                        "🎉 Tous les mini-défis 1000-2000 réussis ! Tu maîtrises la zone 1000-2000 !",
+                        "Bravo ! Maintenant on va découvrir 2000-3000 !",
+                        () => {
+                            const resetCols = initialColumns.map((col) => ({ ...col, unlocked: true }));
+                            resetCols[3].value = 2;
+                            resetCols[2].value = 0;
+                            resetCols[1].value = 0;
+                            resetCols[0].value = 0;
+                            set({
+                                columns: resetCols,
+                                phase: 'learn-two-thousand-to-three-thousand',
+                                pendingAutoCount: false,
+                                isCountingAutomatically: false
+                            });
+                            get().updateButtonVisibility();
+                            sequenceFeedback("DEUX-MILLE ! Monte directement à 2500 ! △");
+                        }
+                    );
+                } else {
+                    // Prochain objectif
+                    sendNextGoal();
+                    const nextTarget = challenge.targets[thousandToTwoThousandTargetIndex + 1];
                     const resetCols = initialColumns.map((col) => ({ ...col, unlocked: true }));
-                    resetCols[3].value = 2;
-                    resetCols[2].value = 0;
-                    resetCols[1].value = 0;
-                    resetCols[0].value = 0;
-                    set({
-                        columns: resetCols,
-                        phase: 'learn-two-thousand-to-three-thousand',
-                        pendingAutoCount: false,
-                        isCountingAutomatically: false
-                    });
-                    get().updateButtonVisibility();
-                    sequenceFeedback("Bravo ! Maintenant on va découvrir 2000-3000 !", "DEUX-MILLE ! Monte directement à 2500 ! △");
-                });
-            } else {
-                // Send next goal message to Unity
-                sendNextGoal();
-                
-                const nextTarget = challenge.targets[thousandToTwoThousandTargetIndex + 1];
-                const resetCols = initialColumns.map((col) => ({ ...col, unlocked: true }));
-                set({ thousandToTwoThousandTargetIndex: thousandToTwoThousandTargetIndex + 1, columns: resetCols });
-                sequenceFeedback(`✅ Correct ! ${newSuccessCount}/${challenge.targets.length} réussis !`, `Maintenant affiche **${nextTarget}** !`);
-            }
+                    set({ thousandToTwoThousandTargetIndex: thousandToTwoThousandTargetIndex + 1, columns: resetCols });
+                    sequenceFeedback(
+                        `✅ Correct ! ${newSuccessCount}/${challenge.targets.length} réussis !`,
+                        `Maintenant affiche **${nextTarget}** !`
+                    );
+                }
+            });
         } else {
-            // FAILURE - Generate progressive feedback
-            // Send wrong value message to Unity
+            // Échec
             sendWrongValue();
-            
             const newAttemptCount = attemptCount + 1;
             setAttemptCount(newAttemptCount);
 
@@ -3382,25 +3336,18 @@ export const useStore = create<MachineState>((set, get) => ({
                 lastUserAnswer: totalNumber
             });
 
-            get().setFeedback(feedbackMsg.message);
-
-            // Show help options on 4th attempt
-            if (feedbackMsg.showHelp) {
-                setShowHelpOptions(true);
-            }
-
-            // If too many attempts, increase consecutive failures
-            if (newAttemptCount >= 4) {
-                const newConsecutiveFailures = consecutiveFailures + 1;
-                setConsecutiveFailures(newConsecutiveFailures);
-
-                // Check for high frustration
-                if (newConsecutiveFailures >= 3) {
-                    setTimeout(() => {
-                        get().setFeedback(getFrustrationInterventionMessage());
-                    }, FEEDBACK_DELAY * 2);
+            get().speakAndThen(feedbackMsg.message, () => {
+                if (feedbackMsg.showHelp) {
+                    setShowHelpOptions(true);
                 }
-            }
+                if (newAttemptCount >= 4) {
+                    const newConsecutiveFailures = consecutiveFailures + 1;
+                    setConsecutiveFailures(newConsecutiveFailures);
+                    if (newConsecutiveFailures >= 3) {
+                        get().speakAndThen(getFrustrationInterventionMessage());
+                    }
+                }
+            });
         }
     },
 
@@ -3417,48 +3364,47 @@ export const useStore = create<MachineState>((set, get) => ({
         setCurrentTarget(targetNumber);
 
         if (totalNumber === targetNumber) {
-            // SUCCESS!
-            // Send correct value message to Unity
+            // Succès
             sendCorrectValue();
-            
             const successMsg = getSuccessMessage(attemptCount + 1, false);
-            get().setFeedback(successMsg);
+            get().speakAndThen(successMsg, () => {
+                resetAttempts();
+                setConsecutiveFailures(0);
+                setTotalChallengesCompleted(totalChallengesCompleted + 1);
+                const newSuccessCount = twoThousandToThreeThousandSuccessCount + 1;
+                set({ twoThousandToThreeThousandSuccessCount: newSuccessCount });
 
-            // Reset attempts and update stats
-            resetAttempts();
-            setConsecutiveFailures(0);
-            setTotalChallengesCompleted(totalChallengesCompleted + 1);
-
-            const newSuccessCount = twoThousandToThreeThousandSuccessCount + 1;
-            set({ twoThousandToThreeThousandSuccessCount: newSuccessCount });
-
-            if (twoThousandToThreeThousandTargetIndex + 1 >= challenge.targets.length) {
-                // All challenges completed!
-                get().speakAndThen("🎉 Tous les mini-défis 2000-3000 réussis ! Tu maîtrises la zone 2000-3000 !", () => {
+                if (twoThousandToThreeThousandTargetIndex + 1 >= challenge.targets.length) {
+                    sequenceFeedback(
+                        "🎉 Tous les mini-défis 2000-3000 réussis ! Tu maîtrises la zone 2000-3000 !",
+                        "Bravo ! Maintenant regarde la machine compter les milliers RONDS !",
+                        () => {
+                            const resetCols = initialColumns.map((col) => ({ ...col, unlocked: true }));
+                            set({
+                                columns: resetCols,
+                                phase: 'learn-thousands',
+                                pendingAutoCount: true,
+                                isCountingAutomatically: false
+                            });
+                            get().updateButtonVisibility();
+                            sequenceFeedback("3000, 4000, 5000... Observe bien !");
+                        }
+                    );
+                } else {
+                    // Prochain objectif
+                    sendNextGoal();
+                    const nextTarget = challenge.targets[twoThousandToThreeThousandTargetIndex + 1];
                     const resetCols = initialColumns.map((col) => ({ ...col, unlocked: true }));
-                    set({
-                        columns: resetCols,
-                        phase: 'learn-thousands',
-                        pendingAutoCount: true,
-                        isCountingAutomatically: false
-                    });
-                    get().updateButtonVisibility();
-                    sequenceFeedback("Bravo ! Maintenant regarde la machine compter les milliers RONDS !", "3000, 4000, 5000... Observe bien !");
-                });
-            } else {
-                // Send next goal message to Unity
-                sendNextGoal();
-                
-                const nextTarget = challenge.targets[twoThousandToThreeThousandTargetIndex + 1];
-                const resetCols = initialColumns.map((col) => ({ ...col, unlocked: true }));
-                set({ twoThousandToThreeThousandTargetIndex: twoThousandToThreeThousandTargetIndex + 1, columns: resetCols });
-                sequenceFeedback(`✅ Correct ! ${newSuccessCount}/${challenge.targets.length} réussis !`, `Maintenant affiche **${nextTarget}** !`);
-            }
+                    set({ twoThousandToThreeThousandTargetIndex: twoThousandToThreeThousandTargetIndex + 1, columns: resetCols });
+                    sequenceFeedback(
+                        `✅ Correct ! ${newSuccessCount}/${challenge.targets.length} réussis !`,
+                        `Maintenant affiche **${nextTarget}** !`
+                    );
+                }
+            });
         } else {
-            // FAILURE - Generate progressive feedback
-            // Send wrong value message to Unity
+            // Échec
             sendWrongValue();
-            
             const newAttemptCount = attemptCount + 1;
             setAttemptCount(newAttemptCount);
 
@@ -3470,25 +3416,18 @@ export const useStore = create<MachineState>((set, get) => ({
                 lastUserAnswer: totalNumber
             });
 
-            get().setFeedback(feedbackMsg.message);
-
-            // Show help options on 4th attempt
-            if (feedbackMsg.showHelp) {
-                setShowHelpOptions(true);
-            }
-
-            // If too many attempts, increase consecutive failures
-            if (newAttemptCount >= 4) {
-                const newConsecutiveFailures = consecutiveFailures + 1;
-                setConsecutiveFailures(newConsecutiveFailures);
-
-                // Check for high frustration
-                if (newConsecutiveFailures >= 3) {
-                    setTimeout(() => {
-                        get().setFeedback(getFrustrationInterventionMessage());
-                    }, FEEDBACK_DELAY * 2);
+            get().speakAndThen(feedbackMsg.message, () => {
+                if (feedbackMsg.showHelp) {
+                    setShowHelpOptions(true);
                 }
-            }
+                if (newAttemptCount >= 4) {
+                    const newConsecutiveFailures = consecutiveFailures + 1;
+                    setConsecutiveFailures(newConsecutiveFailures);
+                    if (newConsecutiveFailures >= 3) {
+                        get().speakAndThen(getFrustrationInterventionMessage());
+                    }
+                }
+            });
         }
     },
 
@@ -3678,7 +3617,7 @@ export const useStore = create<MachineState>((set, get) => ({
 
     updateInstruction: () => {
         const { phase, unitTargetIndex, unitSuccessCount, tensTargetIndex, tensSuccessCount, hundredsTargetIndex, hundredsSuccessCount, thousandsTargetIndex, thousandsSuccessCount } = get();
-        console.log('phase', phase);
+        console.log(' gedo phase', phase);
 
         let newInstruction = "";
 
@@ -3916,11 +3855,10 @@ export const useStore = create<MachineState>((set, get) => ({
 
         console.log('newInstruction', newInstruction);
         set({ instruction: newInstruction });
-        
-        // Speak the instruction using text-to-speech
-        if (newInstruction) {
-            textToSpeechService.speak(newInstruction);
-        }
+
+        // NOTE: Do NOT call textToSpeechService.speak() here!
+        // Let speakAndThen() and sequenceFeedback() be the only ones controlling speech
+        // This prevents callback conflicts and ensures TTS-driven transitions work correctly
     },
 
     startLearningPhase: () => {
@@ -4151,92 +4089,8 @@ useStore.subscribe(
     (state, previousState) => {
         // Automatically trigger transitions and auto-counting when conditions are met
 
-        // Get the appropriate index based on the current phase
-        // These variables were used for tracking but are currently unused
-        // Keeping the logic in case it's needed in the future
-        /*
-        let currentIndex = 0;
-        let previousIndex = 0;
-        if (state.phase.startsWith('challenge-unit-')) {
-            currentIndex = state.unitTargetIndex;
-            previousIndex = previousState.unitTargetIndex;
-        } else if (state.phase === 'challenge-ten-to-twenty') {
-            currentIndex = state.tenToTwentyTargetIndex;
-            previousIndex = previousState.tenToTwentyTargetIndex;
-        } else if (state.phase.startsWith('challenge-tens-')) {
-            currentIndex = state.tensTargetIndex;
-            previousIndex = previousState.tensTargetIndex;
-        } else if (state.phase === 'challenge-hundred-to-two-hundred') {
-            currentIndex = state.hundredToTwoHundredTargetIndex;
-            previousIndex = previousState.hundredToTwoHundredTargetIndex;
-        } else if (state.phase === 'challenge-two-hundred-to-three-hundred') {
-            currentIndex = state.twoHundredToThreeHundredTargetIndex;
-            previousIndex = previousState.twoHundredToThreeHundredTargetIndex;
-        } else if (state.phase.startsWith('challenge-hundreds-')) {
-            currentIndex = state.hundredsTargetIndex;
-            previousIndex = previousState.hundredsTargetIndex;
-        } else if (state.phase === 'challenge-thousand-to-two-thousand') {
-            currentIndex = state.thousandToTwoThousandTargetIndex;
-            previousIndex = previousState.thousandToTwoThousandTargetIndex;
-        } else if (state.phase === 'challenge-two-thousand-to-three-thousand') {
-            currentIndex = state.twoThousandToThreeThousandTargetIndex;
-            previousIndex = previousState.twoThousandToThreeThousandTargetIndex;
-        } else if (state.phase === 'challenge-thousands-simple-combination') {
-            currentIndex = state.thousandsSimpleCombinationTargetIndex;
-            previousIndex = previousState.thousandsSimpleCombinationTargetIndex;
-        } else if (state.phase.startsWith('challenge-thousands-')) {
-            currentIndex = state.thousandsTargetIndex;
-            previousIndex = previousState.thousandsTargetIndex;
-        }
-        */
-        
-        // Only send remaining targets to Unity when phase changes or target index changes
-        // Currently disabled as not needed
-        // if (state.phase !== previousState.phase || currentIndex !== previousIndex) {
-        //     sendRemainingTargetsToUnity(state.phase, currentIndex);
-        // }
-        
-        // Handle intro-welcome phase transition
-        if (state.phase === 'intro-welcome') {
-            // Clear any existing timer first
-            if (state.timer) {
-                clearTimeout(state.timer);
-            }
-
-            setTimeout(() => {
-                const currentState = useStore.getState();
-                // Verify we're still in the same phase before transitioning
-                if (currentState.phase === 'intro-welcome') {
-                    currentState.setPhase('intro-discover');
-                    currentState.setTimer(null);
-                    currentState.updateButtonVisibility();
-                    currentState.updateInstruction();
-                }
-            }, 3000);
-        }
-
-        // Handle intro-discover phase transition
-        if (state.phase === 'intro-discover') {
-            // Clear any existing timer first
-            if (state.timer) {
-                clearTimeout(state.timer);
-            }
-
-            setTimeout(() => {
-                const currentState = useStore.getState();
-                // Verify we're still in the same phase before transitioning
-                if (currentState.phase === 'intro-discover') {
-                    currentState.setPhase('tutorial');
-                    //    currentState.setTimer(null);
-                    currentState.updateButtonVisibility();
-                    currentState.updateInstruction();
-                }
-            }, 3000);
-
-            //useStore.getState().setTimer(newTimer as unknown as number);
-        }
-
-
+        // NOTE: intro-welcome and intro-discover transitions are now handled by speakAndThen in setPhase
+        // Do NOT add setTimeout here as it conflicts with TTS-driven transitions
 
         // Handle auto-counting trigger for learn phases
         if (
