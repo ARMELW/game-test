@@ -3892,9 +3892,7 @@ export const useStore = create<MachineState>((set, get) => ({
             default:
                 newInstruction = PHASE_INSTRUCTIONS['default'];
         }
-        get().speakAndThen(newInstruction, ()=> {
-            get().setPhase('intro-discover');
-        })
+        get().speakAndThen(newInstruction);
         set({ instruction: newInstruction });
 
 
