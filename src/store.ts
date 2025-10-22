@@ -4424,6 +4424,9 @@ useStore.subscribe(
             if (phase == 'intro-first-interaction' && isUnit) {
                 lockUnits = false;
             }
+             if(phase == 'intro-second-column' && isUnit){
+                lockUnits = true;
+            }
 
             else if (phase === "normal") {
                 // In normal mode, directly use store unlock state
