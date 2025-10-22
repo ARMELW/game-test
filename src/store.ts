@@ -4432,12 +4432,12 @@ useStore.subscribe(
                 lockUnits = false;
             }
              if(phase == 'intro-second-column' && isUnit){
-                lockUnits = true;
+                lockUnits = false;
             }
              if(phase == 'delock-dizaines'){
                 // During unlock phase, keep everything locked to show the unlocking animation
-                lockUnits = true;
-                lockTens = true;
+                lockUnits = false;
+                lockTens = false;
             }
 
             else if (phase === "normal") {
