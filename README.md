@@ -96,7 +96,7 @@ const status = getPhaseStatus('tutorial');
 // Marquer une phase comme terminée
 markPhaseComplete('tutorial');
 
-// Activer les transitions automatiques
+// Activer/désactiver les transitions automatiques (activées par défaut)
 setAutoTransitionEnabled(true);
 ```
 

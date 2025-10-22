@@ -47,7 +47,7 @@ Enregistre le statut de toutes les phases du jeu.
 ### autoTransitionEnabled
 - **Type**: `boolean`
 - **Description**: Active/désactive les transitions automatiques entre phases
-- **Valeur initiale**: `false`
+- **Valeur initiale**: `true`
 
 ## Fonctions
 

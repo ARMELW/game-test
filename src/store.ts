@@ -234,7 +234,7 @@ export const useStore = create<MachineState>((set, get) => ({
 
     // Phase status tracking
     phaseStatusMap: createInitialPhaseStatusMap(),
-    autoTransitionEnabled: false,
+    autoTransitionEnabled: true,
 
     // Actions
     setColumns: (updater) => {
