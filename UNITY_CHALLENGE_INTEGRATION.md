@@ -31,16 +31,18 @@ setPhase('challenge-unit-1');
 // Sends: ChangeList3/5/7
 ```
 
-#### 2. Target Index Changes
-When a target index is updated (moving to the next target in a challenge), Unity receives the remaining targets starting from the new index.
+#### 2. Moving to Next Target
+When a target is successfully validated and there are more targets in the challenge, Unity receives a `next goal` message to advance to the next target in its current list.
 
 **Example:**
 ```typescript
 // Challenge has targets [3, 5, 7]
-setUnitTargetIndex(0); // Sends: ChangeList3/5/7
-setUnitTargetIndex(1); // Sends: ChangeList5/7
-setUnitTargetIndex(2); // Sends: ChangeList7
+// User validates target 3 successfully
+sendNextGoal(); // Sends: "next goal" message
+// Unity advances to show target 5 (second item in its list)
 ```
+
+**Note:** Unity keeps the full list of targets it received when the phase started and advances through it using the `next goal` message. This prevents synchronization issues.
 
 #### 3. Challenge Reset
 When a challenge is reset, Unity receives the full list of targets again.
@@ -82,15 +84,16 @@ export function sendChallengeListToUnity(targets: number[]) {
 
 ### store.ts
 
-Added two helper functions:
+Added helper functions:
 
 1. **sendChallengeToUnity(phase: string)**: Sends the full challenge list for a given phase
-2. **sendRemainingTargetsToUnity(phase: string, currentIndex: number)**: Sends remaining targets from the current index
+2. **sendRemainingTargetsToUnity(phase: string, currentIndex: number)**: Sends remaining targets from the current index (only used when phase changes)
 
 These helpers are integrated into:
 - `setPhase()` - Sends full list when entering challenge phase
-- All `setXxxTargetIndex()` functions - Sends remaining targets when index changes
+- Subscriber - Sends full list only when phase changes to a challenge phase (prevents race conditions)
 - All `resetXxxChallenge()` functions - Sends full list on reset
+- Validation handlers - Send `sendNextGoal()` message to advance Unity through its current list
 
 ## Error Handling
 
@@ -112,15 +115,20 @@ To verify the integration:
 ## Example Flow
 
 ```
-User Flow                          Unity Message
-─────────────────────────────────  ──────────────────────────
-Enter challenge-unit-1              ChangeList3/5/7
-Complete target 3                   ChangeList5/7
-Complete target 5                   ChangeList7
-Complete target 7                   (Challenge complete)
-Enter challenge-unit-2              ChangeList2/6/8
-Reset challenge                     ChangeList2/6/8
+User Flow                          Unity Message                React State
+─────────────────────────────────  ──────────────────────────   ─────────────────────────
+Enter challenge-unit-1              ChangeList3/5/7              targetIndex=0, showing 3
+Complete target 3                   "next goal"                  targetIndex=1, showing 5
+Complete target 5                   "next goal"                  targetIndex=2, showing 7
+Complete target 7                   (Challenge complete)         Move to next phase
+Enter challenge-unit-2              ChangeList2/6/8              targetIndex=0, showing 2
+Reset challenge                     ChangeList2/6/8              targetIndex=0, showing 2
 ```
+
+**Key Point:** Unity maintains the full goal list and advances through it using "next goal" messages. The goal list is only sent when:
+- Entering a new challenge phase
+- Resetting a challenge
+- NOT when just incrementing the target index (this prevents synchronization issues)
 
 ## Notes
 
