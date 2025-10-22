@@ -77,6 +77,31 @@ L'application suit un parcours d'apprentissage progressif :
 7. **Phase Échange** (learn-carry) : Découverte de l'échange 10 pour 1
 8. **Mode Libre** (normal) : Manipulation libre des nombres
 
+### 🎯 Suivi de Complétion des Phases
+
+Le système de suivi de complétion des phases permet de :
+- Connaître l'état de chaque phase (non-démarrée, en-cours, terminée)
+- Passer automatiquement d'une phase à l'autre
+- Suivre la progression globale de l'apprentissage
+
+**Documentation complète :**
+- [Guide API de Suivi des Phases](docs/PHASE_COMPLETION_TRACKING.md)
+- [Exemples d'Utilisation](docs/PHASE_COMPLETION_EXAMPLES.md)
+
+**Utilisation rapide :**
+```typescript
+// Vérifier le statut d'une phase
+const status = getPhaseStatus('tutorial');
+
+// Marquer une phase comme terminée
+markPhaseComplete('tutorial');
+
+// Activer les transitions automatiques
+setAutoTransitionEnabled(true);
+```
+
+**Mode Debug :** En développement, un panneau de debug s'affiche automatiquement pour tester le système. En production, ajoutez `?debug` à l'URL.
+
 ## 🎮 Integration Unity
 
 L'application intègre un jeu Unity WebGL qui affiche une **machine à compter virtuelle en 3D**. Cette machine remplace l'ancienne représentation visuelle avec jetons et offre une expérience plus immersive et engageante pour les enfants.
