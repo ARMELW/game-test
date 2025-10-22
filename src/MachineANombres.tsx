@@ -446,7 +446,8 @@ function MachineANombres() {
           }}
           onClick={async () => {
             // Débloquer l'AudioContext si besoin (compatibilité Chrome/Safari)
-             const AudioCtx = window.AudioContext || (window.webkitAudioContext as typeof window.AudioContext);
+            const WindowWithWebkit = window as Window & { webkitAudioContext?: typeof AudioContext };
+            const AudioCtx = window.AudioContext || WindowWithWebkit.webkitAudioContext;
             if (AudioCtx) {
               try {
                 const ctx = new AudioCtx();
