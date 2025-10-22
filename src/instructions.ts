@@ -62,6 +62,7 @@ export const PHASE_INSTRUCTIONS = {
   
   // Tutorial phases
   'tutorial': "Bienvenue ! Clique sur △ pour découvrir la machine !",
+  'tutorial-challenge': "Maintenant, un petit défi pour apprendre ! 🎯",
   'explore-units': "Clique sur △ pour ajouter une bille. Lève UN doigt à chaque clic. Répète : UN, DEUX, TROIS !",
   'click-add': "Continue jusqu'à 9 ! Chaque clic ajoute UNE bille !",
   'click-remove': "Clique sur ∇ pour enlever les billes jusqu'à ZÉRO !",
@@ -111,6 +112,11 @@ export const PHASE_INSTRUCTIONS = {
 // ============================================================================
 
 export const CHALLENGE_INSTRUCTIONS = {
+  tutorialChallenge: (targetNumber: number) =>
+    `🎯 PREMIER DÉFI : Affiche le nombre **${targetNumber}** puis clique sur VALIDER ! 
+    
+Essaie de le faire ! Si tu te trompes, ce n'est pas grave, tu apprendras ce qu'il se passe ! 😊`,
+  
   units: (challengeIndex: number, targetNumber: number, successCount: number, totalTargets: number) =>
     `DÉFI ${challengeIndex + 1} : Affiche **${targetNumber}** puis clique sur VALIDER ! (${successCount}/${totalTargets})`,
   

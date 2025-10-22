@@ -22,6 +22,7 @@ function MachineANombres() {
     handleAdd,
     handleSubtract,
     handleSetValue,
+    handleValidateTutorialChallenge,
     handleValidateLearning,
     handleValidateTenToTwenty,
     handleValidateTens,
@@ -92,6 +93,8 @@ function MachineANombres() {
     }, 100);
     if (phase === "challenge-ten-to-twenty") {
       handleValidateTenToTwenty();
+    } else if (phase === 'tutorial-challenge') {
+      handleValidateTutorialChallenge();
     } else if (
       phase === "challenge-unit-1" ||
       phase === "challenge-unit-2" ||
