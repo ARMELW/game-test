@@ -38,14 +38,14 @@ import {
     HELP_CHOICE_MESSAGES,
     GUIDED_MESSAGES,
 } from './instructions.ts';
-import { sendChallengeListToUnity, setValue, sendCorrectValue, sendWrongValue, sendNextGoal } from './unityBridge.ts';
+import { sendChallengeListToUnity, setValue, sendCorrectValue, sendWrongValue, sendNextGoal, LockUnitRoll, LockTenRoll, LockThousandRoll, LockHundredRoll } from './unityBridge.ts';
 import { textToSpeechService } from './voice/services/speech/text-to-speech.ts';
 
 export const initialColumns: Column[] = [
-    { name: 'Unités', value: 0, unlocked: false, color: 'bg-green-500' },
-    { name: 'Dizaines', value: 0, unlocked: false, color: 'bg-blue-500' },
-    { name: 'Centaines', value: 0, unlocked: false, color: 'bg-yellow-500' },
-    { name: 'Milliers', value: 0, unlocked: false, color: 'bg-red-500' },
+    { name: 'Unités', value: 0, unlocked: true, color: 'bg-green-500' },
+    { name: 'Dizaines', value: 0, unlocked: true, color: 'bg-blue-500' },
+    { name: 'Centaines', value: 0, unlocked: true, color: 'bg-yellow-500' },
+    { name: 'Milliers', value: 0, unlocked: true, color: 'bg-red-500' },
 ];
 
 // Initialize phase status map with all phases as 'not-started'
@@ -4403,4 +4403,141 @@ Tu veux :
         }, 500);
     },
 }));
+useStore.subscribe(
+    (state) => {
+        const phase = state.phase;
+        const columns = state.columns;
+        const isCountingAutomatically = state.isCountingAutomatically;
+        if(phase != 'loading'){
+      // Get unlocked state from store columns - this is the source of truth
+      const isUnit = columns[0]?.unlocked || false;
+      const isTen = columns[1]?.unlocked || false;
+      const isHundred = columns[2]?.unlocked || false;
+      const isThousand = columns[3]?.unlocked || false;
 
+      console.log('isUnit:', isUnit);
+
+      // Lock all rolls initially
+      let lockUnits = true;
+      let lockTens = true;
+      let lockHundreds = true;
+      let lockThousands = true;
+
+      // Determine which rolls should be unlocked based on phase and column unlock state
+      if (phase === "intro-welcome" && isUnit) {
+        lockUnits = false;
+      } else if (phase === "intro-discover" && isUnit) {
+        lockUnits = false;
+      } else if (phase === "intro-add-roll" && isUnit) {
+        lockUnits = false;
+      } else if (phase === "normal") {
+        // In normal mode, directly use store unlock state
+        lockUnits = !isUnit;
+        lockTens = !isTen;
+        lockHundreds = !isHundred;
+        lockThousands = !isThousand;
+      } else if (
+        (phase === "tutorial" ||
+          phase === "explore-units" ||
+          phase === "click-add" ||
+          phase === "click-remove" ||
+          phase.startsWith("challenge-unit-") ||
+          phase === "challenge-ten-to-twenty") &&
+        isUnit
+      ) {
+        lockUnits = false;
+      } else if (phase === "learn-carry" && isUnit) {
+        lockUnits = false;
+      } else if (phase === "practice-ten" && (isUnit || isTen)) {
+        // Use store unlock state for practice
+        lockUnits = !isUnit;
+        lockTens = !isTen;
+      } else if (
+        (phase === "learn-ten-to-twenty" ||
+          phase === "learn-twenty-to-thirty") &&
+        isUnit
+      ) {
+        lockUnits = false;
+      } else if (
+        phase === "practice-hundred" &&
+        (isUnit || isTen || isHundred)
+      ) {
+        // Use store unlock state for practice
+        lockUnits = !isUnit;
+        lockTens = !isTen;
+        lockHundreds = !isHundred;
+      } else if (
+        (phase === "learn-hundred-to-hundred-ten" ||
+          phase === "learn-hundred-ten-to-two-hundred" ||
+          phase === "challenge-hundred-to-two-hundred" ||
+          phase === "learn-two-hundred-to-three-hundred" ||
+          phase === "challenge-two-hundred-to-three-hundred") &&
+        isUnit
+      ) {
+        lockUnits = false;
+      } else if (
+        (phase.startsWith("challenge-tens-") ||
+          phase === "learn-tens-combination") &&
+        (isUnit || isTen)
+      ) {
+        // Use store unlock state
+        lockUnits = !isUnit;
+        lockTens = !isTen;
+      } else if (
+        (phase.startsWith("challenge-hundreds-") ||
+          phase === "learn-hundreds-combination" ||
+          phase === "learn-hundreds-simple-combination") &&
+        (isUnit || isTen || isHundred)
+      ) {
+        // Use store unlock state
+        lockUnits = !isUnit;
+        lockTens = !isTen;
+        lockHundreds = !isHundred;
+      } else if (
+        phase === "practice-thousand" &&
+        (isUnit || isTen || isHundred || isThousand)
+      ) {
+        // Use store unlock state for practice
+        lockUnits = !isUnit;
+        lockTens = !isTen;
+        lockHundreds = !isHundred;
+        lockThousands = !isThousand;
+      } else if (
+        (phase === "learn-thousand-to-thousand-ten" ||
+          phase === "learn-thousand-to-thousand-hundred" ||
+          phase === "learn-thousand-hundred-to-two-thousand" ||
+          phase === "challenge-thousand-to-two-thousand" ||
+          phase === "learn-two-thousand-to-three-thousand" ||
+          phase === "challenge-two-thousand-to-three-thousand") &&
+        isUnit
+      ) {
+        lockUnits = false;
+      } else if (
+        (phase.startsWith("challenge-thousands-") ||
+          phase === "learn-thousands-combination" ||
+          phase === "challenge-thousands-simple-combination" ||
+          phase === "learn-thousands-very-simple-combination" ||
+          phase === "learn-thousands-full-combination") &&
+        (isUnit || isTen || isHundred || isThousand)
+      ) {
+        // Use store unlock state
+        lockUnits = !isUnit;
+        lockTens = !isTen;
+        lockHundreds = !isHundred;
+        lockThousands = !isThousand;
+      }
+
+      // During auto-counting, lock everything
+      if (isCountingAutomatically) {
+        lockUnits = true;
+        lockTens = true;
+        lockHundreds = true;
+        lockThousands = true;
+      }
+      
+      LockUnitRoll(lockUnits);
+      LockTenRoll(lockTens);
+      LockHundredRoll(lockHundreds);
+      LockThousandRoll(lockThousands);
+    }
+    });
