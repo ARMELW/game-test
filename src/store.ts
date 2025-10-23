@@ -3980,10 +3980,10 @@ export const useStore = create<MachineState>((set, get) => ({
                 
                 // Transition to intro-discover-carry after unlocking
                 console.log('[updateInstruction] delock-dizaines complete, transitioning to intro-discover-carry');
-                get().speakAndThen("(Bruit d'allumage : bzzzz, ding !)", () => {
-                    set({ phase: 'intro-discover-carry' });
+                /**get().speakAndThen("(Bruit d'allumage : bzzzz, ding !)", () => {
+                    set({ phase: 'practice-ten' });
                     get().updateInstruction();
-                });
+                });**/
             });
         } else if (phase === 'challenge-unit-intro') {
             get().speakAndThen(newInstruction, () => {
