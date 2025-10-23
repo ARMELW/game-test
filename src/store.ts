@@ -2812,12 +2812,13 @@ export const useStore = create<MachineState>((set, get) => ({
                         const resetCols = get().columns.map((col, i) =>
                             i === 0 ? { ...col, value: 0 } : col
                         );
-                        set({
+                        /**set({
                             columns: resetCols,
                             phase: 'learn-carry'
                         });
                         get().updateButtonVisibility();
                         sequenceFeedback("Prêt pour la magie ?  Tu vas voir l'échange 10 pour 1 !", "D'abord, compte jusqu'à 9 en cliquant sur △. Ensuite, la magie va opérer ! ");
+                        **/
                     } else {
                         // Moving to next challenge phase - do NOT call sendNextGoal() 
                         // because setPhase will send a new challenge list to Unity
