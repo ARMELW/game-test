@@ -1235,10 +1235,10 @@ export const useStore = create<MachineState>((set, get) => ({
                 get().speakAndThen("STOP ! 🛑 Le compteur est à 90. Tu as vu tous les nombres avec les dizaines ! Bravo !", () => {
                     get().setColumns(initialColumns);
                     get().setIsCountingAutomatically(false);
-                    get().speakAndThen("Retour à zéro ! 🔄 Maintenant on va apprendre à combiner les dizaines et les unités !", () => {
+                    //get().speakAndThen("Retour à zéro ! 🔄 Maintenant on va apprendre à combiner les dizaines et les unités !", () => {
                   //      get().setPhase('learn-tens-combination');
                   //      get().setPendingAutoCount(true);
-                    });
+                   // });
                 });
             }
         }
@@ -1345,10 +1345,10 @@ export const useStore = create<MachineState>((set, get) => ({
                 get().speakAndThen("STOP ! 🛑 Le compteur est à 900. Tu as vu tous les nombres avec les centaines ! Bravo !", () => {
                     get().setColumns(initialColumns);
                     get().setIsCountingAutomatically(false);
-                    get().speakAndThen("Retour à zéro ! 🔄 Maintenant on va apprendre à combiner les centaines avec des exemples simples !", () => {
+                    //get().speakAndThen("Retour à zéro ! 🔄 Maintenant on va apprendre à combiner les centaines avec des exemples simples !", () => {
                         //get().setPhase('learn-hundreds-simple-combination');
                         //get().setPendingAutoCount(true);
-                    });
+                    //});
                 });
             }
         }
