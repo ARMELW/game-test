@@ -251,6 +251,10 @@ export interface MachineState {
     thousandsSimpleCombinationSuccessCount: number;
     timer: number | null;
 
+  // Unity loading state
+  unityLoaded: boolean;
+  unityLoadingProgression: number;
+
   // Phase completion tracking
   phaseStatusMap: PhaseStatusMap;
   autoTransitionEnabled: boolean;
@@ -372,6 +376,8 @@ export interface MachineState {
     setShowInputField: (show: boolean) => void;
     handleUserInputSubmit: () => void;
     setTimer: (timer: number | null) => void;
+    setUnityLoaded: (loaded: boolean) => void;
+    setUnityLoadingProgression: (progression: number) => void;
 
     // Business logic
     setFeedbackSequence: (sequence: string[], callback?: () => void) => void;
