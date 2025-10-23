@@ -55,6 +55,8 @@ function MachineANombres() {
     handleIntroNameSubmit,
     handleIntroMachineResponse,
     handleIntroSecondColumnChoice,
+    handleIntroThirdColumnChoice,
+    handleIntroFourthColumnChoice,
     introMaxAttempt: _introMaxAttempt,
     // Phase navigation functions
     goToNextPhase,
@@ -755,6 +757,136 @@ function MachineANombres() {
             </button>
             <button
               onClick={() => handleIntroSecondColumnChoice("sais-pas")}
+              style={{
+                fontSize: 16,
+                padding: "10px 20px",
+                background: "linear-gradient(135deg, #94a3b8 0%, #64748b 100%)",
+                color: "#fff",
+                border: "none",
+                borderRadius: 8,
+                cursor: "pointer",
+                fontWeight: "bold",
+                boxShadow: "0 4px 8px rgba(148, 163, 184, 0.3)",
+                width: "280px",
+              }}
+            >
+              Je ne sais pas !
+            </button>
+          </div>
+        )}
+
+        {/* Choice buttons for intro-three-column */}
+        {phase === "intro-three-column" && (
+          <div
+            style={{
+              marginTop: 20,
+              display: "flex",
+              flexDirection: "column",
+              gap: 8,
+              alignItems: "center",
+            }}
+          >
+            <button
+              onClick={() => handleIntroThirdColumnChoice("ajouter-rouleau")}
+              style={{
+                fontSize: 16,
+                padding: "10px 20px",
+                background: "linear-gradient(135deg, #22c55e 0%, #16a34a 100%)",
+                color: "#fff",
+                border: "none",
+                borderRadius: 8,
+                cursor: "pointer",
+                fontWeight: "bold",
+                boxShadow: "0 4px 8px rgba(34, 197, 94, 0.3)",
+                width: "280px",
+              }}
+            >
+              Ajouter un troisième rouleau !
+            </button>
+            <button
+              onClick={() => handleIntroThirdColumnChoice("plus-grande")}
+              style={{
+                fontSize: 16,
+                padding: "10px 20px",
+                background: "linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%)",
+                color: "#fff",
+                border: "none",
+                borderRadius: 8,
+                cursor: "pointer",
+                fontWeight: "bold",
+                boxShadow: "0 4px 8px rgba(14, 165, 233, 0.3)",
+                width: "280px",
+              }}
+            >
+              Faire une encore plus grande machine !
+            </button>
+            <button
+              onClick={() => handleIntroThirdColumnChoice("sais-pas")}
+              style={{
+                fontSize: 16,
+                padding: "10px 20px",
+                background: "linear-gradient(135deg, #94a3b8 0%, #64748b 100%)",
+                color: "#fff",
+                border: "none",
+                borderRadius: 8,
+                cursor: "pointer",
+                fontWeight: "bold",
+                boxShadow: "0 4px 8px rgba(148, 163, 184, 0.3)",
+                width: "280px",
+              }}
+            >
+              Je ne sais pas !
+            </button>
+          </div>
+        )}
+
+        {/* Choice buttons for intro-four-column */}
+        {phase === "intro-four-column" && (
+          <div
+            style={{
+              marginTop: 20,
+              display: "flex",
+              flexDirection: "column",
+              gap: 8,
+              alignItems: "center",
+            }}
+          >
+            <button
+              onClick={() => handleIntroFourthColumnChoice("ajouter-rouleau")}
+              style={{
+                fontSize: 16,
+                padding: "10px 20px",
+                background: "linear-gradient(135deg, #22c55e 0%, #16a34a 100%)",
+                color: "#fff",
+                border: "none",
+                borderRadius: 8,
+                cursor: "pointer",
+                fontWeight: "bold",
+                boxShadow: "0 4px 8px rgba(34, 197, 94, 0.3)",
+                width: "280px",
+              }}
+            >
+              Ajouter un quatrième rouleau !
+            </button>
+            <button
+              onClick={() => handleIntroFourthColumnChoice("plus-grande")}
+              style={{
+                fontSize: 16,
+                padding: "10px 20px",
+                background: "linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%)",
+                color: "#fff",
+                border: "none",
+                borderRadius: 8,
+                cursor: "pointer",
+                fontWeight: "bold",
+                boxShadow: "0 4px 8px rgba(14, 165, 233, 0.3)",
+                width: "280px",
+              }}
+            >
+              Faire la machine ultime !
+            </button>
+            <button
+              onClick={() => handleIntroFourthColumnChoice("sais-pas")}
               style={{
                 fontSize: 16,
                 padding: "10px 20px",
