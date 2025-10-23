@@ -49,6 +49,7 @@ function MachineANombres() {
     guidedMode,
     showSolutionAnimation,
     currentTarget,
+    setFeedback,
     // New intro state
     showResponseButtons,
     setSelectedResponse,
@@ -130,8 +131,11 @@ function MachineANombres() {
       phase === "challenge-thousands-3"
     ) {
       handleValidateThousands();
+    } else {
+      // Not a challenge phase - provide feedback
+      setFeedback("Il n'y a pas de défi en ce moment ! Suis les instructions ! 👀");
     }
-  }, [phase]);
+  }, [phase, handleValidateTenToTwenty, handleValidateTutorialChallenge, handleValidateLearning, handleValidateTens, handleValidateHundredToTwoHundred, handleValidateTwoHundredToThreeHundred, handleValidateHundreds, handleValidateThousandToTwoThousand, handleValidateTwoThousandToThreeThousand, handleValidateThousandsSimpleCombination, handleValidateThousands, setFeedback]);
 
   // Handle messages from Unity (button clicks)
   const handleUnityMessage = useCallback(

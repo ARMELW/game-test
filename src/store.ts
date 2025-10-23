@@ -1749,10 +1749,10 @@ export const useStore = create<MachineState>((set, get) => ({
     },
 
     handleAdd: (idx: number) => {
-        const { isCountingAutomatically, isTransitioningToChallenge, phase, columns, addClicks, sequenceFeedback, guidedMode, currentTarget } = get();
+        const { isCountingAutomatically, isTransitioningToChallenge, pendingAutoCount, phase, columns, addClicks, sequenceFeedback, guidedMode, currentTarget } = get();
         const totalNumber = columns.reduce((acc: number, col: Column, idx: number) => acc + col.value * Math.pow(10, idx), 0);
 
-        if (isCountingAutomatically || isTransitioningToChallenge) return;
+        if (isCountingAutomatically || isTransitioningToChallenge || pendingAutoCount) return;
 
         const isUnitsColumn = (i: number) => i === 0;
 
@@ -2537,11 +2537,11 @@ export const useStore = create<MachineState>((set, get) => ({
     },
 
     handleSubtract: (idx: number) => {
-        const { isCountingAutomatically, phase, columns, guidedMode, currentTarget } = get();
+        const { isCountingAutomatically, pendingAutoCount, phase, columns, guidedMode, currentTarget } = get();
         const totalNumber = columns.reduce((acc: number, col: Column, idx: number) => acc + col.value * Math.pow(10, idx), 0);
         const { sequenceFeedback } = get();
 
-        if (isCountingAutomatically) return;
+        if (isCountingAutomatically || pendingAutoCount) return;
 
         const isUnitsColumn = (i: number) => i === 0;
 
