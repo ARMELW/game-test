@@ -643,7 +643,7 @@ function MachineANombres() {
                 width: "250px",
               }}
             >
-              Trop belle ! ✨
+              Trop belle !
             </button>
             <button
               onClick={() => {
@@ -663,7 +663,7 @@ function MachineANombres() {
                 width: "250px",
               }}
             >
-              Bof... 😐
+              Bof...
             </button>
             <button
               onClick={() => {
@@ -683,7 +683,7 @@ function MachineANombres() {
                 width: "250px",
               }}
             >
-              J'y comprends rien ! 🤔
+              J'y comprends rien !
             </button>
             <button
               onClick={() => {
@@ -703,7 +703,7 @@ function MachineANombres() {
                 width: "250px",
               }}
             >
-              C'est quoi ? 🧐
+              C'est quoi ?
             </button>
           </div>
         )}
@@ -734,7 +734,7 @@ function MachineANombres() {
                 width: "280px",
               }}
             >
-              Ajouter un rouleau ! 🎡
+              Ajouter un rouleau !
             </button>
             <button
               onClick={() => handleIntroSecondColumnChoice("plus-grande")}
@@ -751,7 +751,7 @@ function MachineANombres() {
                 width: "280px",
               }}
             >
-              Faire une plus grande machine ! 📏
+              Faire une plus grande machine !
             </button>
             <button
               onClick={() => handleIntroSecondColumnChoice("sais-pas")}
@@ -768,7 +768,7 @@ function MachineANombres() {
                 width: "280px",
               }}
             >
-              Je ne sais pas ! 🤷
+              Je ne sais pas !
             </button>
           </div>
         )}
@@ -820,10 +820,10 @@ function MachineANombres() {
                         : "#991b1b",
               }}
             >
-              {attemptCount === 1 && "⭐ Essai 1/4"}
-              {attemptCount === 2 && "💪 Essai 2/4 - Tu peux le faire !"}
-              {attemptCount === 3 && "💡 Essai 3/4 - Voici des indices !"}
-              {attemptCount >= 4 && "🤝 Besoin d'aide ?"}
+              {attemptCount === 1 && "Essai 1/4"}
+              {attemptCount === 2 && "Essai 2/4 - Tu peux le faire !"}
+              {attemptCount === 3 && "Essai 3/4 - Voici des indices !"}
+              {attemptCount >= 4 && "Besoin d'aide ?"}
             </div>
           )}
 
@@ -847,7 +847,7 @@ function MachineANombres() {
                 textAlign: "center",
               }}
             >
-              Comment veux-tu continuer ? 🤔
+              Comment veux-tu continuer ?
             </p>
             <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
               <button
@@ -872,7 +872,7 @@ function MachineANombres() {
                   e.currentTarget.style.transform = "translateY(0)";
                 }}
               >
-                💪 Essayer encore tout seul !
+                Essayer encore tout seul !
               </button>
               <button
                 onClick={() => handleHelpChoice("guided")}
@@ -896,7 +896,7 @@ function MachineANombres() {
                   e.currentTarget.style.transform = "translateY(0)";
                 }}
               >
-                🤝 Aide-moi à le faire !
+                Aide-moi à le faire !
               </button>
               <button
                 onClick={() => handleHelpChoice("showSolution")}
@@ -920,7 +920,7 @@ function MachineANombres() {
                   e.currentTarget.style.transform = "translateY(0)";
                 }}
               >
-                👀 Montre-moi la solution !
+                Montre-moi la solution !
               </button>
             </div>
           </div>
@@ -941,9 +941,9 @@ function MachineANombres() {
               boxShadow: "0 2px 4px rgba(16, 185, 129, 0.3)",
             }}
           >
-            🌟 {totalChallengesCompleted} défi
+            {totalChallengesCompleted} défi
             {totalChallengesCompleted > 1 ? "s" : ""} réussi
-            {totalChallengesCompleted > 1 ? "s" : ""} ! Continue ! 💪
+            {totalChallengesCompleted > 1 ? "s" : ""} ! Continue !
           </div>
         )}
 
@@ -962,7 +962,7 @@ function MachineANombres() {
               boxShadow: "0 2px 4px rgba(59, 130, 246, 0.3)",
             }}
           >
-            🤝 Mode guidé actif - Suis les instructions !
+            Mode guidé actif - Suis les instructions !
           </div>
         )}
 
@@ -981,7 +981,7 @@ function MachineANombres() {
               boxShadow: "0 2px 4px rgba(139, 92, 246, 0.3)",
             }}
           >
-            👀 Regarde bien comment on construit le nombre {currentTarget} !
+            Regarde bien comment on construit le nombre {currentTarget} !
           </div>
         )}
       </div>

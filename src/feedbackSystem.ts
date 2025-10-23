@@ -10,7 +10,6 @@ import {
   SOLUTION_MESSAGES,
   FRUSTRATION_MESSAGES,
   COLUMN_NAMES,
-  COLUMN_EMOJIS,
 } from './instructions';
 
 export interface AttemptState {
@@ -326,12 +325,12 @@ export function getGuidedStepMessage(
   const remaining = targetValue - currentValue;
   
   if (remaining === 0) {
-    return `PARFAIT ! ${columnName} est bon ! ✅`;
+    return `PARFAIT ! ${columnName} est bon !`;
   }
   
   if (remaining > 0) {
     return `Il faut ${remaining} dans les ${COLUMN_NAMES[columnIndex as keyof typeof COLUMN_NAMES]} ! 
-Clique ${remaining} fois sur △ dans les ${COLUMN_NAMES[columnIndex as keyof typeof COLUMN_NAMES]} ! ${COLUMN_EMOJIS[columnIndex as keyof typeof COLUMN_EMOJIS]}`;
+Clique ${remaining} fois sur △ dans les ${COLUMN_NAMES[columnIndex as keyof typeof COLUMN_NAMES]} !`;
   } else {
     return `Il y a trop dans les ${COLUMN_NAMES[columnIndex as keyof typeof COLUMN_NAMES]} ! 
 Clique ${Math.abs(remaining)} fois sur ∇ dans les ${COLUMN_NAMES[columnIndex as keyof typeof COLUMN_NAMES]} !`;
@@ -342,10 +341,10 @@ Clique ${Math.abs(remaining)} fois sur ∇ dans les ${COLUMN_NAMES[columnIndex a
  * Get attempt indicator emoji
  */
 export function getAttemptIndicator(attemptCount: number): string {
-  if (attemptCount === 1) return '⭐';
-  if (attemptCount === 2) return '💪';
-  if (attemptCount === 3) return '💡';
-  return '🤝';
+  if (attemptCount === 1) return '';
+  if (attemptCount === 2) return '';
+  if (attemptCount === 3) return '';
+  return '';
 }
 
 /**
