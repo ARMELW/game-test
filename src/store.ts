@@ -1218,6 +1218,7 @@ export const useStore = create<MachineState>((set, get) => ({
 
                 const nextValue = tensValue + 1;
                 const displayNumber = nextValue * 10;
+                setValue(displayNumber);
                 let infoMessage = "";
                 if (nextValue === 4) infoMessage = `**${displayNumber}** (QUARANTE) !  Compte les paquets : UN, DEUX, TROIS, QUATRE !`;
                 else if (nextValue === 5) infoMessage = `**${displayNumber}** (CINQUANTE) !  5 paquets de 10 !`;
@@ -1328,6 +1329,7 @@ export const useStore = create<MachineState>((set, get) => ({
 
                 const nextValue = hundredsValue + 1;
                 const displayNumber = nextValue * 100;
+                setValue(displayNumber);
                 let infoMessage = `**${displayNumber}** !`;
                 if (nextValue === 4) infoMessage = `**${displayNumber}** (QUATRE-CENTS) !  Compte les GRANDS paquets : UN, DEUX, TROIS, QUATRE !`;
                 else if (nextValue === 5) infoMessage = `**${displayNumber}** (CINQ-CENTS) !  5 grands paquets de 100 !`;
@@ -1501,6 +1503,7 @@ export const useStore = create<MachineState>((set, get) => ({
                 });
                 const nextValue = thousandsValue + 1;
                 const displayNumber = nextValue * 1000;
+                setValue(displayNumber);
                 const numberWords = ["", "", "", "TROIS", "QUATRE", "CINQ", "SIX", "SEPT", "HUIT", "NEUF"];
                 const infoMessage = `**${displayNumber}** ! ${numberWords[nextValue]} ÉNORMES paquets ! Imagine ${displayNumber} billes !`;
                 get().setFeedback(infoMessage);
