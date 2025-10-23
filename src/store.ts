@@ -1983,62 +1983,47 @@ export const useStore = create<MachineState>((set, get) => ({
             const currentValue = newCols[0].value;
             if (hasCarry) {
                 // The magic moment when 9+1 becomes 10!
-                sequenceFeedback("INCROYABLE ! 🎆 C'est de la MAGIE ! 10 petites billes sont devenues 1 PAQUET de 10 !", "C'est la RÈGLE D'OR : 10 billes = 1 paquet dans la colonne de gauche !", () => {
-                    const resetCols = initialColumns.map((col, i) => ({ ...col, unlocked: i === 0 || i === 1 }));
-                    // Keep the value at 10 (1 ten, 0 units) instead of resetting to 0
-                    resetCols[1].value = 1;
-                    resetCols[0].value = 0;
+                sequenceFeedback("INCROYABLE ! 🎆 C'est de la MAGIE ! Les 10 petites lumières se sont TRANSFORMÉES en UNE grosse lumière !", "Tu as vu ? C'est comme si elles avaient VOYAGÉ dans la colonne de gauche ! 10 petites = 1 grosse !", () => {
+                    // Go directly to learn-ten-to-twenty without repetitive practice
+                    const startCols = initialColumns.map((col, i) => ({ ...col, unlocked: i <= 1 }));
+                    startCols[1].value = 1;
+                    startCols[0].value = 0;
                     set({
-                        columns: resetCols,
-                        phase: 'practice-ten',
-                        practiceTenRepetitions: 0
+                        columns: startCols,
+                        phase: 'learn-ten-to-twenty'
                     });
                     get().updateButtonVisibility();
-                    sequenceFeedback("WOW ! 10 petites billes = 1 PAQUET de 10 !", "Clique sur ∇ pour revenir à 9 !");
+                    get().updateInstruction();
                 });
             } else if (currentValue === 9) {
                 // Child is at 9, one more click will trigger the magic!
-                get().setFeedback("Parfait ! Tu es à 9 !  Encore UN clic sur △ et... la MAGIE va opérer ! ");
+                get().speakAndThen("Parfait ! Tu es à 9 !  Encore UN clic sur △ et... la MAGIE va opérer ! ");
             } else if (currentValue >= 1 && currentValue <= 8) {
                 // Counting to 9
                 const remaining = 9 - currentValue;
-                get().setFeedback(`**${currentValue}** ! Continue ! Encore ${remaining} clic${remaining > 1 ? 's' : ''} pour arriver à 9 ! `);
+                get().speakAndThen(`**${currentValue}** ! Continue ! Encore ${remaining} clic${remaining > 1 ? 's' : ''} pour arriver à 9 ! `);
             } else if (currentValue === 0) {
                 // Just started
-                get().setFeedback("Vas-y ! Clique sur △ pour commencer à compter jusqu'à 9 ! 🚀");
+                get().speakAndThen("Vas-y ! Clique sur △ pour commencer à compter jusqu'à 9 ! 🚀");
             }
         } else if (phase === 'practice-ten') {
-            const tensValue = newCols[1].value;
-            const { practiceTenRepetitions } = get();
-
-            if (isUnitsColumn(idx) && hasCarry && tensValue === 1) {
-                const newRepetitions = practiceTenRepetitions + 1;
-                set({ practiceTenRepetitions: newRepetitions });
-
-                if (newRepetitions >= 3) {
-                    sequenceFeedback("Parfait !  Tu as bien compris le concept de paquet !", "Maintenant on va compter AVEC les paquets !");
-                    setTimeout(() => {
-                        // Start at 10 (1 ten, 0 units)
-                        const startCols = initialColumns.map((col, i) => ({ ...col, unlocked: i <= 1 }));
-                        startCols[1].value = 1;
-                        startCols[0].value = 0;
-                        set({
-                            columns: startCols,
-                            phase: 'learn-ten-to-twenty'
-                        });
-                        get().updateButtonVisibility();
-                        get().setFeedback("DIX ! Tu as 1 paquet ! Ajoute 1 bille ! △ sur UNITÉS");
-                    }, FEEDBACK_DELAY * 2);
-                } else {
-                    get().setFeedback("Encore !  Clique sur ∇ pour revenir à 9, puis refais la magie avec △ !");
-                }
-            }
+            // This phase is now skipped - transition directly to learn-ten-to-twenty
+            // If we somehow end up here, move to the next phase
+            const startCols = initialColumns.map((col, i) => ({ ...col, unlocked: i <= 1 }));
+            startCols[1].value = 1;
+            startCols[0].value = 0;
+            set({
+                columns: startCols,
+                phase: 'learn-ten-to-twenty'
+            });
+            get().updateButtonVisibility();
+            get().updateInstruction();
         } else if (phase === 'learn-ten-to-twenty') {
             const unitsValue = newCols[0].value;
             const tensValue = newCols[1].value;
 
             if (!isUnitsColumn(idx)) {
-                get().setFeedback("Non ! Clique sur les UNITÉS (△ sur la colonne de droite) !");
+                get().speakAndThen("Non ! Clique sur les UNITÉS (△ sur la colonne de droite) !");
                 const revertCols = [...columns];
                 set({ columns: revertCols });
                 return;
@@ -2046,7 +2031,7 @@ export const useStore = create<MachineState>((set, get) => ({
 
             if (unitsValue === 0 && tensValue === 2) {
                 // Reached 20!
-                sequenceFeedback(" VINGT ! 2 paquets de 10 !", " BRAVO ! Tu as compris la COMBINAISON ! 10 + 1 = 11, 10 + 2 = 12... jusqu'à 10 + 10 = 20 ! C'est comme assembler des LEGO ! 🧱");
+                sequenceFeedback(" VINGT ! 2 grosses lumières de 10 !", " BRAVO ! Tu as compris la COMBINAISON ! 10 + 1 = 11, 10 + 2 = 12... jusqu'à 10 + 10 = 20 ! C'est comme assembler des LEGO ! 🧱");
                 setTimeout(() => {
                     const resetCols = initialColumns.map((col, i) => ({ ...col, unlocked: i === 0 || i === 1 }));
                     set({
@@ -2054,24 +2039,24 @@ export const useStore = create<MachineState>((set, get) => ({
                     });
                     get().resetTenToTwentyChallenge();
                     //get().setPhase('challenge-ten-to-twenty');
-                    get().setFeedback(` Mini-défi ! Montre-moi **DOUZE** (12) avec les boutons !`);
+                    get().speakAndThen(` Mini-défi ! Montre-moi **DOUZE** (12) avec les boutons !`);
                 }, FEEDBACK_DELAY * 2);
             } else if (unitsValue === 1 && tensValue === 1) {
-                get().setFeedback("ONZE ! C'est 10 + 1. Tu vois la COMBINAISON ? Continue ! △");
+                get().speakAndThen("ONZE ! C'est 10 + 1. Tu vois la COMBINAISON ? Continue ! △");
             } else if (unitsValue === 2 && tensValue === 1) {
-                get().setFeedback("DOUZE ! 10 + 2. Tu assembles les paquets ! Encore ! △");
+                get().speakAndThen("DOUZE ! 10 + 2. Tu assembles les lumières ! Encore ! △");
             } else if (unitsValue === 3 && tensValue === 1) {
-                get().setFeedback("TREIZE ! 10 + 3. Continue ! △");
+                get().speakAndThen("TREIZE ! 10 + 3. Continue ! △");
             } else if (unitsValue === 4 && tensValue === 1) {
-                get().setFeedback("QUATORZE ! 10 + 4. Encore ! △");
+                get().speakAndThen("QUATORZE ! 10 + 4. Encore ! △");
             } else if (unitsValue === 5 && tensValue === 1) {
-                get().setFeedback("QUINZE ! 10 + 5. Continue ! △");
+                get().speakAndThen("QUINZE ! 10 + 5. Continue ! △");
             } else if (unitsValue === 6 && tensValue === 1) {
-                get().setFeedback("SEIZE ! 10 + 6. Encore ! △");
+                get().speakAndThen("SEIZE ! 10 + 6. Encore ! △");
             } else if (unitsValue === 7 && tensValue === 1) {
-                get().setFeedback("DIX-SEPT ! 10 + 7. Tu entends le DIX dans le nom ? △");
+                get().speakAndThen("DIX-SEPT ! 10 + 7. Tu entends le DIX dans le nom ? △");
             } else if (unitsValue === 8 && tensValue === 1) {
-                get().setFeedback("DIX-HUIT ! 10 + 8. Continue ! △");
+                get().speakAndThen("DIX-HUIT ! 10 + 8. Continue ! △");
             } else if (unitsValue === 9 && tensValue === 1) {
                 sequenceFeedback("DIX-NEUF ! 10 + 9 ! STOP ✋ Tout est presque plein !", "Que va-t-il se passer ? Clique sur △ !");
             }
@@ -2630,27 +2615,28 @@ export const useStore = create<MachineState>((set, get) => ({
         if (tempTotalBefore > 0) {
             set({ columns: newCols });
             if (phase === 'practice-ten' && newCols[0].value === 9 && newCols[1].value === 0) {
-                get().setFeedback("Bien ! Tu es revenu à 9. Maintenant, refais la magie ! Clique sur △ pour transformer 10 billes en 1 paquet !");
+                // This phase is now skipped, but keep feedback just in case
+                get().speakAndThen("Bien ! Tu es revenu à 9. Maintenant, refais la magie ! Clique sur △ pour voir la transformation !");
             } else if (phase === 'practice-hundred' && newCols[0].value === 9 && newCols[1].value === 9 && newCols[2].value === 0) {
                 get().setFeedback("Bien ! Tu es revenu à 99. Maintenant, refais la magie ! Clique sur △ pour voir 100 !");
             } else if (phase === 'practice-thousand' && newCols[0].value === 9 && newCols[1].value === 9 && newCols[2].value === 9 && newCols[3].value === 0) {
                 get().setFeedback("Bien ! Tu es revenu à 999. Maintenant, refais la magie ! Clique sur △ pour voir 1000 !");
             } else if (phase === 'learn-ten-to-twenty') {
-                get().setFeedback("On ne descend pas ! Continue à monter avec △ sur UNITÉS !");
+                get().speakAndThen("On ne descend pas ! Continue à monter avec △ sur UNITÉS !");
             } else if (phase === 'learn-twenty-to-thirty') {
-                get().setFeedback("On ne descend pas ! Continue à monter avec △ sur UNITÉS !");
+                get().speakAndThen("On ne descend pas ! Continue à monter avec △ sur UNITÉS !");
             } else if (phase === 'learn-hundred-to-hundred-ten') {
-                get().setFeedback("On ne descend pas ! Continue à monter avec △ sur UNITÉS !");
+                get().speakAndThen("On ne descend pas ! Continue à monter avec △ sur UNITÉS !");
             } else if (phase === 'learn-hundred-ten-to-two-hundred') {
-                get().setFeedback("On ne descend pas ! Continue à monter avec △ sur UNITÉS !");
+                get().speakAndThen("On ne descend pas ! Continue à monter avec △ sur UNITÉS !");
             } else if (phase === 'learn-two-hundred-to-three-hundred') {
-                get().setFeedback("On ne descend pas ! Continue à monter avec △ sur UNITÉS !");
+                get().speakAndThen("On ne descend pas ! Continue à monter avec △ sur UNITÉS !");
             } else if (phase === 'learn-thousand-to-thousand-ten') {
-                get().setFeedback("On ne descend pas ! Continue à monter avec △ sur UNITÉS !");
+                get().speakAndThen("On ne descend pas ! Continue à monter avec △ sur UNITÉS !");
             } else if (phase === 'learn-thousand-to-thousand-hundred') {
-                get().setFeedback("On ne descend pas ! Continue à monter avec △ sur UNITÉS !");
+                get().speakAndThen("On ne descend pas ! Continue à monter avec △ sur UNITÉS !");
             } else if (phase === 'learn-thousand-hundred-to-two-thousand') {
-                get().setFeedback("On ne descend pas ! Continue à monter avec △ sur UNITÉS !");
+                get().speakAndThen("On ne descend pas ! Continue à monter avec △ sur UNITÉS !");
             } else if (phase === 'learn-two-thousand-to-three-thousand') {
                 get().setFeedback("On ne descend pas ! Continue à monter avec △ sur UNITÉS !");
             } else if (!['click-remove', 'tutorial', 'explore-units'].includes(phase) && !phase.startsWith('challenge-unit-') && phase !== 'challenge-ten-to-twenty') {
@@ -2776,7 +2762,7 @@ export const useStore = create<MachineState>((set, get) => ({
     },
 
     handleValidateLearning: () => {
-        const { phase, columns, unitTargetIndex, unitSuccessCount, sequenceFeedback, resetUnitChallenge, attemptCount, consecutiveFailures, resetAttempts, setAttemptCount, setConsecutiveFailures, setShowHelpOptions, totalChallengesCompleted, setTotalChallengesCompleted, setCurrentTarget } = get();
+        const { phase, columns, unitTargetIndex, unitSuccessCount, resetUnitChallenge, attemptCount, consecutiveFailures, resetAttempts, setAttemptCount, setConsecutiveFailures, setShowHelpOptions, totalChallengesCompleted, setTotalChallengesCompleted, setCurrentTarget } = get();
         const challengePhases = ['challenge-unit-1', 'challenge-unit-2', 'challenge-unit-3'] as const;
         const challengeIndex = challengePhases.indexOf(phase as typeof challengePhases[number]);
         if (challengeIndex === -1) return;
@@ -2808,11 +2794,13 @@ export const useStore = create<MachineState>((set, get) => ({
 
                 if (unitTargetIndex + 1 >= challenge.targets.length) {
                     if (challengeIndex === UNIT_CHALLENGES.length - 1) {
+                        // All unit challenges completed - commented out transition
+                        /**
                         // Reset units column to 0 so child can start from the beginning
                         const resetCols = get().columns.map((col, i) =>
                             i === 0 ? { ...col, value: 0 } : col
                         );
-                        /**set({
+                        set({
                             columns: resetCols,
                             phase: 'learn-carry'
                         });
