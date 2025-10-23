@@ -866,6 +866,54 @@ export const useStore = create<MachineState>((set, get) => ({
         }
     },
 
+    handleIntroThirdColumnChoice: (choice: string) => {
+        const { sequenceFeedback } = get();
+        const afterFirstFeedback = () => {
+            get().speakAndThen("Regarde bien, je vais encore modifier la machine !", () => {
+                // Transition to the delock-hundreds phase
+                set({ phase: 'delock-hundreds' });
+                get().updateInstruction();
+            });
+        };
+        if (choice === 'ajouter-rouleau' || choice === 'plus-grande') {
+            sequenceFeedback(
+                "SUPER ! Excellente idée ! ",
+                "On va ajouter un TROISIÈME ROULEAU ! Pour compter encore plus haut !",
+                afterFirstFeedback
+            );
+        } else {
+            sequenceFeedback(
+                "Pas de problème ! Je vais te montrer ce qu'on va faire ! ",
+                "On va ajouter un TROISIÈME ROULEAU !",
+                afterFirstFeedback
+            );
+        }
+    },
+
+    handleIntroFourthColumnChoice: (choice: string) => {
+        const { sequenceFeedback } = get();
+        const afterFirstFeedback = () => {
+            get().speakAndThen("Regarde bien, c'est le DERNIER rouleau !", () => {
+                // Transition to the delock-thousands phase
+                set({ phase: 'delock-thousands' });
+                get().updateInstruction();
+            });
+        };
+        if (choice === 'ajouter-rouleau' || choice === 'plus-grande') {
+            sequenceFeedback(
+                "GÉNIAL ! Tu as tout compris ! ",
+                "On va ajouter le QUATRIÈME et DERNIER ROULEAU ! C'est le plus puissant !",
+                afterFirstFeedback
+            );
+        } else {
+            sequenceFeedback(
+                "Aucun souci ! Regarde ce qu'on va faire ! ",
+                "On va ajouter le QUATRIÈME et DERNIER ROULEAU !",
+                afterFirstFeedback
+            );
+        }
+    },
+
     handleIntroMaxSubmit: () => {
         const { userInput, introMaxAttempt, sequenceFeedback } = get();
         const answer = parseInt(userInput.trim());
@@ -2072,7 +2120,7 @@ export const useStore = create<MachineState>((set, get) => ({
             const tensValue = newCols[1].value;
 
             if (!isUnitsColumn(idx)) {
-                get().setFeedback("Non ! Continue avec les UNITÉS ! △ sur la colonne de droite !");
+                get().speakAndThen("Non ! Continue avec les UNITÉS ! △ sur la colonne de droite !");
                 const revertCols = [...columns];
                 set({ columns: revertCols });
                 return;
@@ -2093,9 +2141,22 @@ export const useStore = create<MachineState>((set, get) => ({
                     get().updateButtonVisibility();
                     sequenceFeedback("Maintenant, regarde la machine compter les dizaines rondes !", "40, 50, 60... Observe bien !");
                 }, FEEDBACK_DELAY * 2);
-            } else if (unitsValue < 9 && tensValue === 2) {
-                const number = tensValue * 10 + unitsValue;
-                get().setFeedback(`${number} ! Continue à remplir jusqu'à 29 ! △`);
+            } else if (unitsValue === 1 && tensValue === 2) {
+                get().speakAndThen("VINGT-ET-UN ! 20 + 1 ! Continue ! △");
+            } else if (unitsValue === 2 && tensValue === 2) {
+                get().speakAndThen("VINGT-DEUX ! Continue à remplir ! △");
+            } else if (unitsValue === 3 && tensValue === 2) {
+                get().speakAndThen("VINGT-TROIS ! C'est bien ! △");
+            } else if (unitsValue === 4 && tensValue === 2) {
+                get().speakAndThen("VINGT-QUATRE ! Continue ! △");
+            } else if (unitsValue === 5 && tensValue === 2) {
+                get().speakAndThen("VINGT-CINQ ! À mi-chemin vers 30 ! △");
+            } else if (unitsValue === 6 && tensValue === 2) {
+                get().speakAndThen("VINGT-SIX ! Encore quelques-uns ! △");
+            } else if (unitsValue === 7 && tensValue === 2) {
+                get().speakAndThen("VINGT-SEPT ! Presque à 29 ! △");
+            } else if (unitsValue === 8 && tensValue === 2) {
+                get().speakAndThen("VINGT-HUIT ! Encore un peu ! △");
             } else if (unitsValue === 9 && tensValue === 2) {
                 sequenceFeedback("29 ! VINGT-NEUF ! Que va-t-il se passer ?", "Clique sur △ pour découvrir !");
             }
@@ -3004,20 +3065,21 @@ export const useStore = create<MachineState>((set, get) => ({
                         set((state: MachineState) => ({ completedChallenges: { ...state.completedChallenges, tens: true } }));
                         const newCols = [...get().columns];
                         if (!newCols[2].unlocked) {
-                            newCols[2].unlocked = true;
+                            newCols[2].unlocked = false; // Keep it locked for now
                             set({ columns: newCols });
                         }
-                        // Set up for practice-hundred: start at 99
-                        const resetCols = initialColumns.map((col, i) => ({ ...col, unlocked: i === 0 || i === 1 || i === 2 }));
+                        // Transition to intro-three-column first (like intro-second-column for tens)
+                        const resetCols = initialColumns.map((col, i) => ({ ...col, unlocked: i === 0 || i === 1 }));
                         resetCols[1].value = 9;
                         resetCols[0].value = 9;
                         set({
                             columns: resetCols,
-                            phase: 'practice-hundred',
-                            practiceHundredCount: 0
+                            phase: 'intro-three-column',
+                            showResponseButtons: true,
+                            selectedResponse: null
                         });
                         get().updateButtonVisibility();
-                        sequenceFeedback("APPRENTISSAGE DES DIZAINES TERMINÉ ! Bravo ! ", "NIVEAU DÉBLOQUÉ : Les CENTAINES !  STOP ! Regarde bien : TOUT est plein ! 9 paquets de 10 + 9 billes. Clique sur △ pour voir une GRANDE MAGIE ! ");
+                        sequenceFeedback("APPRENTISSAGE DES DIZAINES TERMINÉ ! Bravo ! ", "Tu maîtrises les dizaines ! MAIS... regarde : la machine est bloquée à 99 !");
                     } else {
                         // Moving to next challenge phase - do NOT call sendNextGoal()
                         // because setPhase will send a new challenge list to Unity
@@ -3269,17 +3331,24 @@ export const useStore = create<MachineState>((set, get) => ({
                         set((state: MachineState) => ({ completedChallenges: { ...state.completedChallenges, hundreds: true } }));
                         sequenceFeedback(
                             "APPRENTISSAGE DES CENTAINES TERMINÉ ! Bravo ! ",
-                            " BRAVO CHAMPION ! Tu maîtrises les centaines ! C'est INCROYABLE !",
+                            " BRAVO CHAMPION ! Tu maîtrises les centaines ! MAIS... regarde : la machine est bloquée à 999 !",
                             () => {
                                 const newCols = [...get().columns];
+                                // Keep thousands column locked for now
                                 if (!newCols[3].unlocked) {
-                                    newCols[3].unlocked = true;
+                                    newCols[3].unlocked = false;
                                     set({ columns: newCols });
                                 }
-                                const resetCols = columns.map((col: Column) => ({ ...col, unlocked: true }));
+                                // Set up for intro-four-column: start at 999
+                                const resetCols = initialColumns.map((col, i) => ({ ...col, unlocked: i === 0 || i === 1 || i === 2 }));
+                                resetCols[2].value = 9;
+                                resetCols[1].value = 9;
+                                resetCols[0].value = 9;
                                 set({
                                     columns: resetCols,
-                                    phase: 'celebration-before-thousands',
+                                    phase: 'intro-four-column',
+                                    showResponseButtons: true,
+                                    selectedResponse: null,
                                     pendingAutoCount: false,
                                     isCountingAutomatically: false
                                 });
@@ -3735,6 +3804,18 @@ export const useStore = create<MachineState>((set, get) => ({
             case 'delock-dizaines':
                 newInstruction = PHASE_INSTRUCTIONS['delock-dizaines'];
                 break;
+            case 'intro-three-column':
+                newInstruction = PHASE_INSTRUCTIONS['intro-three-column'];
+                break;
+            case 'delock-hundreds':
+                newInstruction = PHASE_INSTRUCTIONS['delock-hundreds'];
+                break;
+            case 'intro-four-column':
+                newInstruction = PHASE_INSTRUCTIONS['intro-four-column'];
+                break;
+            case 'delock-thousands':
+                newInstruction = PHASE_INSTRUCTIONS['delock-thousands'];
+                break;
             case 'intro-discover-carry':
                 if (get().columns[0].value < 9) {
                     newInstruction = PHASE_INSTRUCTIONS['intro-discover-carry'].fillToNine;
@@ -3972,6 +4053,29 @@ export const useStore = create<MachineState>((set, get) => ({
                     set({ phase: 'practice-ten' });
                     get().updateInstruction();
                 });**/
+            });
+        } else if (phase === 'delock-hundreds') {
+            get().speakAndThen(newInstruction, () => {
+                // Unlock the hundreds column during this phase
+                const newCols = [...initialColumns];
+                newCols[0].unlocked = true;
+                newCols[1].unlocked = true;
+                newCols[2].unlocked = true;
+                set({ columns: newCols });
+                
+                console.log('[updateInstruction] delock-hundreds complete, transitioning to practice-hundred');
+            });
+        } else if (phase === 'delock-thousands') {
+            get().speakAndThen(newInstruction, () => {
+                // Unlock all columns during this phase
+                const newCols = [...initialColumns];
+                newCols[0].unlocked = true;
+                newCols[1].unlocked = true;
+                newCols[2].unlocked = true;
+                newCols[3].unlocked = true;
+                set({ columns: newCols });
+                
+                console.log('[updateInstruction] delock-thousands complete, transitioning to practice-thousand');
             });
         } else if (phase === 'challenge-unit-intro') {
             get().speakAndThen(newInstruction, () => {

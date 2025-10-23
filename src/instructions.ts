@@ -46,6 +46,10 @@ export const PHASE_INSTRUCTIONS = {
   
   'delock-dizaines': "Regarde bien ! Je vais débloquer le deuxième rouleau ! Et voilààààà ! Maintenant il y a DEUX rouleaux !",
   
+  'intro-three-column': "Félicitations ! Tu maîtrises les dizaines ! Mais maintenant, comment va-t-on faire pour compter plus haut que 99 ? La machine BLOQUE à 99 ! À ton avis, que peut-on faire ?",
+  
+  'delock-hundreds': "Exactement ! Je vais débloquer le TROISIÈME rouleau ! (Bruits : tic tic tic, bzzzz, clic !) Et voilààààà ! Maintenant il y a TROIS rouleaux ! La machine peut compter jusqu'à 999 ! Je vais l'allumer !",
+  
   'intro-discover-carry': {
     fillToNine: "Maintenant, on va voir quelque chose de MAGIQUE ! Amène le premier rouleau à 9 !",
     atNine: "Parfait ! Tout est PLEIN ! 9 lumières allumées ! Maintenant... que va-t-il se passer si tu cliques encore une fois sur △ ? Réfléchis bien... Tu ne sais pas ? C'est normal ! Clique et tu verras !",
@@ -77,8 +81,8 @@ export const PHASE_INSTRUCTIONS = {
   'learn-units': "Regarde ! La machine compte de 1 à 9. Compte avec tes doigts !",
   'learn-carry': "Compte jusqu'à 9 en cliquant sur △ ! Quand tu arrives à 9, un clic de plus et... MAGIE !",
   'practice-ten': "WAOUH ! Tu as vu comment 10 petites lumières se transforment en 1 grosse lumière ? C'est INCROYABLE ! Maintenant ajoute des billes pour voir ce qui se passe après 10 !",
-  'learn-ten-to-twenty': "Tu as 1 grosse lumière de 10 ! Maintenant ajoute des petites billes pour comprendre la COMBINAISON : 10 + 1 = 11, 10 + 2 = 12... Clique sur △ jusqu'à 20 !",
-  'learn-twenty-to-thirty': "Parfait ! Tu comprends la combinaison : 1 dizaine + unités ! Maintenant un peu de pratique : remplis jusqu'à 30 pour voir l'échange magique !",
+  'learn-ten-to-twenty': "Maintenant on va faire quelque chose de SUPER COOL ! Tu as 1 grosse lumière de 10 ! Ajoute des petites billes une par une pour découvrir la COMBINAISON MAGIQUE : 10 + 1 = 11, 10 + 2 = 12... Clique sur △ jusqu'à 20 ! C'est comme assembler des LEGO !",
+  'learn-twenty-to-thirty': "GÉNIAL ! Tu as compris la combinaison : 1 dizaine + unités ! Maintenant on va pratiquer encore un peu ! Continue à remplir jusqu'à 30 pour voir un NOUVEL échange magique ! Observe bien ce qui se passe quand tu arrives à 29... puis 30 !",
   'learn-tens': "Regarde ! La machine compte par dizaines : 40, 50, 60...",
   'learn-tens-combination': "Regarde maintenant la MAGIE des GROSSES lumières ! La machine va montrer comment assembler 1 grosse + 2 petites = DOUZE, puis 2 grosses + 5 petites = VINGT-CINQ ! C'est comme des LEGO !",
   
@@ -92,6 +96,10 @@ export const PHASE_INSTRUCTIONS = {
   'learn-hundreds-combination': "Maintenant on assemble TOUT ! La machine va montrer : 1 GRAND paquet + 2 paquets + 3 billes = CENT-VINGT-TROIS ! Comme une tour de LEGO avec 3 étages !",
   
   // Thousands phases
+  'intro-four-column': "INCROYABLE ! Tu es un champion des centaines ! Mais regarde... la machine BLOQUE à 999 ! Comment va-t-on faire pour compter encore plus haut ? À ton avis, que peut-on faire ?",
+  
+  'delock-thousands': "PARFAIT ! Je vais débloquer le QUATRIÈME rouleau ! Le dernier rouleau ! (Bruits : tic tic tic, bzzzz, clic !) Et voilààààà ! QUATRE rouleaux ! La machine peut maintenant compter jusqu'à 9999 ! C'est ÉNORME ! Je l'allume !",
+  
   'celebration-before-thousands': "BRAVO CHAMPION ! Tu maîtrises les centaines ! Maintenant, on va découvrir les MILLE ! C'est le niveau EXPERT ! Si tu es fatigué, tu peux faire une pause. Sinon, clique sur DÉMARRER L'APPRENTISSAGE DES MILLIERS !",
   'practice-thousand': "STOP ! Regarde bien : TOUT, TOUT, TOUT est plein ! 999 ! Que va-t-il se passer si on ajoute encore 1 toute petite bille ? Clique sur △ pour voir !",
   'learn-thousand-to-thousand-ten': "MILLE ! 1 énorme paquet ! Maintenant ajoute des billes pour comprendre la COMBINAISON : 1000 + 1 = 1001, 1000 + 2 = 1002... Clique sur △ jusqu'à 1020 !",
@@ -184,6 +192,16 @@ export const UI_MESSAGES = {
     secondColumn: {
       ajouterRouleau: "Ajouter un rouleau ! 🎡",
       plusGrande: "Faire une plus grande machine ! 📏",
+      saisPas: "Je ne sais pas ! 🤷",
+    },
+    thirdColumn: {
+      ajouterRouleau: "Ajouter un troisième rouleau ! 🎡",
+      plusGrande: "Faire une encore plus grande machine ! 📏",
+      saisPas: "Je ne sais pas ! 🤷",
+    },
+    fourthColumn: {
+      ajouterRouleau: "Ajouter un quatrième rouleau ! 🎡",
+      plusGrande: "Faire la machine ultime ! 📏",
       saisPas: "Je ne sais pas ! 🤷",
     },
   },

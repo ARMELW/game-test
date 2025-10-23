@@ -40,6 +40,8 @@ export type Phase =
     | 'challenge-tens-1'
     | 'challenge-tens-2'
     | 'challenge-tens-3'
+    | 'intro-three-column'
+    | 'delock-hundreds'
     | 'practice-hundred'
     | 'learn-hundred-to-hundred-ten'
     | 'learn-hundred-ten-to-two-hundred'
@@ -52,6 +54,8 @@ export type Phase =
     | 'challenge-hundreds-1'
     | 'challenge-hundreds-2'
     | 'challenge-hundreds-3'
+    | 'intro-four-column'
+    | 'delock-thousands'
     | 'celebration-before-thousands'
     | 'practice-thousand'
     | 'learn-thousand-to-thousand-ten'
@@ -107,6 +111,9 @@ export const ALL_PHASES: readonly Phase[] = [
   'challenge-tens-1',
   'challenge-tens-2',
   'challenge-tens-3',
+  'intro-three-column',
+  'delock-hundreds',
+  'practice-hundred',
   'learn-hundred-to-hundred-ten',
   'learn-hundred-ten-to-two-hundred',
   'challenge-hundred-to-two-hundred',
@@ -115,6 +122,8 @@ export const ALL_PHASES: readonly Phase[] = [
   'challenge-hundreds-1',
   'challenge-hundreds-2',
   'challenge-hundreds-3',
+  'intro-four-column',
+  'delock-thousands',
   'celebration-before-thousands',
   'practice-thousand',
   'learn-thousand-to-thousand-ten',
@@ -372,6 +381,8 @@ export interface MachineState {
     showIntroDigitsVisual: () => void;
     runIntroDigitsGuided: () => void;
     handleIntroSecondColumnChoice: (choice: string) => void;
+    handleIntroThirdColumnChoice: (choice: string) => void;
+    handleIntroFourthColumnChoice: (choice: string) => void;
     handleIntroMaxSubmit: () => void;
     runIntroMaxGuided: () => void;
     completeIntroMaxGuided: () => void;
