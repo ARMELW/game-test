@@ -4046,56 +4046,81 @@ export const useStore = create<MachineState>((set, get) => ({
 
         // Speak the instruction, but handle automatic transitions in phase-specific logic
         // Only phases with automatic transitions after speaking should be handled here
-        if (phase === 'intro-challenge-introduction') {
+        if (phase === 'intro-welcome') {
             get().speakAndThen(newInstruction, () => {
-                // Transition to intro-second-column after introduction message
-                console.log('[updateInstruction] intro-challenge-introduction complete, transitioning to intro-second-column');
-               // get().setPhase('intro-second-column');
+                get().markPhaseComplete('intro-welcome');
+                console.log('[updateInstruction] intro-welcome complete, transitioning to next phase');
+                get().goToNextPhase();
+            });
+        } else if (phase === 'intro-discover') {
+            get().speakAndThen(newInstruction, () => {
+                get().markPhaseComplete('intro-discover');
+                console.log('[updateInstruction] intro-discover complete, transitioning to next phase');
+                get().goToNextPhase();
+            });
+        } else if (phase === 'intro-challenge-introduction') {
+            get().speakAndThen(newInstruction, () => {
+                get().markPhaseComplete('intro-challenge-introduction');
+                console.log('[updateInstruction] intro-challenge-introduction complete, transitioning to next phase');
+                get().goToNextPhase();
+            });
+        } else if (phase === 'challenge-unit-intro') {
+            get().speakAndThen(newInstruction, () => {
+                get().markPhaseComplete('challenge-unit-intro');
+                get().resetUnitChallenge();
+                console.log('[updateInstruction] challenge-unit-intro complete, transitioning to next phase');
+                get().goToNextPhase();
             });
         } else if (phase === 'delock-dizaines') {
             get().speakAndThen(newInstruction, () => {
-                // Unlock the columns during this phase
                 const newCols = [...initialColumns];
                 newCols[0].unlocked = true;
                 newCols[1].unlocked = true;
                 set({ columns: newCols });
-                
-                // Transition to intro-discover-carry after unlocking
-                console.log('[updateInstruction] delock-dizaines complete, transitioning to intro-discover-carry');
-                /**get().speakAndThen("(Bruit d'allumage : bzzzz, ding !)", () => {
-                    set({ phase: 'practice-ten' });
-                    get().updateInstruction();
-                });**/
+                get().markPhaseComplete('delock-dizaines');
+                console.log('[updateInstruction] delock-dizaines complete, transitioning to next phase');
+                get().goToNextPhase();
             });
         } else if (phase === 'delock-hundreds') {
             get().speakAndThen(newInstruction, () => {
-                // Unlock the hundreds column during this phase
                 const newCols = [...initialColumns];
                 newCols[0].unlocked = true;
                 newCols[1].unlocked = true;
                 newCols[2].unlocked = true;
                 set({ columns: newCols });
-                
-                console.log('[updateInstruction] delock-hundreds complete, transitioning to practice-hundred');
+                get().markPhaseComplete('delock-hundreds');
+                console.log('[updateInstruction] delock-hundreds complete, transitioning to next phase');
+                get().goToNextPhase();
             });
         } else if (phase === 'delock-thousands') {
             get().speakAndThen(newInstruction, () => {
-                // Unlock all columns during this phase
                 const newCols = [...initialColumns];
                 newCols[0].unlocked = true;
                 newCols[1].unlocked = true;
                 newCols[2].unlocked = true;
                 newCols[3].unlocked = true;
                 set({ columns: newCols });
-                
-                console.log('[updateInstruction] delock-thousands complete, transitioning to practice-thousand');
+                get().markPhaseComplete('delock-thousands');
+                console.log('[updateInstruction] delock-thousands complete, transitioning to next phase');
+                get().goToNextPhase();
             });
-        } else if (phase === 'challenge-unit-intro') {
+        } else if (phase === 'intro-three-column') {
             get().speakAndThen(newInstruction, () => {
-                // Transition to challenge-unit-1 after introduction message
-                console.log('[updateInstruction] challenge-unit-intro complete, transitioning to challenge-unit-1');
-                get().resetUnitChallenge();
-                //get().setPhase('challenge-unit-1');
+                get().markPhaseComplete('intro-three-column');
+                console.log('[updateInstruction] intro-three-column complete, transitioning to next phase');
+                get().goToNextPhase();
+            });
+        } else if (phase === 'intro-four-column') {
+            get().speakAndThen(newInstruction, () => {
+                get().markPhaseComplete('intro-four-column');
+                console.log('[updateInstruction] intro-four-column complete, transitioning to next phase');
+                get().goToNextPhase();
+            });
+        } else if (phase === 'intro-second-column') {
+            get().speakAndThen(newInstruction, () => {
+                get().markPhaseComplete('intro-second-column');
+                console.log('[updateInstruction] intro-second-column complete, transitioning to next phase');
+                get().goToNextPhase();
             });
         } else {
             // For all other phases, just speak without automatic transition
