@@ -1109,7 +1109,7 @@ export const useStore = create<MachineState>((set, get) => ({
 
         set({
             showUnlockButton: phase === 'normal' && !allColumnsUnlocked,
-            showStartLearningButton: phase === 'done' || phase === 'celebration-before-thousands' || phase === 'celebration-thousands-complete',
+            showStartLearningButton: phase === 'done' || phase === 'celebration-before-thousands' || phase === 'celebration-thousands-complete' || phase === 'intro-learn-tens' || phase === 'intro-learn-hundreds' || phase === 'intro-learn-thousands',
             showValidateLearningButton: phase === 'tutorial-challenge' || phase.startsWith('challenge-unit-') || phase === 'challenge-ten-to-twenty',
             showValidateTensButton: phase.startsWith('challenge-tens-'),
             showValidateHundredsButton: phase.startsWith('challenge-hundreds-') || phase === 'challenge-hundred-to-two-hundred' || phase === 'challenge-two-hundred-to-three-hundred',
@@ -2134,15 +2134,14 @@ export const useStore = create<MachineState>((set, get) => ({
                 sequenceFeedback(" TRENTE ! TROIS paquets de 10 !", "Bravo !  Tu as compris que c'est le même principe que 9→10 et 19→20 !");
                 setTimeout(() => {
                     const resetCols = initialColumns.map((col, i) => ({ ...col, unlocked: i === 0 || i === 1 }));
-                    // Now move to learn-tens which will start at 30 and count to 90
+                    // Now move to intro-learn-tens to explain the concept before auto-counting
                     set({
                         columns: resetCols,
-                        phase: 'learn-tens',
-                        pendingAutoCount: true,
-                        isCountingAutomatically: false
+                        phase: 'intro-learn-tens',
+                        showStartLearningButton: true
                     });
                     get().updateButtonVisibility();
-                    sequenceFeedback("Maintenant, regarde la machine compter les dizaines rondes !", "40, 50, 60... Observe bien !");
+                    get().updateInstruction();
                 }, FEEDBACK_DELAY * 2);
             } else if (unitsValue === 1 && tensValue === 2) {
                 get().speakAndThen("VINGT-ET-UN ! 20 + 1 ! Continue ! △");
@@ -3248,17 +3247,17 @@ export const useStore = create<MachineState>((set, get) => ({
                 if (twoHundredToThreeHundredTargetIndex + 1 >= challenge.targets.length) {
                     // Tous les challenges terminés !
                     sequenceFeedback(
-                        "Bravo ! Maintenant regarde la machine compter les centaines rondes !",
-                        "300, 400, 500... Observe bien !",
+                        "Bravo ! Tu as maîtrisé les centaines !",
+                        "Maintenant je vais t'expliquer quelque chose d'important !",
                         () => {
                             const resetCols = initialColumns.map((col, i) => ({ ...col, unlocked: i <= 2 }));
                             set({
                                 columns: resetCols,
-                                phase: 'learn-hundreds',
-                                pendingAutoCount: true,
-                                isCountingAutomatically: false
+                                phase: 'intro-learn-hundreds',
+                                showStartLearningButton: true
                             });
                             get().updateButtonVisibility();
+                            get().updateInstruction();
                         }
                     );
                 } else {
@@ -3524,17 +3523,16 @@ export const useStore = create<MachineState>((set, get) => ({
                 if (twoThousandToThreeThousandTargetIndex + 1 >= challenge.targets.length) {
                     sequenceFeedback(
                         " Tous les mini-défis 2000-3000 réussis ! Tu maîtrises la zone 2000-3000 !",
-                        "Bravo ! Maintenant regarde la machine compter les milliers RONDS !",
+                        "Bravo ! Maintenant je vais t'expliquer quelque chose d'important !",
                         () => {
                             const resetCols = initialColumns.map((col) => ({ ...col, unlocked: true }));
                             set({
                                 columns: resetCols,
-                                phase: 'learn-thousands',
-                                pendingAutoCount: true,
-                                isCountingAutomatically: false
+                                phase: 'intro-learn-thousands',
+                                showStartLearningButton: true
                             });
                             get().updateButtonVisibility();
-                            sequenceFeedback("3000, 4000, 5000... Observe bien !");
+                            get().updateInstruction();
                         }
                     );
                 } else {
@@ -3907,6 +3905,9 @@ export const useStore = create<MachineState>((set, get) => ({
             case 'learn-twenty-to-thirty':
                 newInstruction = PHASE_INSTRUCTIONS['learn-twenty-to-thirty'];
                 break;
+            case 'intro-learn-tens':
+                newInstruction = PHASE_INSTRUCTIONS['intro-learn-tens'];
+                break;
             case 'learn-tens':
                 newInstruction = PHASE_INSTRUCTIONS['learn-tens'];
                 break;
@@ -3946,6 +3947,9 @@ export const useStore = create<MachineState>((set, get) => ({
                 newInstruction = CHALLENGE_INSTRUCTIONS.twoHundredToThreeHundred(targetNumber, get().twoHundredToThreeHundredSuccessCount, challenge.targets.length);
                 break;
             }
+            case 'intro-learn-hundreds':
+                newInstruction = PHASE_INSTRUCTIONS['intro-learn-hundreds'];
+                break;
             case 'learn-hundreds':
                 newInstruction = PHASE_INSTRUCTIONS['learn-hundreds'];
                 break;
@@ -3994,6 +3998,9 @@ export const useStore = create<MachineState>((set, get) => ({
                 newInstruction = CHALLENGE_INSTRUCTIONS.twoThousandToThreeThousand(targetNumber, get().twoThousandToThreeThousandSuccessCount, challenge.targets.length);
                 break;
             }
+            case 'intro-learn-thousands':
+                newInstruction = PHASE_INSTRUCTIONS['intro-learn-thousands'];
+                break;
             case 'learn-thousands':
                 newInstruction = PHASE_INSTRUCTIONS['learn-thousands'];
                 break;
@@ -4107,6 +4114,39 @@ export const useStore = create<MachineState>((set, get) => ({
             });
             get().updateButtonVisibility();
             sequenceFeedback(SEQUENCE_FEEDBACK.learnUnits.part1, SEQUENCE_FEEDBACK.learnUnits.part2);
+        } else if (phase === 'intro-learn-tens') {
+            // Start learn-tens after intro explanation
+            const resetCols = initialColumns.map((col, i) => ({ ...col, unlocked: i === 0 || i === 1 }));
+            set({
+                columns: resetCols,
+                phase: 'learn-tens',
+                pendingAutoCount: true,
+                isCountingAutomatically: false
+            });
+            get().updateButtonVisibility();
+            sequenceFeedback("Maintenant, regarde la machine compter les dizaines rondes !", "30, 40, 50, 60... Observe bien !");
+        } else if (phase === 'intro-learn-hundreds') {
+            // Start learn-hundreds after intro explanation
+            const resetCols = initialColumns.map((col, i) => ({ ...col, unlocked: i <= 2 }));
+            set({
+                columns: resetCols,
+                phase: 'learn-hundreds',
+                pendingAutoCount: true,
+                isCountingAutomatically: false
+            });
+            get().updateButtonVisibility();
+            sequenceFeedback("Regarde bien ! La machine va compter par centaines !", "300, 400, 500... Observe bien !");
+        } else if (phase === 'intro-learn-thousands') {
+            // Start learn-thousands after intro explanation
+            const resetCols = initialColumns.map((col) => ({ ...col, unlocked: true }));
+            set({
+                columns: resetCols,
+                phase: 'learn-thousands',
+                pendingAutoCount: true,
+                isCountingAutomatically: false
+            });
+            get().updateButtonVisibility();
+            sequenceFeedback("Regarde bien ! La machine va compter par milliers !", "3000, 4000, 5000... Imagine combien de billes ça fait !");
         } else if (phase === 'celebration-before-thousands') {
             // Start thousands learning
             const resetCols = initialColumns.map((col) => ({ ...col, unlocked: true }));
@@ -4137,7 +4177,7 @@ export const useStore = create<MachineState>((set, get) => ({
     },
 
     unlockNextColumn: () => {
-        const { columns, completedChallenges, sequenceFeedback } = get();
+        const { columns, completedChallenges } = get();
         const nextIdx = columns.findIndex((col: Column, i: number) => !col.unlocked && i > 0);
         if (nextIdx !== -1) {
             const newCols = [...columns];
@@ -4155,12 +4195,11 @@ export const useStore = create<MachineState>((set, get) => ({
                     const resetCols = initialColumns.map((col, i) => ({ ...col, unlocked: i === 0 || i === 1 || i === 2 }));
                     set({
                         columns: resetCols,
-                        phase: 'learn-hundreds',
-                        pendingAutoCount: true,
-                        isCountingAutomatically: false
+                        phase: 'intro-learn-hundreds',
+                        showStartLearningButton: true
                     });
                     get().updateButtonVisibility();
-                    sequenceFeedback(SEQUENCE_FEEDBACK.unlockHundreds.part1, SEQUENCE_FEEDBACK.unlockHundreds.part2);
+                    get().updateInstruction();
                 }, FEEDBACK_DELAY);
             } else if (nextIdx === 3) {
                 if (!completedChallenges.hundreds) {
@@ -4173,12 +4212,11 @@ export const useStore = create<MachineState>((set, get) => ({
                     const resetCols = columns.map((col: Column) => ({ ...col, unlocked: true }));
                     set({
                         columns: resetCols,
-                        phase: 'learn-thousands',
-                        pendingAutoCount: true,
-                        isCountingAutomatically: false
+                        phase: 'intro-learn-thousands',
+                        showStartLearningButton: true
                     });
                     get().updateButtonVisibility();
-                    sequenceFeedback(SEQUENCE_FEEDBACK.unlockThousands.part1, SEQUENCE_FEEDBACK.unlockThousands.part2);
+                    get().updateInstruction();
                 }, FEEDBACK_DELAY);
             } else {
                 newCols[nextIdx].unlocked = true;
