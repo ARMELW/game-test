@@ -81,8 +81,8 @@ export const PHASE_INSTRUCTIONS = {
   'learn-units': "Regarde ! La machine compte de 1 à 9. Compte avec tes doigts !",
   'learn-carry': "Compte jusqu'à 9 en cliquant sur △ ! Quand tu arrives à 9, un clic de plus et... MAGIE !",
   'practice-ten': "WAOUH ! Tu as vu comment 10 petites lumières se transforment en 1 grosse lumière ? C'est INCROYABLE ! Maintenant ajoute des billes pour voir ce qui se passe après 10 !",
-  'learn-ten-to-twenty': "Tu as 1 grosse lumière de 10 ! Maintenant ajoute des petites billes pour comprendre la COMBINAISON : 10 + 1 = 11, 10 + 2 = 12... Clique sur △ jusqu'à 20 !",
-  'learn-twenty-to-thirty': "Parfait ! Tu comprends la combinaison : 1 dizaine + unités ! Maintenant un peu de pratique : remplis jusqu'à 30 pour voir l'échange magique !",
+  'learn-ten-to-twenty': "Maintenant on va faire quelque chose de SUPER COOL ! Tu as 1 grosse lumière de 10 ! Ajoute des petites billes une par une pour découvrir la COMBINAISON MAGIQUE : 10 + 1 = 11, 10 + 2 = 12... Clique sur △ jusqu'à 20 ! C'est comme assembler des LEGO !",
+  'learn-twenty-to-thirty': "GÉNIAL ! Tu as compris la combinaison : 1 dizaine + unités ! Maintenant on va pratiquer encore un peu ! Continue à remplir jusqu'à 30 pour voir un NOUVEL échange magique ! Observe bien ce qui se passe quand tu arrives à 29... puis 30 !",
   'learn-tens': "Regarde ! La machine compte par dizaines : 40, 50, 60...",
   'learn-tens-combination': "Regarde maintenant la MAGIE des GROSSES lumières ! La machine va montrer comment assembler 1 grosse + 2 petites = DOUZE, puis 2 grosses + 5 petites = VINGT-CINQ ! C'est comme des LEGO !",
   

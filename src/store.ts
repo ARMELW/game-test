@@ -2120,7 +2120,7 @@ export const useStore = create<MachineState>((set, get) => ({
             const tensValue = newCols[1].value;
 
             if (!isUnitsColumn(idx)) {
-                get().setFeedback("Non ! Continue avec les UNITÉS ! △ sur la colonne de droite !");
+                get().speakAndThen("Non ! Continue avec les UNITÉS ! △ sur la colonne de droite !");
                 const revertCols = [...columns];
                 set({ columns: revertCols });
                 return;
@@ -2141,9 +2141,22 @@ export const useStore = create<MachineState>((set, get) => ({
                     get().updateButtonVisibility();
                     sequenceFeedback("Maintenant, regarde la machine compter les dizaines rondes !", "40, 50, 60... Observe bien !");
                 }, FEEDBACK_DELAY * 2);
-            } else if (unitsValue < 9 && tensValue === 2) {
-                const number = tensValue * 10 + unitsValue;
-                get().setFeedback(`${number} ! Continue à remplir jusqu'à 29 ! △`);
+            } else if (unitsValue === 1 && tensValue === 2) {
+                get().speakAndThen("VINGT-ET-UN ! 20 + 1 ! Continue ! △");
+            } else if (unitsValue === 2 && tensValue === 2) {
+                get().speakAndThen("VINGT-DEUX ! Continue à remplir ! △");
+            } else if (unitsValue === 3 && tensValue === 2) {
+                get().speakAndThen("VINGT-TROIS ! C'est bien ! △");
+            } else if (unitsValue === 4 && tensValue === 2) {
+                get().speakAndThen("VINGT-QUATRE ! Continue ! △");
+            } else if (unitsValue === 5 && tensValue === 2) {
+                get().speakAndThen("VINGT-CINQ ! À mi-chemin vers 30 ! △");
+            } else if (unitsValue === 6 && tensValue === 2) {
+                get().speakAndThen("VINGT-SIX ! Encore quelques-uns ! △");
+            } else if (unitsValue === 7 && tensValue === 2) {
+                get().speakAndThen("VINGT-SEPT ! Presque à 29 ! △");
+            } else if (unitsValue === 8 && tensValue === 2) {
+                get().speakAndThen("VINGT-HUIT ! Encore un peu ! △");
             } else if (unitsValue === 9 && tensValue === 2) {
                 sequenceFeedback("29 ! VINGT-NEUF ! Que va-t-il se passer ?", "Clique sur △ pour découvrir !");
             }
