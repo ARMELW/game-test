@@ -82,33 +82,39 @@ class TextToSpeechService {
       }
     }
 
+    // Capture callbacks in closure to avoid race condition when stop() is called
+    // This ensures each utterance has its own callback references
+    const capturedCallbacks = { ...this.callbacks };
+
     // Événements
     utterance.onstart = () => {
-      this.callbacks.onStart?.();
+      capturedCallbacks.onStart?.();
     };
 
     utterance.onend = () => {
-      this.currentUtterance = null;
-      const endCallback = this.callbacks.onEnd;
-      // Clear callbacks after they fire to prevent them from being reused
-      this.callbacks = {};
-      endCallback?.();
+      // Only process if this utterance is still the current one
+      if (this.currentUtterance === utterance) {
+        this.currentUtterance = null;
+        this.callbacks = {};
+      }
+      capturedCallbacks.onEnd?.();
     };
 
     utterance.onerror = (event) => {
-      this.currentUtterance = null;
-      const errorCallback = this.callbacks.onError;
-      // Clear callbacks after they fire to prevent them from being reused
-      this.callbacks = {};
-      errorCallback?.(event.error);
+      // Only process if this utterance is still the current one
+      if (this.currentUtterance === utterance) {
+        this.currentUtterance = null;
+        this.callbacks = {};
+      }
+      capturedCallbacks.onError?.(event.error);
     };
 
     utterance.onpause = () => {
-      this.callbacks.onPause?.();
+      capturedCallbacks.onPause?.();
     };
 
     utterance.onresume = () => {
-      this.callbacks.onResume?.();
+      capturedCallbacks.onResume?.();
     };
 
     return utterance;
