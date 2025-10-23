@@ -1233,12 +1233,13 @@ export const useStore = create<MachineState>((set, get) => ({
                 });
             } else { // tensValue is 9
                 get().speakAndThen("STOP ! 🛑 Le compteur est à 90. Tu as vu tous les nombres avec les dizaines ! Bravo !", () => {
-                    get().setColumns(initialColumns);
+                    get().setColumns(initialColumns.map(c => ({ ...c, unlocked: c.name === 'Unités' || c.name === 'Dizaines' })));
                     get().setIsCountingAutomatically(false);
-                    //get().speakAndThen("Retour à zéro ! 🔄 Maintenant on va apprendre à combiner les dizaines et les unités !", () => {
-                  //      get().setPhase('learn-tens-combination');
-                  //      get().setPendingAutoCount(true);
-                   // });
+                    get().resetTensChallenge();
+                    get().markPhaseComplete('learn-tens');
+                    get().speakAndThen("Retour à zéro ! 🔄 Maintenant c'est à toi de jouer !", () => {
+                        get().goToNextPhase();
+                    });
                 });
             }
         }
@@ -1343,12 +1344,13 @@ export const useStore = create<MachineState>((set, get) => ({
                 });
             } else { // hundredsValue is 9
                 get().speakAndThen("STOP ! 🛑 Le compteur est à 900. Tu as vu tous les nombres avec les centaines ! Bravo !", () => {
-                    get().setColumns(initialColumns);
+                    get().setColumns(initialColumns.map(c => ({ ...c, unlocked: c.name === 'Unités' || c.name === 'Dizaines' || c.name === 'Centaines' })));
                     get().setIsCountingAutomatically(false);
-                    //get().speakAndThen("Retour à zéro ! 🔄 Maintenant on va apprendre à combiner les centaines avec des exemples simples !", () => {
-                        //get().setPhase('learn-hundreds-simple-combination');
-                        //get().setPendingAutoCount(true);
-                    //});
+                    get().resetHundredsChallenge();
+                    get().markPhaseComplete('learn-hundreds');
+                    get().speakAndThen("Retour à zéro ! 🔄 Maintenant c'est à toi de jouer !", () => {
+                        get().goToNextPhase();
+                    });
                 });
             }
         }
@@ -1512,11 +1514,12 @@ export const useStore = create<MachineState>((set, get) => ({
                 });
             } else {
                 get().speakAndThen("STOP ! 🛑 Le compteur est à 9000. C'est GIGANTESQUE !", () => {
-                    get().setColumns(initialColumns);
+                    get().setColumns(initialColumns.map(c => ({ ...c, unlocked: true })));
                     get().setIsCountingAutomatically(false);
-                    get().speakAndThen("Retour à zéro ! 🔄 Apprenons les combinaisons SIMPLES !", () => {
-                       // get().setPhase('learn-thousands-very-simple-combination');
-                        get().setPendingAutoCount(true);
+                    get().resetThousandsChallenge();
+                    get().markPhaseComplete('learn-thousands');
+                    get().speakAndThen("Retour à zéro ! 🔄 Maintenant c'est à toi de jouer !", () => {
+                        get().goToNextPhase();
                     });
                 });
             }
@@ -1879,13 +1882,13 @@ export const useStore = create<MachineState>((set, get) => ({
             if (currentPhaseForCheck === 'normal') return true;
             if (isUnitsColumn(idx)) return true;
             if (currentPhaseForCheck === 'practice-ten' || currentPhaseForCheck === 'learn-ten-to-twenty' || currentPhaseForCheck === 'challenge-ten-to-twenty' || currentPhaseForCheck === 'learn-twenty-to-thirty') return isUnitsColumn(idx);
-            if (idx === 1 && (currentPhaseForCheck.startsWith('challenge-tens-') || currentPhaseForCheck === 'learn-tens-combination')) return true;
+            if (idx === 1 && currentPhaseForCheck.startsWith('challenge-tens-')) return true;
             if (currentPhaseForCheck === 'practice-hundred' || currentPhaseForCheck === 'learn-hundred-to-hundred-ten' || currentPhaseForCheck === 'learn-hundred-ten-to-two-hundred' || currentPhaseForCheck === 'challenge-hundred-to-two-hundred') return isUnitsColumn(idx);
             if (currentPhaseForCheck === 'learn-two-hundred-to-three-hundred' || currentPhaseForCheck === 'challenge-two-hundred-to-three-hundred') return isUnitsColumn(idx);
-            if ((idx === 1 || idx === 2) && (currentPhaseForCheck.startsWith('challenge-hundreds-') || currentPhaseForCheck === 'learn-hundreds-combination' || currentPhaseForCheck === 'learn-hundreds-simple-combination')) return true;
+            if ((idx === 1 || idx === 2) && currentPhaseForCheck.startsWith('challenge-hundreds-')) return true;
             if (currentPhaseForCheck === 'practice-thousand' || currentPhaseForCheck === 'learn-thousand-to-thousand-ten' || currentPhaseForCheck === 'learn-thousand-to-thousand-hundred' || currentPhaseForCheck === 'learn-thousand-hundred-to-two-thousand' || currentPhaseForCheck === 'challenge-thousand-to-two-thousand') return isUnitsColumn(idx);
             if (currentPhaseForCheck === 'learn-two-thousand-to-three-thousand' || currentPhaseForCheck === 'challenge-two-thousand-to-three-thousand') return isUnitsColumn(idx);
-            if ((idx === 1 || idx === 2 || idx === 3) && (currentPhaseForCheck.startsWith('challenge-thousands-') || currentPhaseForCheck === 'learn-thousands-combination' || currentPhaseForCheck === 'learn-thousands-very-simple-combination' || currentPhaseForCheck === 'learn-thousands-full-combination' || currentPhaseForCheck === 'challenge-thousands-simple-combination')) return true;
+            if ((idx === 1 || idx === 2 || idx === 3) && (currentPhaseForCheck.startsWith('challenge-thousands-') || currentPhaseForCheck === 'challenge-thousands-simple-combination')) return true;
             if (currentPhaseForCheck === 'learn-carry') return isUnitsColumn(idx);
             return false;
         };
@@ -2639,9 +2642,9 @@ export const useStore = create<MachineState>((set, get) => ({
             if (phase === 'practice-ten' || phase === 'learn-ten-to-twenty' || phase === 'challenge-ten-to-twenty' || phase === 'learn-twenty-to-thirty') return isUnitsColumn(idx);
             if (phase === 'practice-hundred' || phase === 'learn-hundred-to-hundred-ten' || phase === 'learn-hundred-ten-to-two-hundred' || phase === 'challenge-hundred-to-two-hundred') return isUnitsColumn(idx);
             if (phase === 'learn-two-hundred-to-three-hundred' || phase === 'challenge-two-hundred-to-three-hundred') return isUnitsColumn(idx);
-            if (idx === 1 && (phase.startsWith('challenge-tens-') || phase === 'learn-tens-combination')) return true;
-            if ((idx === 1 || idx === 2) && (phase.startsWith('challenge-hundreds-') || phase === 'learn-hundreds-combination' || phase === 'learn-hundreds-simple-combination')) return true;
-            if ((idx === 1 || idx === 2 || idx === 3) && (phase.startsWith('challenge-thousands-') || phase === 'learn-thousands-combination')) return true;
+            if (idx === 1 && phase.startsWith('challenge-tens-')) return true;
+            if ((idx === 1 || idx === 2) && phase.startsWith('challenge-hundreds-')) return true;
+            if ((idx === 1 || idx === 2 || idx === 3) && (phase.startsWith('challenge-thousands-') || phase === 'challenge-thousands-simple-combination')) return true;
             return false;
         };
 
@@ -3610,13 +3613,13 @@ export const useStore = create<MachineState>((set, get) => ({
                 get().speakAndThen(" Tous les défis de combinaisons SIMPLES réussis ! Bravo !", () => {
                     const resetCols = initialColumns.map((col) => ({ ...col, unlocked: true }));
                     set({
-                        columns: resetCols,
-                        phase: 'learn-thousands-full-combination',
-                        pendingAutoCount: true,
-                        isCountingAutomatically: false
+                        columns: resetCols
                     });
+                    get().markPhaseComplete('challenge-thousands-simple-combination');
                     get().updateButtonVisibility();
-                    sequenceFeedback("Bravo ! Maintenant regardons les nombres COMPLETS !", "1234, 2345... C'est long à dire mais tu vas voir la logique !");
+                    sequenceFeedback("Bravo ! Maintenant passons aux défis !", "C'est à toi de jouer !", () => {
+                        get().goToNextPhase();
+                    });
                 });
             } else {
                 // Send next goal message to Unity
@@ -4043,56 +4046,81 @@ export const useStore = create<MachineState>((set, get) => ({
 
         // Speak the instruction, but handle automatic transitions in phase-specific logic
         // Only phases with automatic transitions after speaking should be handled here
-        if (phase === 'intro-challenge-introduction') {
+        if (phase === 'intro-welcome') {
             get().speakAndThen(newInstruction, () => {
-                // Transition to intro-second-column after introduction message
-                console.log('[updateInstruction] intro-challenge-introduction complete, transitioning to intro-second-column');
-               // get().setPhase('intro-second-column');
+                get().markPhaseComplete('intro-welcome');
+                console.log('[updateInstruction] intro-welcome complete, transitioning to next phase');
+                get().goToNextPhase();
+            });
+        } else if (phase === 'intro-discover') {
+            get().speakAndThen(newInstruction, () => {
+                get().markPhaseComplete('intro-discover');
+                console.log('[updateInstruction] intro-discover complete, transitioning to next phase');
+                get().goToNextPhase();
+            });
+        } else if (phase === 'intro-challenge-introduction') {
+            get().speakAndThen(newInstruction, () => {
+                get().markPhaseComplete('intro-challenge-introduction');
+                console.log('[updateInstruction] intro-challenge-introduction complete, transitioning to next phase');
+                get().goToNextPhase();
+            });
+        } else if (phase === 'challenge-unit-intro') {
+            get().speakAndThen(newInstruction, () => {
+                get().markPhaseComplete('challenge-unit-intro');
+                get().resetUnitChallenge();
+                console.log('[updateInstruction] challenge-unit-intro complete, transitioning to next phase');
+                get().goToNextPhase();
             });
         } else if (phase === 'delock-dizaines') {
             get().speakAndThen(newInstruction, () => {
-                // Unlock the columns during this phase
                 const newCols = [...initialColumns];
                 newCols[0].unlocked = true;
                 newCols[1].unlocked = true;
                 set({ columns: newCols });
-                
-                // Transition to intro-discover-carry after unlocking
-                console.log('[updateInstruction] delock-dizaines complete, transitioning to intro-discover-carry');
-                /**get().speakAndThen("(Bruit d'allumage : bzzzz, ding !)", () => {
-                    set({ phase: 'practice-ten' });
-                    get().updateInstruction();
-                });**/
+                get().markPhaseComplete('delock-dizaines');
+                console.log('[updateInstruction] delock-dizaines complete, transitioning to next phase');
+                get().goToNextPhase();
             });
         } else if (phase === 'delock-hundreds') {
             get().speakAndThen(newInstruction, () => {
-                // Unlock the hundreds column during this phase
                 const newCols = [...initialColumns];
                 newCols[0].unlocked = true;
                 newCols[1].unlocked = true;
                 newCols[2].unlocked = true;
                 set({ columns: newCols });
-                
-                console.log('[updateInstruction] delock-hundreds complete, transitioning to practice-hundred');
+                get().markPhaseComplete('delock-hundreds');
+                console.log('[updateInstruction] delock-hundreds complete, transitioning to next phase');
+                get().goToNextPhase();
             });
         } else if (phase === 'delock-thousands') {
             get().speakAndThen(newInstruction, () => {
-                // Unlock all columns during this phase
                 const newCols = [...initialColumns];
                 newCols[0].unlocked = true;
                 newCols[1].unlocked = true;
                 newCols[2].unlocked = true;
                 newCols[3].unlocked = true;
                 set({ columns: newCols });
-                
-                console.log('[updateInstruction] delock-thousands complete, transitioning to practice-thousand');
+                get().markPhaseComplete('delock-thousands');
+                console.log('[updateInstruction] delock-thousands complete, transitioning to next phase');
+                get().goToNextPhase();
             });
-        } else if (phase === 'challenge-unit-intro') {
+        } else if (phase === 'intro-three-column') {
             get().speakAndThen(newInstruction, () => {
-                // Transition to challenge-unit-1 after introduction message
-                console.log('[updateInstruction] challenge-unit-intro complete, transitioning to challenge-unit-1');
-                get().resetUnitChallenge();
-                //get().setPhase('challenge-unit-1');
+                get().markPhaseComplete('intro-three-column');
+                console.log('[updateInstruction] intro-three-column complete, transitioning to next phase');
+                get().goToNextPhase();
+            });
+        } else if (phase === 'intro-four-column') {
+            get().speakAndThen(newInstruction, () => {
+                get().markPhaseComplete('intro-four-column');
+                console.log('[updateInstruction] intro-four-column complete, transitioning to next phase');
+                get().goToNextPhase();
+            });
+        } else if (phase === 'intro-second-column') {
+            get().speakAndThen(newInstruction, () => {
+                get().markPhaseComplete('intro-second-column');
+                console.log('[updateInstruction] intro-second-column complete, transitioning to next phase');
+                get().goToNextPhase();
             });
         } else {
             // For all other phases, just speak without automatic transition
