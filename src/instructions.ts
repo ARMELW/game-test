@@ -83,6 +83,7 @@ export const PHASE_INSTRUCTIONS = {
   'practice-ten': "WAOUH ! Tu as vu comment 10 petites lumières se transforment en 1 grosse lumière ? C'est INCROYABLE ! Maintenant ajoute des billes pour voir ce qui se passe après 10 !",
   'learn-ten-to-twenty': "Maintenant on va faire quelque chose de SUPER COOL ! Tu as 1 grosse lumière de 10 ! Ajoute des petites billes une par une pour découvrir la COMBINAISON MAGIQUE : 10 + 1 = 11, 10 + 2 = 12... Clique sur △ jusqu'à 20 ! C'est comme assembler des LEGO !",
   'learn-twenty-to-thirty': "GÉNIAL ! Tu as compris la combinaison : 1 dizaine + unités ! Maintenant on va pratiquer encore un peu ! Continue à remplir jusqu'à 30 pour voir un NOUVEL échange magique ! Observe bien ce qui se passe quand tu arrives à 29... puis 30 !",
+  'intro-learn-tens': "BRAVO ! Tu as compté jusqu'à 30 ! Maintenant tu comprends le principe : 10 + 1 = 11, 20 + 1 = 21, 30 + 1 = 31 ! Pour les autres dizaines, c'est pareil ! Par exemple : 40 + 1 = 41, 40 + 2 = 42... 50 + 1 = 51, 50 + 2 = 52... Tu vois le principe ? Maintenant je vais te montrer TOUTES les dizaines !",
   'learn-tens': "Regarde bien ! 👀 La machine va compter AUTOMATIQUEMENT par dizaines : 30, 40, 50, 60... jusqu'à 90 ! Ne clique pas, OBSERVE ! 🎬",
   'learn-tens-combination': "Regarde maintenant la MAGIE des GROSSES lumières ! La machine va montrer comment assembler 1 grosse + 2 petites = DOUZE, puis 2 grosses + 5 petites = VINGT-CINQ ! C'est comme des LEGO !",
   
@@ -91,6 +92,7 @@ export const PHASE_INSTRUCTIONS = {
   'learn-hundred-to-hundred-ten': "Tu as 1 GRAND paquet de 100 ! Maintenant ajoute des billes pour comprendre la COMBINAISON : 100 + 1 = 101, 100 + 2 = 102... Clique sur △ jusqu'à 120 !",
   'learn-hundred-ten-to-two-hundred': "Bravo ! Tu comprends : 1 centaine + dizaines + unités ! Pratique un peu : monte jusqu'à 200 pour voir l'échange magique !",
   'learn-two-hundred-to-three-hundred': "Remplis tout jusqu'à 299 ! Clique sur △ pour ajouter des billes !",
+  'intro-learn-hundreds': "FANTASTIQUE ! Tu maîtrises les centaines maintenant ! Tu sais que 100 + 1 = 101, 200 + 1 = 201, 300 + 1 = 301... C'est le même principe pour toutes les centaines ! Par exemple : 400 + 1 = 401, 500 + 10 = 510, 600 + 50 = 650... Tu comprends ? On peut assembler les GRANDS paquets avec les paquets normaux ! Maintenant regarde toutes les centaines !",
   'learn-hundreds': "Regarde bien ! 👀 La machine va compter AUTOMATIQUEMENT par centaines : 300, 400, 500... jusqu'à 900 ! Ne clique pas, OBSERVE ! 🎬",
   'learn-hundreds-simple-combination': "Maintenant les GRANDS paquets de 100 ! La machine va montrer : 1 GRAND paquet = CENT, puis 1 GRAND + 1 paquet = CENT-DIX ! C'est facile d'assembler les paquets !",
   'learn-hundreds-combination': "Maintenant on assemble TOUT ! La machine va montrer : 1 GRAND paquet + 2 paquets + 3 billes = CENT-VINGT-TROIS ! Comme une tour de LEGO avec 3 étages !",
@@ -106,6 +108,7 @@ export const PHASE_INSTRUCTIONS = {
   'learn-thousand-to-thousand-hundred': "Super ! Tu comprends la combinaison : 1 millier + centaines + dizaines + unités ! Monte jusqu'à 1100 pour pratiquer !",
   'learn-thousand-hundred-to-two-thousand': "Excellent ! Continue à pratiquer jusqu'à 2000 pour bien comprendre les milliers !",
   'learn-two-thousand-to-three-thousand': "DEUX-MILLE ! Monte directement à 2500, puis 2900, puis 2999, puis 3000 ! Clique sur △ sur les UNITÉS !",
+  'intro-learn-thousands': "INCROYABLE ! Tu es un champion des milliers ! Maintenant tu comprends : 1000 + 1 = 1001, 2000 + 1 = 2001, 3000 + 1 = 3001... C'est toujours le même principe magique ! Par exemple : 4000 + 1 = 4001, 5000 + 100 = 5100, 6000 + 500 = 6500... On peut assembler les ÉNORMES paquets avec tous les autres ! Regarde tous les milliers maintenant !",
   'learn-thousands': "Regarde bien ! 👀 La machine va compter AUTOMATIQUEMENT par milliers : 3000, 4000, 5000... jusqu'à 9000 ! Ne clique pas, OBSERVE ! Imagine combien de billes ça fait ! 🎬",
   'learn-thousands-very-simple-combination': "Les ÉNORMES paquets de 1000 ! La machine va montrer : 1 ÉNORME paquet = MILLE, puis 1 ÉNORME + 1 GRAND = MILLE-CENT ! C'est magique d'assembler de si grands nombres !",
   'learn-thousands-full-combination': "Prépare-toi pour le GRAND spectacle ! La machine va montrer comment assembler TOUS les paquets ensemble : 1 ÉNORME + 2 GRANDS + 3 paquets + 4 billes = MILLE-DEUX-CENT-TRENTE-QUATRE ! Tu es un CHAMPION !",
