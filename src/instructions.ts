@@ -76,11 +76,11 @@ export const PHASE_INSTRUCTIONS = {
   // Learning phases
   'learn-units': "Regarde ! La machine compte de 1 à 9. Compte avec tes doigts !",
   'learn-carry': "Compte jusqu'à 9 en cliquant sur △ ! Quand tu arrives à 9, un clic de plus et... MAGIE !",
-  'practice-ten': "Pratique le concept de paquet ! Clique sur ∇ pour revenir à 9, puis △ pour refaire l'échange magique !",
-  'learn-ten-to-twenty': "Tu as 1 paquet de 10 ! Maintenant ajoute des billes pour comprendre la COMBINAISON : 10 + 1 = 11, 10 + 2 = 12... Clique sur △ jusqu'à 20 !",
+  'practice-ten': "WAOUH ! Tu as vu comment 10 petites lumières se transforment en 1 grosse lumière ? C'est INCROYABLE ! Maintenant ajoute des billes pour voir ce qui se passe après 10 !",
+  'learn-ten-to-twenty': "Tu as 1 grosse lumière de 10 ! Maintenant ajoute des petites billes pour comprendre la COMBINAISON : 10 + 1 = 11, 10 + 2 = 12... Clique sur △ jusqu'à 20 !",
   'learn-twenty-to-thirty': "Parfait ! Tu comprends la combinaison : 1 dizaine + unités ! Maintenant un peu de pratique : remplis jusqu'à 30 pour voir l'échange magique !",
   'learn-tens': "Regarde ! La machine compte par dizaines : 40, 50, 60...",
-  'learn-tens-combination': "Regarde maintenant la MAGIE des paquets ! La machine va montrer comment assembler 1 paquet + 2 billes = DOUZE, puis 2 paquets + 5 billes = VINGT-CINQ ! C'est comme des LEGO !",
+  'learn-tens-combination': "Regarde maintenant la MAGIE des GROSSES lumières ! La machine va montrer comment assembler 1 grosse + 2 petites = DOUZE, puis 2 grosses + 5 petites = VINGT-CINQ ! C'est comme des LEGO !",
   
   // Hundreds phases
   'practice-hundred': "Pratique le concept de GRAND paquet ! Clique sur ∇ pour revenir à 99, puis △ pour refaire l'échange magique vers 100 !",
