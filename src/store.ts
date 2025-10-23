@@ -232,6 +232,10 @@ export const useStore = create<MachineState>((set, get) => ({
     showValidateHundredsButton: false,
     showValidateThousandsButton: false,
 
+    // Unity loading state
+    unityLoaded: false,
+    unityLoadingProgression: 0,
+
     // Phase status tracking
     phaseStatusMap: createInitialPhaseStatusMap(),
     autoTransitionEnabled: true,
@@ -278,23 +282,31 @@ export const useStore = create<MachineState>((set, get) => ({
             sendChallengeToUnity(phase);
         }
 
-        // Handle loading phase - wait for TTS to be ready
+        // Handle loading phase - wait for TTS and Unity to be ready
         if (phase === 'loading') {
             set({ feedback: "", instruction: "" });
-            console.log('[setPhase] loading: checking TTS readiness');
+            console.log('[setPhase] loading: checking TTS and Unity readiness');
 
             let checkCount = 0;
-            const MAX_CHECKS = 25; // Max 5 seconds (25 * 200ms)
+            const MAX_CHECKS = 100; // Max 20 seconds (100 * 200ms)
 
-            // Function to check if voices are loaded
-            const checkVoicesLoaded = () => {
+            // Function to check if both TTS and Unity are loaded
+            const checkReadiness = () => {
                 const voices = textToSpeechService.getVoices();
+                const { unityLoaded, unityLoadingProgression } = get();
                 checkCount++;
-                console.log('[setPhase] Check #' + checkCount + ', Voices loaded:', voices.length);
+                console.log('[setPhase] Check #' + checkCount + 
+                    ', Voices:', voices.length + 
+                    ', Unity loaded:', unityLoaded + 
+                    ', Unity progression:', Math.round(unityLoadingProgression * 100) + '%');
 
-                if (voices.length > 0) {
-                    // Voices are ready, transition to intro
-                    console.log('[setPhase] TTS ready, transitioning to intro-welcome');
+                // Check if both TTS voices and Unity are ready
+                const ttsReady = voices.length > 0;
+                const unityReady = unityLoaded && unityLoadingProgression >= 1.0;
+
+                if (ttsReady && unityReady) {
+                    // Both are ready, transition to intro
+                    console.log('[setPhase] TTS and Unity ready, transitioning to intro-welcome');
                     setTimeout(() => {
                         set({ phase: 'intro-welcome', timer: null });
                         get().updateButtonVisibility();
@@ -302,22 +314,25 @@ export const useStore = create<MachineState>((set, get) => ({
                     }, 500); // Small delay to ensure everything is ready
                 } else if (checkCount >= MAX_CHECKS) {
                     // Timeout after max checks - proceed anyway
-                    console.log('[setPhase] TTS initialization timeout, proceeding to intro anyway');
+                    console.log('[setPhase] Loading timeout, proceeding to intro anyway (TTS ready:', ttsReady + ', Unity ready:', unityReady + ')');
                     setTimeout(() => {
                         set({ phase: 'intro-welcome', timer: null });
                         get().updateButtonVisibility();
                         get().updateInstruction();
                     }, 500);
                 } else {
-                    // Voices not ready yet, check again
-                    console.log('[setPhase] Voices not ready, checking again in 200ms');
-                    const newTimer = setTimeout(checkVoicesLoaded, 200);
+                    // Not ready yet, check again
+                    const waitingFor = [];
+                    if (!ttsReady) waitingFor.push('TTS');
+                    if (!unityReady) waitingFor.push('Unity');
+                    console.log('[setPhase] Waiting for:', waitingFor.join(' and ') + ', checking again in 200ms');
+                    const newTimer = setTimeout(checkReadiness, 200);
                     set({ timer: newTimer as unknown as number });
                 }
             };
 
             // Start checking after a small delay
-            const newTimer = setTimeout(checkVoicesLoaded, 100);
+            const newTimer = setTimeout(checkReadiness, 100);
             set({ timer: newTimer as unknown as number });
             return;
         }
@@ -544,6 +559,8 @@ export const useStore = create<MachineState>((set, get) => ({
     setUserInput: (input) => set({ userInput: input }),
     setShowInputField: (show) => set({ showInputField: show }),
     setTimer: (timer) => set({ timer }),
+    setUnityLoaded: (loaded) => set({ unityLoaded: loaded }),
+    setUnityLoadingProgression: (progression) => set({ unityLoadingProgression: progression }),
 
     // New error management actions
     setAttemptCount: (count) => set({ attemptCount: count }),
@@ -616,8 +633,7 @@ export const useStore = create<MachineState>((set, get) => ({
     },
 
     handleIntroMachineResponse: () => {
-        const { selectedResponse, userName, sequenceFeedback } = get();
-        const name = userName || "l'enfant";
+        const { selectedResponse, sequenceFeedback } = get();
 
         set({ showResponseButtons: false });
 

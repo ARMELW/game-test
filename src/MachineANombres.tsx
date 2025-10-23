@@ -63,11 +63,15 @@ function MachineANombres() {
     goToNextPhase,
     goToPreviousPhase,
     getCurrentPhaseIndex,
+    // Unity loading state setters
+    setUnityLoaded,
+    setUnityLoadingProgression,
   } = useStore();
 
   // Unity integration
   const {
     isLoaded: unityLoaded,
+    loadingProgression: unityLoadingProgression,
     changeCurrentValue,
   } = useUnity();
 
@@ -255,6 +259,15 @@ function MachineANombres() {
   );
 
   const isTyping = isTypingInstruction || isTypingFeedback;
+
+  // Update store with Unity loading state
+  useEffect(() => {
+    setUnityLoaded(unityLoaded);
+  }, [unityLoaded, setUnityLoaded]);
+
+  useEffect(() => {
+    setUnityLoadingProgression(unityLoadingProgression);
+  }, [unityLoadingProgression, setUnityLoadingProgression]);
 
   // Sync Unity machine value with current state
   useEffect(() => {
