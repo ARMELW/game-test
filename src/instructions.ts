@@ -31,16 +31,16 @@ export const PHASE_INSTRUCTIONS = {
     `Tadaaaaa ! Comment tu la trouves ? `,
   
   'intro-first-interaction': {
-    initial: " Bon, elle peut paraître un peu compliquée comme ça... mais elle n'aura bientôt plus de secrets pour toi ! Grâce à cette machine bizarre, nous allons comprendre comment fonctionnent les nombres ! Et hop, je vais la mettre en route ! Maintenant tu peux appuyer sur ses boutons ! Clique sur le bouton △ VERT pour voir ce qu'il se passe !",
-    continuing: "Continue à cliquer sur △ pour remplir la machine !",
-    full: "La machine est pleine ! Essaie maintenant le bouton ROUGE ∇ pour voir ce qu'il fait !",
+    initial: " Bon, elle peut paraître un peu compliquée comme ça... mais elle n'aura bientôt plus de secrets pour toi ! Grâce à cette machine bizarre, nous allons comprendre comment fonctionnent les nombres ! Et hop, je vais la mettre en route ! Maintenant tu peux appuyer sur ses boutons ! Clique sur le bouton  VERT pour voir ce qu'il se passe !",
+    continuing: "Continue à cliquer sur bouton VERT pour remplir la machine !",
+    full: "La machine est pleine ! Essaie maintenant le bouton ROUGE bouton ROUGE pour voir ce qu'il fait !",
   },
   
   'intro-count-digits': "Maintenant, une petite question pour voir si tu as bien regardé ! Te rappelles-tu combien de chiffres DIFFÉRENTS tu as vu ? Prends ton temps pour réfléchir...",
   
   'intro-challenge-introduction': "Parfait ! Tu as bien compris ! Maintenant que tu connais les 10 chiffres (0, 1, 2, 3, 4, 5, 6, 7, 8, 9), il est temps de passer aux DÉFIS ! Dans les défis, je vais te demander d'afficher des nombres précis sur la machine. Es-tu prêt(e) ? C'est parti pour ton premier challenge !",
   
-  'challenge-unit-intro': "Excellent travail ! Tu as bien pratiqué avec les boutons △ et ∇, et tu maîtrises maintenant les chiffres de 0 à 9 ! Maintenant, il est temps de passer aux VRAIS DÉFIS ! Dans ces défis, je vais te demander d'afficher des nombres précis, puis tu devras cliquer sur VALIDER pour vérifier. Es-tu prêt(e) ? Allons-y !",
+  'challenge-unit-intro': "Excellent travail ! Tu as bien pratiqué avec les boutons bouton VERT et bouton ROUGE, et tu maîtrises maintenant les chiffres de 0 à 9 ! Maintenant, il est temps de passer aux VRAIS DÉFIS ! Dans ces défis, je vais te demander d'afficher des nombres précis, puis tu devras cliquer sur VALIDER pour vérifier. Es-tu prêt(e) ? Allons-y !",
   
   'intro-second-column': "Bon, tout ça c'est très bien... Mais j'ai un PROBLÈME ! Comment va-t-on faire pour compter plus haut que 9 ? Pour l'instant, la machine BLOQUE à 9 ! Tu vois ? Ça ne bouge plus ! À ton avis, que peut-on faire ?",
   
@@ -52,14 +52,14 @@ export const PHASE_INSTRUCTIONS = {
   
   'intro-discover-carry': {
     fillToNine: "Maintenant, on va voir quelque chose de MAGIQUE ! Amène le premier rouleau à 9 !",
-    atNine: "Parfait ! Tout est PLEIN ! 9 lumières allumées ! Maintenant... que va-t-il se passer si tu cliques encore une fois sur △ ? Réfléchis bien... Tu ne sais pas ? C'est normal ! Clique et tu verras !",
-    afterCarry: "WAOUH ! Tu as vu ça ??? C'était MAGIQUE non ? Les 10 lumières ont VOYAGÉ ! Elles se sont regroupées pour devenir UNE seule lumière sur le deuxième rouleau ! Maintenant, refais l'inverse ! Clique sur ∇ pour voir ce qu'il se passe !",
+    atNine: "Parfait ! Tout est PLEIN ! 9 lumières allumées ! Maintenant... que va-t-il se passer si tu cliques encore une fois sur bouton VERT ? Réfléchis bien... Tu ne sais pas ? C'est normal ! Clique et tu verras !",
+    afterCarry: "WAOUH ! Tu as vu ça ??? C'était MAGIQUE non ? Les 10 lumières ont VOYAGÉ ! Elles se sont regroupées pour devenir UNE seule lumière sur le deuxième rouleau ! Maintenant, refais l'inverse ! Clique sur bouton ROUGE pour voir ce qu'il se passe !",
   },
   
   'intro-max-value-question': {
     guided: {
-      firstRoll: "Clique sur △ pour remplir le PREMIER rouleau au maximum !",
-      secondRoll: "Parfait ! Maintenant clique sur △ du DEUXIÈME rouleau pour le remplir aussi !",
+      firstRoll: "Clique sur bouton VERT pour remplir le PREMIER rouleau au maximum !",
+      secondRoll: "Parfait ! Maintenant clique sur bouton VERT du DEUXIÈME rouleau pour le remplir aussi !",
       maximum: "C'est le MAXIMUM ! 99 !",
     },
     question: "Maintenant que tu as vu comment ça marche... J'ai une question pour toi ! Avec DEUX rouleaux, jusqu'à combien peut-on compter ? Réfléchis bien !",
@@ -70,28 +70,28 @@ export const PHASE_INSTRUCTIONS = {
   'intro-question-max': "Jusqu'à combien peut-on compter maintenant ? (Saisis ta réponse)",
   
   // Tutorial phases
-  'tutorial': "Bienvenue ! Clique sur △ pour découvrir la machine !",
+  'tutorial': "Bienvenue ! Clique sur bouton VERT pour découvrir la machine !",
   'tutorial-challenge': "Maintenant, un petit défi pour apprendre !",
-  'explore-units': "Clique sur △ pour ajouter une bille. Lève UN doigt à chaque clic!",
+  'explore-units': "Clique sur bouton VERT pour ajouter une bille. Lève UN doigt à chaque clic!",
   'click-add': "Continue jusqu'à 9 ! Chaque clic ajoute UNE bille !",
-  'click-remove': "Clique sur ∇ pour enlever les billes jusqu'à ZÉRO !",
+  'click-remove': "Clique sur bouton ROUGE pour enlever les billes jusqu'à ZÉRO !",
   'done': "Génial ! Clique sur 'Commencer l'apprentissage' pour découvrir l'échange 10 pour 1 !",
   
   // Learning phases
   'learn-units': "Regarde ! La machine compte de 1 à 9. Compte avec tes doigts !",
-  'learn-carry': "Compte jusqu'à 9 en cliquant sur △ ! Quand tu arrives à 9, un clic de plus et... MAGIE !",
+  'learn-carry': "Compte jusqu'à 9 en cliquant sur bouton VERT ! Quand tu arrives à 9, un clic de plus et... MAGIE !",
   'practice-ten': "WAOUH ! Tu as vu comment 10 petites lumières se transforment en 1 grosse lumière ? C'est INCROYABLE ! Maintenant ajoute des billes pour voir ce qui se passe après 10 !",
-  'learn-ten-to-twenty': "Maintenant on va faire quelque chose de SUPER COOL ! Tu as 1 grosse lumière de 10 ! Ajoute des petites billes une par une pour découvrir la COMBINAISON MAGIQUE : 10 + 1 = 11, 10 + 2 = 12... Clique sur △ jusqu'à 20 ! C'est comme assembler des LEGO !",
+  'learn-ten-to-twenty': "Maintenant on va faire quelque chose de SUPER COOL ! Tu as 1 grosse lumière de 10 ! Ajoute des petites billes une par une pour découvrir la COMBINAISON MAGIQUE : 10 + 1 = 11, 10 + 2 = 12... Clique sur bouton VERT jusqu'à 20 ! C'est comme assembler des LEGO !",
   'learn-twenty-to-thirty': "GÉNIAL ! Tu as compris la combinaison : 1 dizaine + unités ! Maintenant on va pratiquer encore un peu ! Continue à remplir jusqu'à 30 pour voir un NOUVEL échange magique ! Observe bien ce qui se passe quand tu arrives à 29... puis 30 !",
   'intro-learn-tens': "BRAVO ! Tu as compté jusqu'à 30 ! Maintenant tu comprends le principe : 10 + 1 = 11, 20 + 1 = 21, 30 + 1 = 31 ! Pour les autres dizaines, c'est pareil ! Par exemple : 40 + 1 = 41, 40 + 2 = 42... 50 + 1 = 51, 50 + 2 = 52... Tu vois le principe ? Maintenant je vais te montrer TOUTES les dizaines !",
   'learn-tens': "Regarde bien ! 👀 La machine va compter AUTOMATIQUEMENT par dizaines : 30, 40, 50, 60... jusqu'à 90 ! Ne clique pas, OBSERVE ! 🎬",
   'learn-tens-combination': "Regarde maintenant la MAGIE des GROSSES lumières ! La machine va montrer comment assembler 1 grosse + 2 petites = DOUZE, puis 2 grosses + 5 petites = VINGT-CINQ ! C'est comme des LEGO !",
   
   // Hundreds phases
-  'practice-hundred': "Pratique le concept de GRAND paquet ! Clique sur ∇ pour revenir à 99, puis △ pour refaire l'échange magique vers 100 !",
-  'learn-hundred-to-hundred-ten': "Tu as 1 GRAND paquet de 100 ! Maintenant ajoute des billes pour comprendre la COMBINAISON : 100 + 1 = 101, 100 + 2 = 102... Clique sur △ jusqu'à 120 !",
+  'practice-hundred': "Pratique le concept de GRAND paquet ! Clique sur bouton ROUGE pour revenir à 99, puis bouton VERT pour refaire l'échange magique vers 100 !",
+  'learn-hundred-to-hundred-ten': "Tu as 1 GRAND paquet de 100 ! Maintenant ajoute des billes pour comprendre la COMBINAISON : 100 + 1 = 101, 100 + 2 = 102... Clique sur bouton VERT jusqu'à 120 !",
   'learn-hundred-ten-to-two-hundred': "Bravo ! Tu comprends : 1 centaine + dizaines + unités ! Pratique un peu : monte jusqu'à 200 pour voir l'échange magique !",
-  'learn-two-hundred-to-three-hundred': "Remplis tout jusqu'à 299 ! Clique sur △ pour ajouter des billes !",
+  'learn-two-hundred-to-three-hundred': "Remplis tout jusqu'à 299 ! Clique sur bouton VERT pour ajouter des billes !",
   'intro-learn-hundreds': "FANTASTIQUE ! Tu maîtrises les centaines maintenant ! Tu sais que 100 + 1 = 101, 200 + 1 = 201, 300 + 1 = 301... C'est le même principe pour toutes les centaines ! Par exemple : 400 + 1 = 401, 500 + 10 = 510, 600 + 50 = 650... Tu comprends ? On peut assembler les GRANDS paquets avec les paquets normaux ! Maintenant regarde toutes les centaines !",
   'learn-hundreds': "Regarde bien ! 👀 La machine va compter AUTOMATIQUEMENT par centaines : 300, 400, 500... jusqu'à 900 ! Ne clique pas, OBSERVE ! 🎬",
   'learn-hundreds-simple-combination': "Maintenant les GRANDS paquets de 100 ! La machine va montrer : 1 GRAND paquet = CENT, puis 1 GRAND + 1 paquet = CENT-DIX ! C'est facile d'assembler les paquets !",
@@ -103,11 +103,11 @@ export const PHASE_INSTRUCTIONS = {
   'delock-thousands': "PARFAIT ! Je vais débloquer le QUATRIÈME rouleau ! Le dernier rouleau ! (Bruits : tic tic tic, bzzzz, clic !) Et voilààààà ! QUATRE rouleaux ! La machine peut maintenant compter jusqu'à 9999 ! C'est ÉNORME ! Je l'allume !",
   
   'celebration-before-thousands': "BRAVO CHAMPION ! Tu maîtrises les centaines ! Maintenant, on va découvrir les MILLE ! C'est le niveau EXPERT ! Si tu es fatigué, tu peux faire une pause. Sinon, clique sur DÉMARRER L'APPRENTISSAGE DES MILLIERS !",
-  'practice-thousand': "STOP ! Regarde bien : TOUT, TOUT, TOUT est plein ! 999 ! Que va-t-il se passer si on ajoute encore 1 toute petite bille ? Clique sur △ pour voir !",
-  'learn-thousand-to-thousand-ten': "MILLE ! 1 énorme paquet ! Maintenant ajoute des billes pour comprendre la COMBINAISON : 1000 + 1 = 1001, 1000 + 2 = 1002... Clique sur △ jusqu'à 1020 !",
+  'practice-thousand': "STOP ! Regarde bien : TOUT, TOUT, TOUT est plein ! 999 ! Que va-t-il se passer si on ajoute encore 1 toute petite bille ? Clique sur bouton VERT pour voir !",
+  'learn-thousand-to-thousand-ten': "MILLE ! 1 énorme paquet ! Maintenant ajoute des billes pour comprendre la COMBINAISON : 1000 + 1 = 1001, 1000 + 2 = 1002... Clique sur bouton VERT jusqu'à 1020 !",
   'learn-thousand-to-thousand-hundred': "Super ! Tu comprends la combinaison : 1 millier + centaines + dizaines + unités ! Monte jusqu'à 1100 pour pratiquer !",
   'learn-thousand-hundred-to-two-thousand': "Excellent ! Continue à pratiquer jusqu'à 2000 pour bien comprendre les milliers !",
-  'learn-two-thousand-to-three-thousand': "DEUX-MILLE ! Monte directement à 2500, puis 2900, puis 2999, puis 3000 ! Clique sur △ sur les UNITÉS !",
+  'learn-two-thousand-to-three-thousand': "DEUX-MILLE ! Monte directement à 2500, puis 2900, puis 2999, puis 3000 ! Clique sur bouton VERT sur les UNITÉS !",
   'intro-learn-thousands': "INCROYABLE ! Tu es un champion des milliers ! Maintenant tu comprends : 1000 + 1 = 1001, 2000 + 1 = 2001, 3000 + 1 = 3001... C'est toujours le même principe magique ! Par exemple : 4000 + 1 = 4001, 5000 + 100 = 5100, 6000 + 500 = 6500... On peut assembler les ÉNORMES paquets avec tous les autres ! Regarde tous les milliers maintenant !",
   'learn-thousands': "Regarde bien ! 👀 La machine va compter AUTOMATIQUEMENT par milliers : 3000, 4000, 5000... jusqu'à 9000 ! Ne clique pas, OBSERVE ! Imagine combien de billes ça fait ! 🎬",
   'learn-thousands-very-simple-combination': "Les ÉNORMES paquets de 1000 ! La machine va montrer : 1 ÉNORME paquet = MILLE, puis 1 ÉNORME + 1 GRAND = MILLE-CENT ! C'est magique d'assembler de si grands nombres !",
@@ -281,8 +281,8 @@ export const FEEDBACK_MESSAGES = {
       column: "Attention ! Les chiffres sont bons mais pas à la bonne place !\nRegarde bien les COLONNES : Milliers, Centaines, Dizaines, Unités !",
       composition: "Tu as commencé, mais il manque des choses !\nN'oublie pas de remplir TOUTES les colonnes nécessaires !",
       magnitude: "Attention à l'ordre de grandeur !\nRegarde combien de colonnes tu dois utiliser !",
-      directionUp: "C'est trop petit !\nLe nombre est PLUS GRAND que ça !\nMonte ! Utilise △ !",
-      directionDown: "C'est un peu trop grand !\nLe nombre est PLUS PETIT que ça !\nDescends ! Utilise ∇ !",
+      directionUp: "C'est trop petit !\nLe nombre est PLUS GRAND que ça !\nMonte ! Utilise bouton VERT !",
+      directionDown: "C'est un peu trop grand !\nLe nombre est PLUS PETIT que ça !\nDescends ! Utilise bouton ROUGE !",
       randomUp: "Le nombre est beaucoup PLUS GRAND !\nRecommence tranquillement !",
       randomDown: "Le nombre est beaucoup PLUS PETIT !\nRecommence tranquillement !",
     },
@@ -416,9 +416,9 @@ Tu fais exactement ce que je te dis, d'accord ?`,
     
     action: {
       increase: (clicks: number, columnName: string) =>
-        `Clique ${clicks} FOIS sur △ dans la colonne des ${columnName} !`,
+        `Clique ${clicks} FOIS sur bouton VERT dans la colonne des ${columnName} !`,
       decrease: (clicks: number, columnName: string) =>
-        `Clique ${clicks} FOIS sur ∇ dans la colonne des ${columnName} !`,
+        `Clique ${clicks} FOIS sur bouton ROUGE dans la colonne des ${columnName} !`,
     },
   },
   
@@ -525,7 +525,7 @@ export const SEQUENCE_FEEDBACK = {
   
   practiceThousand: {
     part1: "STOP ! Regarde bien : TOUT, TOUT, TOUT est plein !",
-    part2: "9 GRANDS paquets + 9 paquets + 9 billes. C'est le MAXIMUM ! Que va-t-il se passer si on ajoute encore 1 toute petite bille ? Clique sur △",
+    part2: "9 GRANDS paquets + 9 paquets + 9 billes. C'est le MAXIMUM ! Que va-t-il se passer si on ajoute encore 1 toute petite bille ? Clique sur bouton VERT",
   },
   
   normalMode: {

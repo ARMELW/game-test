@@ -30,8 +30,8 @@ DÉMARRAGE DU JEU
     - Feedback à chaque clic (1, 2, 3... 9 STOP !)
     - Guidage progressif si pas de clic (5s, 10s)
          ↓
-    "Essaie le bouton ROUGE ∇ maintenant !"
-    🎯 Action : Décrémenter pour comprendre ∇
+    "Essaie le bouton ROUGE bouton ROUGE maintenant !"
+    🎯 Action : Décrémenter pour comprendre bouton ROUGE
          ↓
     [intro-count-digits]
     "Combien de chiffres différents as-tu vu ?"
@@ -75,7 +75,7 @@ DÉMARRAGE DU JEU
     - Clic 2 → "Super ! Deux ronds"
     - Clic 3 → "Essaie le bouton ROUGE"
          ↓
-    L'utilisateur décrémente de 3 à 0 avec ∇
+    L'utilisateur décrémente de 3 à 0 avec bouton ROUGE
          ↓
     [tutorial-challenge]
     "Maintenant, un petit défi pour apprendre ! 🎯"
@@ -108,7 +108,7 @@ DÉMARRAGE DU JEU
     🎯 Action : L'utilisateur monte jusqu'à 9
          ↓
     [click-remove]
-    "Clique sur ∇ pour descendre à zéro"
+    "Clique sur bouton ROUGE pour descendre à zéro"
     🎯 Action : L'utilisateur descend de 9 à 0
          ↓
 ┌────────────────────────────────────────────────────────────────┐
@@ -339,7 +339,7 @@ challenge-tens-3        challenge-hund-3    challenge-thou-3
 
 ### 4️⃣ Phases interactives libres
 
-- `tutorial` : Apprendre △ et ∇
+- `tutorial` : Apprendre △ et bouton ROUGE
 - `explore-units` : Pratiquer 1, 2, 3
 - `click-add` : Monter jusqu'à 9
 - `click-remove` : Descendre à 0
@@ -403,7 +403,7 @@ challenge-tens-3        challenge-hund-3    challenge-thou-3
 7. `intro-max-value-question` - Question sur le maximum (système à 3 tentatives)
 
 ### Tutoriel (5 phases)
-8. `tutorial` - Apprentissage des boutons △ et ∇
+8. `tutorial` - Apprentissage des boutons △ et bouton ROUGE
 9. `tutorial-challenge` - Apprentissage des mécaniques de défi (gagner/perdre)
 10. `explore-units` - Exploration guidée 1-3
 11. `click-add` - Montée jusqu'à 9

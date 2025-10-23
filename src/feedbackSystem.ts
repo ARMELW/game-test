@@ -330,10 +330,10 @@ export function getGuidedStepMessage(
   
   if (remaining > 0) {
     return `Il faut ${remaining} dans les ${COLUMN_NAMES[columnIndex as keyof typeof COLUMN_NAMES]} ! 
-Clique ${remaining} fois sur △ dans les ${COLUMN_NAMES[columnIndex as keyof typeof COLUMN_NAMES]} !`;
+Clique ${remaining} fois sur bouton VERT dans les ${COLUMN_NAMES[columnIndex as keyof typeof COLUMN_NAMES]} !`;
   } else {
     return `Il y a trop dans les ${COLUMN_NAMES[columnIndex as keyof typeof COLUMN_NAMES]} ! 
-Clique ${Math.abs(remaining)} fois sur ∇ dans les ${COLUMN_NAMES[columnIndex as keyof typeof COLUMN_NAMES]} !`;
+Clique ${Math.abs(remaining)} fois sur bouton ROUGE dans les ${COLUMN_NAMES[columnIndex as keyof typeof COLUMN_NAMES]} !`;
   }
 }
 
